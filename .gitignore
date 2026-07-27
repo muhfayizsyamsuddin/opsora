@@ -2,21 +2,30 @@
 logs
 *.log
 npm-debug.log*
+pnpm-debug.log*
 
 # Environment
 .env
-.env.local
+.env.*
+!.env.example
 
 # Dependencies
 node_modules
 
 # Build
+.next
 dist
 build
-.next
+out
 
 # Coverage
 coverage
+
+# Turbo
+.turbo
+
+# TypeScript
+*.tsbuildinfo
 
 # OS
 .DS_Store
@@ -30,9 +39,11 @@ Thumbs.db
 *.pid
 
 # Prisma
-backend/prisma/dev.db
+prisma/dev.db
 
 # Misc
 *.tmp
 
+# Personal Notes
 note.md
+cli.md
