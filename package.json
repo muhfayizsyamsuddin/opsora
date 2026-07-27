@@ -3,18 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "",
+  "packageManager": "pnpm@11.17.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.17.0",
-      "onFail": "download"
-    }
+  "devDependencies": {
+    "turbo": "^2.10.7"
   }
 }
