@@ -228,6 +228,9 @@ importers:
       helmet:
         specifier: ^8.3.0
         version: 8.3.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
