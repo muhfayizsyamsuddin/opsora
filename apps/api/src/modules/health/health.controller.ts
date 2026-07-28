@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
+import { asyncHandler } from "../../utils/asyncHandler.js";
 import { HealthService } from "./health.service.js";
 
 export class HealthController {
-  static getHealth(_req: Request, res: Response) {
+  static getHealth = asyncHandler(async (_req: Request, res: Response) => {
     const result = HealthService.getHealth();
 
-    return res.status(200).json(result);
-  }
+    res.json(result);
+  });
 }
