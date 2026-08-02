@@ -26,8 +26,41 @@ export class EmployeeService {
         return EmployeeRepository.create(data);
     }
 
-    static async getAll() {
-        return EmployeeRepository.findMany();
+    static async getAll(query: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        departmentId?: string;
+        sort?: "name" | "salary" | "hireDate" | "createdAt";
+        order?: "asc" | "desc";
+    }) {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const skip = (page - 1) * limit;
+
+        const employees = await EmployeeRepository.findMany(
+            skip,
+            limit,
+            query.search,
+            query.departmentId,
+            query.sort,
+            query.order,
+        );
+
+        const total = await EmployeeRepository.count(
+            query.search,
+            query.departmentId,
+        );
+
+        return {
+            data: employees,
+            meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            },
+        };
     }
 
     static async getById(id: string) {

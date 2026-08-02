@@ -15,8 +15,27 @@ export class EmployeeController {
         );
     });
 
-    static getAll = asyncHandler(async (_req: Request, res: Response) => {
-        const employees = await EmployeeService.getAll();
+    static getAll = asyncHandler(async (req: Request, res: Response) => {
+        const employees = await EmployeeService.getAll({
+            page: req.query.page
+            ? Number(req.query.page)
+            : undefined,
+            limit: req.query.limit
+            ? Number(req.query.limit)
+            : undefined,
+            search: req.query.search?.toString(),
+            departmentId: req.query.departmentId?.toString(),
+            sort: req.query.sort as
+            | "name"
+            | "salary"
+            | "hireDate"
+            | "createdAt"
+            | undefined,
+            order: req.query.order as
+            | "asc"
+            | "desc"
+            | undefined,
+        });
 
         return success(res, employees);
     });

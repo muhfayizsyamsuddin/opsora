@@ -39,5 +39,14 @@ export const getEmployeeByIdSchema = z.object({
 export const getEmployeesSchema = z.object({
   body: z.object({}),
   params: z.object({}),
-  query: z.object({}),
+  query: z.object({
+    page: z.coerce.number().int().positive().optional(),
+    limit: z.coerce.number().int().positive().optional(),
+    search: z.string().optional(),
+    departmentId: z.string().uuid().optional(),
+    sort: z
+      .enum(["name", "salary", "hireDate", "createdAt"])
+      .optional(),
+    order: z.enum(["asc", "desc"]).optional(),
+  }),
 });

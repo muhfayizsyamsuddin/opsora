@@ -36,13 +36,49 @@ export class EmployeeRepository {
         });
     }
 
-    static async findMany() {
+    static async findMany(
+        skip: number,
+        take: number,
+        search?: string,
+        departmentId?: string,
+        sort: "name" | "salary" | "hireDate" | "createdAt" = "createdAt",
+        order: "asc" | "desc" = "desc",
+    ) {
         return prisma.employee.findMany({
+            skip,
+            take,
+            where: {
+            ...(search && {
+                OR: [
+                {
+                    name: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                {
+                    email: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                {
+                    position: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                ],
+            }),
+            ...(departmentId && {
+                departmentId,
+            }),
+            },
             include: {
             department: true,
             },
             orderBy: {
-            createdAt: "desc",
+            [sort]: order,
             },
         });
     }
@@ -77,7 +113,38 @@ export class EmployeeRepository {
         });
     }
 
-    static async count() {
-        return prisma.employee.count();
+    static async count(
+        search?: string,
+        departmentId?: string,
+    ) {
+        return prisma.employee.count({
+            where: {
+            ...(search && {
+                OR: [
+                {
+                    name: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                {
+                    email: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                {
+                    position: {
+                    contains: search,
+                    mode: "insensitive",
+                    },
+                },
+                ],
+            }),
+            ...(departmentId && {
+                departmentId,
+            }),
+            },
+        });
     }
 }
