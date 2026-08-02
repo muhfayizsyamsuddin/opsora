@@ -63,6 +63,7 @@ export class UserRepository {
     data: {
       name?: string;
       email?: string;
+      role?: UserRole;
     },
   ) {
     return prisma.user.update({

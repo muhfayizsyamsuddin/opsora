@@ -56,4 +56,33 @@ export class UserService {
 
     return safeUser;
   }
+
+  static async update(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      role?: UserRole;
+    },
+  ) {
+    const user = await UserRepository.findById(id);
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (data.email && data.email !== user.email) {
+      const existingUser = await UserRepository.findByEmail(data.email);
+
+      if (existingUser) {
+        throw new AppError("Email already exists", 409);
+      }
+    }
+
+    const updatedUser = await UserRepository.update(id, data);
+
+    const { password, ...safeUser } = updatedUser;
+
+    return safeUser;
+  }
 }

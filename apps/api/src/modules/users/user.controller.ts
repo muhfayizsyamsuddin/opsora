@@ -24,4 +24,12 @@ export class UserController {
 
     return success(res, user);
   });
+
+  static update = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+
+    const user = await UserService.update(id, req.body);
+
+    return success(res, user, "User updated successfully");
+  });
 }
