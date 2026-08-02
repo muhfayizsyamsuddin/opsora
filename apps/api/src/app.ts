@@ -10,6 +10,7 @@ import departmentRoutes from "./modules/departments/department.routes.js";
 import employeeRoutes from "./modules/employees/employee.routes.js";
 import attendanceRoutes from "./modules/attendances/attendance.routes.js";
 import leaveRoutes from "./modules/leaves/leave.routes.js";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/departments", departmentRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/attendances", attendanceRoutes);
 app.use("/leaves", leaveRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.use(errorMiddleware);
 
 export default app;
