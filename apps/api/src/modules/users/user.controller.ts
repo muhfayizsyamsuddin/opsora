@@ -16,4 +16,10 @@ export class UserController {
 
     return success(res, user);
   });
+
+  static getAll = asyncHandler(async (_req: Request, res: Response) => {
+    const users = await UserService.getAllUsers();
+
+    return success(res, users);
+  });
 }

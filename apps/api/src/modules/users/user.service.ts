@@ -40,4 +40,8 @@ export class UserService {
 
     return safeUser;
   }
+
+  static async getAllUsers() {
+    return UserRepository.findMany();
+  }
 }
