@@ -28,4 +28,16 @@ export class UserService {
 
     return safeUser;
   }
+
+  static async getProfile(userId: string) {
+    const user = await UserRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const { password, ...safeUser } = user;
+
+    return safeUser;
+  }
 }
