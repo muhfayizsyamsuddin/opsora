@@ -62,6 +62,7 @@ model Employee {
   attendances Attendance[]
   leaves      Leave[]
   payrolls    Payroll[]
+  performanceReviews PerformanceReview[]
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -118,4 +119,22 @@ model Payroll {
   updatedAt     DateTime @updatedAt
 
   @@unique([employeeId, month, year])
+}
+
+model PerformanceReview {
+  id          String   @id @default(uuid())
+
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+
+  reviewer    String
+
+  score       Int
+
+  comments    String?
+
+  reviewDate  DateTime
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -12,6 +12,7 @@ import attendanceRoutes from "./modules/attendances/attendance.routes.js";
 import leaveRoutes from "./modules/leaves/leave.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import payrollRoutes from "./modules/payroll/payroll.routes.js";
+import performanceReviewRoutes from "./modules/performance-reviews/performance-review.routes.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/attendances", attendanceRoutes);
 app.use("/leaves", leaveRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/payrolls", payrollRoutes);
+app.use("/performance-reviews", performanceReviewRoutes);
 app.use(errorMiddleware);
 
 export default app;
