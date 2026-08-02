@@ -30,15 +30,46 @@ export class UserRepository {
   }
 
   static async findMany() {
-  return prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true,
+    return prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  static async findAll() {
+    return prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  static async update(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
     },
-  });
-}
+  ) {
+    return prisma.user.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
 }

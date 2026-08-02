@@ -19,5 +19,11 @@ router.get(
   authorize(UserRole.ADMIN),
   UserController.getAll,
 );
+router.get(
+  "/:id",
+  authenticate,
+  authorize(UserRole.ADMIN),
+  UserController.getById,
+);
 
 export default router;

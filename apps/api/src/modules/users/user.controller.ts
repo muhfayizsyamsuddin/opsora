@@ -16,4 +16,12 @@ export class UserController {
 
     return success(res, users);
   });
+
+  static getById = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+
+    const user = await UserService.getById(id);
+
+    return success(res, user);
+  });
 }

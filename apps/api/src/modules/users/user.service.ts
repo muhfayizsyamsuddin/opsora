@@ -44,4 +44,16 @@ export class UserService {
   static async getAllUsers() {
     return UserRepository.findMany();
   }
+
+  static async getById(id: string) {
+    const user = await UserRepository.findById(id);
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const { password, ...safeUser } = user;
+
+    return safeUser;
+  }
 }
