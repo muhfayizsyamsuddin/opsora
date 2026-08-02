@@ -3,6 +3,7 @@ import { ZodError, ZodType } from "zod";
 
 export function validate(schema: ZodType) {
   return (req: Request, _res: Response, next: NextFunction) => {
+    console.log(req.body);
     const result = schema.safeParse({
       body: req.body,
       query: req.query,
