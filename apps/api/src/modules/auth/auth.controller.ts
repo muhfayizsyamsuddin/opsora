@@ -8,7 +8,7 @@ export class AuthController {
   static register = asyncHandler(async (req: Request, res: Response) => {
     const user = await AuthService.register(req.body);
 
-    return success(res, user, "User registered successfully");
+    return success(res, user, "Register successful");
   });
 
   static login = asyncHandler(async (req: Request, res: Response) => {
