@@ -23,3 +23,21 @@ export const updateUserSchema = z.object({
   }),
   query: z.object({}),
 });
+
+export const getUsersSchema = z.object({
+  body: z.object({}),
+  params: z.object({}),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    search: z.string().optional(),
+    role: z.nativeEnum(UserRole).optional(),
+    sort: z
+      .enum(["name", "email", "role", "createdAt"])
+      .default("createdAt"),
+
+    order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
+  }),
+});

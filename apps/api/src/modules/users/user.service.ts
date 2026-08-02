@@ -41,8 +41,37 @@ export class UserService {
     return safeUser;
   }
 
-  static async getAllUsers() {
-    return UserRepository.findMany();
+  static async getAllUsers(
+    page: number,
+    limit: number,
+    search?: string,
+    role?: UserRole,
+    sort: "name" | "email" | "role" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
+  ) {
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      UserRepository.findMany(
+        skip,
+        limit,
+        search,
+        role,
+        sort,
+        order,
+      ),
+      UserRepository.count(search, role),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   static async getById(id: string) {

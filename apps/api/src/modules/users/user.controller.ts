@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { success } from "../../utils/response.js";
 import { UserService } from "./user.service.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { UserRole } from "../../generated/prisma/enums.js";
 
 export class UserController {
   static me = asyncHandler(async (req: Request, res: Response) => {
@@ -11,8 +12,30 @@ export class UserController {
     return success(res, user);
   });
 
-  static getAll = asyncHandler(async (_req: Request, res: Response) => {
-    const users = await UserService.getAllUsers();
+  static getAll = asyncHandler(async (req: Request, res: Response) => {
+    const page = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 10);
+    const search = req.query.search?.toString();
+    const role = req.query.role as UserRole | undefined;
+
+    const sort = (req.query.sort?.toString() ?? "createdAt") as
+      | "name"
+      | "email"
+      | "role"
+      | "createdAt";
+
+    const order = (req.query.order?.toString() ?? "desc") as
+      | "asc"
+      | "desc";
+
+    const users = await UserService.getAllUsers(
+      page,
+      limit,
+      search,
+      role,
+      sort,
+      order,
+    );
 
     return success(res, users);
   });

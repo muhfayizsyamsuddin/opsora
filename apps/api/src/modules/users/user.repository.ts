@@ -29,31 +29,40 @@ export class UserRepository {
     });
   }
 
-  static async findMany() {
+  static async findMany(
+    skip: number,
+    take: number,
+    search?: string,
+    role?: UserRole,
+    sort: "name" | "email" | "role" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
+  ) {
     return prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-  }
-
-  static async findAll() {
-    return prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
+      skip,
+      take,
+      where: {
+        ...(search && {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              email: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+        }),
+        ...(role && {
+          role,
+        }),
       },
       orderBy: {
-        createdAt: "desc",
+        [sort]: order,
       },
     });
   }
@@ -71,6 +80,32 @@ export class UserRepository {
         id,
       },
       data,
+    });
+  }
+
+  static async count(search?: string, role?: UserRole) {
+    return prisma.user.count({
+      where: {
+        ...(search && {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              email: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+        }),
+        ...(role && {
+          role,
+        }),
+      },
     });
   }
 }
