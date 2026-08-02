@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 
 import { AppError } from "../../errors/AppError.js";
 import { UserRepository } from "../users/user.repository.js";
+import { generateAccessToken } from "../../utils/jwt.js";
 
 export class AuthService {
   static async register(data: {
@@ -46,7 +47,17 @@ export class AuthService {
       throw new AppError("Invalid email or password", 401);
     }
 
+    const accessToken = generateAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
     const { password, ...safeUser } = user;
-    return safeUser;
+
+    return {
+      accessToken,
+      user: safeUser,
+    };
   }
 }
