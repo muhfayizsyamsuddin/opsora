@@ -13,6 +13,7 @@ import leaveRoutes from "./modules/leaves/leave.routes.js";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import payrollRoutes from "./modules/payroll/payroll.routes.js";
 import performanceReviewRoutes from "./modules/performance-reviews/performance-review.routes.js";
+import reportRoutes from "./modules/reports/report.routes.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/leaves", leaveRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/payrolls", payrollRoutes);
 app.use("/performance-reviews", performanceReviewRoutes);
+app.use("/reports", reportRoutes);
 app.use(errorMiddleware);
 
 export default app;
