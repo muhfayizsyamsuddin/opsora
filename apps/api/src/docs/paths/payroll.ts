@@ -6,8 +6,6 @@
  *       - Payroll
  *     summary: Get all payroll records
  *     description: Retrieve payroll records with pagination, filtering, and sorting.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -61,9 +59,9 @@
  *       200:
  *         description: Payroll records retrieved successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -74,8 +72,6 @@
  *       - Payroll
  *     summary: Generate payroll
  *     description: Generate a payroll record for an employee. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -90,9 +86,9 @@
  *             schema:
  *               $ref: '#/components/schemas/Payroll'
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/BadRequest'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -102,8 +98,6 @@
  *     tags:
  *       - Payroll
  *     summary: Get payroll by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -115,7 +109,7 @@
  *       200:
  *         description: Payroll retrieved successfully
  *       404:
- *         description: Payroll not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -126,8 +120,6 @@
  *       - Payroll
  *     summary: Delete payroll
  *     description: Delete a payroll record. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,5 +131,5 @@
  *       204:
  *         description: Payroll deleted successfully
  *       404:
- *         description: Payroll not found
+ *         $ref: '#/components/responses/NotFound'
  */

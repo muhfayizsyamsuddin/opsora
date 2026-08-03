@@ -6,8 +6,6 @@
  *       - Leave
  *     summary: Get all leave requests
  *     description: Retrieve leave requests with pagination, search, filtering, and sorting.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -55,7 +53,7 @@
  *       200:
  *         description: Leave requests retrieved successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  */
 
 /**
@@ -66,8 +64,6 @@
  *       - Leave
  *     summary: Create leave request
  *     description: Create a new leave request. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -78,11 +74,11 @@
  *       201:
  *         description: Leave request created successfully
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -92,8 +88,6 @@
  *     tags:
  *       - Leave
  *     summary: Get leave request by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -116,8 +110,6 @@
  *       - Leave
  *     summary: Update leave request
  *     description: Update a leave request. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -146,8 +138,6 @@
  *       - Leave
  *     summary: Approve leave request
  *     description: Approve a pending leave request. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -170,8 +160,6 @@
  *       - Leave
  *     summary: Reject leave request
  *     description: Reject a pending leave request. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -194,8 +182,6 @@
  *       - Leave
  *     summary: Delete leave request
  *     description: Delete a leave request. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -6,8 +6,6 @@
  *       - Dashboard
  *     summary: Get dashboard statistics
  *     description: Retrieve overall system statistics for the dashboard. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Dashboard statistics retrieved successfully
@@ -16,7 +14,7 @@
  *             schema:
  *               $ref: '#/components/schemas/DashboardStatistics'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */

@@ -6,8 +6,6 @@
  *       - Employees
  *     summary: Get all employees
  *     description: Retrieve employees with pagination, search and filtering.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -44,9 +42,9 @@
  *       200:
  *         description: Employees retrieved successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -57,8 +55,6 @@
  *       - Employees
  *     summary: Create employee
  *     description: Create a new employee.
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -69,11 +65,11 @@
  *       201:
  *         description: Employee created successfully
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -83,8 +79,6 @@
  *     tags:
  *       - Employees
  *     summary: Get employee by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -108,7 +102,7 @@
  *                 salary: 15000000
  *                 hireDate: "2026-08-01T00:00:00.000Z"
  *       404:
- *         description: Employee not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -119,8 +113,6 @@
  *       - Employees
  *     summary: Update employee
  *     description: Update employee information.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -138,7 +130,7 @@
  *       200:
  *         description: Employee updated successfully
  *       404:
- *         description: Employee not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -148,8 +140,6 @@
  *     tags:
  *       - Employees
  *     summary: Delete employee
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -161,5 +151,5 @@
  *       204:
  *         description: Employee deleted successfully
  *       404:
- *         description: Employee not found
+ *         $ref: '#/components/responses/NotFound'
  */

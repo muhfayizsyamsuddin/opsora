@@ -6,8 +6,6 @@
  *       - Attendance
  *     summary: Get all attendance records
  *     description: Retrieve attendance records with pagination, search, employee filter, and attendance status filter.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -54,7 +52,7 @@
  *       200:
  *         description: Attendance records retrieved successfully
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  */
 
 /**
@@ -65,8 +63,6 @@
  *       - Attendance
  *     summary: Create attendance
  *     description: Create a new attendance record. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -77,11 +73,11 @@
  *       201:
  *         description: Attendance created successfully
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
- *         description: Forbidden
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -91,8 +87,6 @@
  *     tags:
  *       - Attendance
  *     summary: Get attendance by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -104,7 +98,7 @@
  *       200:
  *         description: Attendance retrieved successfully
  *       404:
- *         description: Attendance not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -115,8 +109,6 @@
  *       - Attendance
  *     summary: Update attendance
  *     description: Update an attendance record. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -134,7 +126,7 @@
  *       200:
  *         description: Attendance updated successfully
  *       404:
- *         description: Attendance not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -145,8 +137,6 @@
  *       - Attendance
  *     summary: Delete attendance
  *     description: Delete an attendance record. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -158,5 +148,5 @@
  *       204:
  *         description: Attendance deleted successfully
  *       404:
- *         description: Attendance not found
+ *         $ref: '#/components/responses/NotFound'
  */

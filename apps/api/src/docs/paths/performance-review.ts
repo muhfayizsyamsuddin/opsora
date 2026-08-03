@@ -6,8 +6,6 @@
  *       - Performance Review
  *     summary: Get all performance reviews
  *     description: Retrieve performance reviews with pagination, filtering, and sorting.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -64,8 +62,6 @@
  *       - Performance Review
  *     summary: Create performance review
  *     description: Create a new performance review. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -84,8 +80,6 @@
  *     tags:
  *       - Performance Review
  *     summary: Get performance review by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -106,8 +100,6 @@
  *       - Performance Review
  *     summary: Update performance review
  *     description: Update an existing performance review. Requires ADMIN or MANAGER role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -134,8 +126,6 @@
  *       - Performance Review
  *     summary: Delete performance review
  *     description: Delete a performance review. Requires ADMIN role.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -6,8 +6,6 @@
  *       - Departments
  *     summary: Get all departments
  *     description: Retrieve all departments with pagination, search, and sorting.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -47,8 +45,6 @@
  *     tags:
  *       - Departments
  *     summary: Create a department
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -59,9 +55,9 @@
  *       201:
  *         description: Department created successfully
  *       400:
- *         description: Validation error
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/Unauthorized'
  */
 
 /**
@@ -71,8 +67,6 @@
  *     tags:
  *       - Departments
  *     summary: Get department by ID
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -88,7 +82,7 @@
  *             schema:
  *               $ref: '#/components/schemas/DepartmentResponse'
  *       404:
- *         description: Department not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -98,8 +92,6 @@
  *     tags:
  *       - Departments
  *     summary: Update department
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -117,7 +109,7 @@
  *       200:
  *         description: Department updated successfully
  *       404:
- *         description: Department not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
@@ -127,8 +119,6 @@
  *     tags:
  *       - Departments
  *     summary: Delete department
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -140,5 +130,5 @@
  *       204:
  *         description: Department deleted successfully
  *       404:
- *         description: Department not found
+ *         $ref: '#/components/responses/NotFound'
  */

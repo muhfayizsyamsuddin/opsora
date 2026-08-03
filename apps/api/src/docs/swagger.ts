@@ -19,12 +19,43 @@ export const swaggerSpec = swaggerJsdoc({
       title: "Opsora API",
       version: "1.0.0",
       description: "HR Management System API",
+
+      contact: {
+        name: "Faiz Ms",
+      },
+
+      license: {
+        name: "MIT",
+      },
     },
 
     servers: [
       {
         url: "http://localhost:3001",
+        description: "Development Server",
       },
+      {
+        url: "https://api-opsora.faizms.com",
+        description: "Production Server",
+      },
+    ],
+
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+
+    tags: [
+      { name: "Authentication", description: "Authentication endpoints" },
+      { name: "Departments", description: "Department management" },
+      { name: "Employees", description: "Employee management" },
+      { name: "Attendance", description: "Attendance management" },
+      { name: "Leave", description: "Leave management" },
+      { name: "Payroll", description: "Payroll management" },
+      { name: "Performance Review", description: "Performance review management" },
+      { name: "Dashboard", description: "Dashboard statistics" },
+      { name: "Reports", description: "Reporting endpoints" },
     ],
 
     components: {
@@ -33,6 +64,24 @@ export const swaggerSpec = swaggerJsdoc({
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
+        },
+      },
+
+      responses: {
+        Unauthorized: {
+          description: "Authentication required.",
+        },
+        Forbidden: {
+          description: "You don't have permission to access this resource.",
+        },
+        BadRequest: {
+          description: "Validation failed.",
+        },
+        NotFound: {
+          description: "Resource not found.",
+        },
+        InternalServerError: {
+          description: "Internal server error.",
         },
       },
 
