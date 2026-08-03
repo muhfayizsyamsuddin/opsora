@@ -2,6 +2,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 
 import { authSchemas } from "./schemas/auth.schema.js";
 import { commonSchemas } from "./schemas/common.schema.js";
+import { departmentSchemas } from "./schemas/department.schema.js";
 
 export const swaggerSpec = swaggerJsdoc({
   definition: {
@@ -31,6 +32,7 @@ export const swaggerSpec = swaggerJsdoc({
       schemas: {
         ...commonSchemas,
         ...authSchemas,
+        ...departmentSchemas,
       },
     },
   },
