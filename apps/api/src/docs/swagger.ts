@@ -7,6 +7,7 @@ import { employeeSchemas } from "./schemas/employee.schema.js";
 import { attendanceSchemas } from "./schemas/attendance.schema.js";
 import { leaveSchemas } from "./schemas/leave.schema.js";
 import { payrollSchemas } from "./schemas/payroll.schema.js";
+import { performanceReviewSchemas } from "./schemas/performance-review.schema.js";
 
 export const swaggerSpec = swaggerJsdoc({
   definition: {
@@ -41,6 +42,7 @@ export const swaggerSpec = swaggerJsdoc({
         ...attendanceSchemas,
         ...leaveSchemas,
         ...payrollSchemas,
+        ...performanceReviewSchemas,
       },
     },
   },
