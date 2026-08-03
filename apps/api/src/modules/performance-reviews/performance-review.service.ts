@@ -1,6 +1,7 @@
 import { AppError } from "../../errors/AppError.js";
 import { EmployeeRepository } from "../employees/employee.repository.js";
 import { PerformanceReviewRepository } from "./performance-review.repository.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 export class PerformanceReviewService {
   static async create(data: {
@@ -19,8 +20,17 @@ export class PerformanceReviewService {
     return PerformanceReviewRepository.create(data);
   }
 
-  static async getAll() {
-    return PerformanceReviewRepository.findMany();
+  static async getAll(query: {
+    page: number;
+    limit: number;
+    employeeId?: string;
+    reviewer?: string;
+    score?: number;
+    search?: string;
+    sort: keyof Prisma.PerformanceReviewOrderByWithRelationInput;
+    order: Prisma.SortOrder;
+  }) {
+    return PerformanceReviewRepository.findMany(query);
   }
 
   static async getById(id: string) {

@@ -36,7 +36,29 @@ export const getPerformanceReviewByIdSchema = z.object({
 export const getPerformanceReviewsSchema = z.object({
   body: z.object({}),
   params: z.object({}),
-  query: z.object({}),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+
+    employeeId: z.string().uuid().optional(),
+
+    reviewer: z.string().optional(),
+
+    score: z.coerce.number().int().min(1).max(100).optional(),
+
+    search: z.string().optional(),
+
+    sort: z
+      .enum([
+        "reviewDate",
+        "score",
+        "createdAt",
+      ])
+      .default("reviewDate"),
+
+    order: z.enum(["asc", "desc"]).default("desc"),
+  }),
 });
 
 export const deletePerformanceReviewSchema = z.object({

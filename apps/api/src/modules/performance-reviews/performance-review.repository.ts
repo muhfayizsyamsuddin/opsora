@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 export class PerformanceReviewRepository {
   static async create(data: {
@@ -35,19 +36,77 @@ export class PerformanceReviewRepository {
     });
   }
 
-  static async findMany() {
-    return prisma.performanceReview.findMany({
-      include: {
+  static async findMany({
+    page,
+    limit,
+    employeeId,
+    reviewer,
+    score,
+    search,
+    sort,
+    order,
+  }: {
+    page: number;
+    limit: number;
+    employeeId?: string;
+    reviewer?: string;
+    score?: number;
+    search?: string;
+    sort: keyof Prisma.PerformanceReviewOrderByWithRelationInput;
+    order: Prisma.SortOrder;
+  }) {
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.PerformanceReviewWhereInput = {
+      ...(employeeId && { employeeId }),
+      ...(reviewer && {
+        reviewer: {
+          contains: reviewer,
+          mode: "insensitive",
+        },
+      }),
+      ...(score && { score }),
+      ...(search && {
         employee: {
-          include: {
-            department: true,
+          name: {
+            contains: search,
+            mode: "insensitive",
           },
         },
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.performanceReview.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          [sort]: order,
+        },
+        include: {
+          employee: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      }),
+
+      prisma.performanceReview.count({
+        where,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: {
-        reviewDate: "desc",
-      },
-    });
+    };
   }
 
   static async update(

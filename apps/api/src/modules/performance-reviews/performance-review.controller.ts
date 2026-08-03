@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { created, noContent, success } from "../../utils/response.js";
 import { PerformanceReviewService } from "./performance-review.service.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 export class PerformanceReviewController {
   static create = asyncHandler(async (req: Request, res: Response) => {
@@ -14,8 +15,30 @@ export class PerformanceReviewController {
     );
   });
 
-  static getAll = asyncHandler(async (_req: Request, res: Response) => {
-    const reviews = await PerformanceReviewService.getAll();
+  static getAll = asyncHandler(async (req: Request, res: Response) => {
+    const {
+      page,
+      limit,
+      employeeId,
+      reviewer,
+      score,
+      search,
+      sort,
+      order,
+    } = req.query;
+
+    const reviews = await PerformanceReviewService.getAll({
+      page: page ? Number(page) : 1,
+      limit: limit ? Number(limit) : 10,
+      employeeId: employeeId as string | undefined,
+      reviewer: reviewer as string | undefined,
+      score: score ? Number(score) : undefined,
+      search: search as string | undefined,
+      sort:
+        (sort as keyof Prisma.PerformanceReviewOrderByWithRelationInput) ??
+        "reviewDate",
+      order: (order as Prisma.SortOrder) ?? "desc",
+    });
 
     return success(res, reviews);
   });

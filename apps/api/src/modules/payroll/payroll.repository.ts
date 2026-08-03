@@ -1,3 +1,4 @@
+import { Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 
 export class PayrollRepository {
@@ -53,24 +54,72 @@ export class PayrollRepository {
     });
   }
 
-  static async findMany() {
-    return prisma.payroll.findMany({
-      include: {
+  static async findMany({
+    page,
+    limit,
+    employeeId,
+    month,
+    year,
+    search,
+    sort,
+    order,
+  }: {
+    page: number;
+    limit: number;
+    employeeId?: string;
+    month?: number;
+    year?: number;
+    search?: string;
+    sort: keyof Prisma.PayrollOrderByWithRelationInput;
+    order: Prisma.SortOrder;
+  }) {
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.PayrollWhereInput = {
+      ...(employeeId && { employeeId }),
+      ...(month && { month }),
+      ...(year && { year }),
+      ...(search && {
         employee: {
-          include: {
-            department: true,
+          name: {
+            contains: search,
+            mode: "insensitive",
           },
         },
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.payroll.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          [sort]: order,
+        },
+        include: {
+          employee: {
+            include: {
+              department: true,
+            },
+          },
+        },
+      }),
+
+      prisma.payroll.count({
+        where,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: [
-        {
-          year: "desc",
-        },
-        {
-          month: "desc",
-        },
-      ],
-    });
+    };
   }
 
   static async delete(id: string) {

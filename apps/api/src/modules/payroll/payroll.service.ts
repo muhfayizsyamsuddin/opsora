@@ -1,4 +1,5 @@
 import { AppError } from "../../errors/AppError.js";
+import { Prisma } from "../../generated/prisma/client.js";
 import { EmployeeRepository } from "../employees/employee.repository.js";
 import { PayrollRepository } from "./payroll.repository.js";
 
@@ -48,8 +49,17 @@ export class PayrollService {
     });
   }
 
-  static async getAll() {
-    return PayrollRepository.findMany();
+  static async getAll(query: {
+    page: number;
+    limit: number;
+    employeeId?: string;
+    month?: number;
+    year?: number;
+    search?: string;
+    sort: keyof Prisma.PayrollOrderByWithRelationInput;
+    order: Prisma.SortOrder;
+  }) {
+    return PayrollRepository.findMany(query);
   }
 
   static async getById(id: string) {

@@ -23,7 +23,32 @@ export const getPayrollByIdSchema = z.object({
 export const getPayrollsSchema = z.object({
   body: z.object({}),
   params: z.object({}),
-  query: z.object({}),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+
+    employeeId: z.string().uuid().optional(),
+
+    month: z.coerce.number().int().min(1).max(12).optional(),
+
+    year: z.coerce.number().int().min(2000).optional(),
+
+    search: z.string().optional(),
+
+    sort: z
+      .enum([
+        "month",
+        "year",
+        "baseSalary",
+        "bonus",
+        "deduction",
+        "totalSalary",
+        "createdAt",
+      ])
+      .default("createdAt"),
+
+    order: z.enum(["asc", "desc"]).default("desc"),
+  }),
 });
 
 export const deletePayrollSchema = z.object({
