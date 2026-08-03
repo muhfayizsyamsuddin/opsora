@@ -15,11 +15,20 @@ import payrollRoutes from "./modules/payroll/payroll.routes.js";
 import performanceReviewRoutes from "./modules/performance-reviews/performance-review.routes.js";
 import reportRoutes from "./modules/reports/report.routes.js";
 
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger.js";
+
 const app = express();
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec),
+);
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
@@ -33,5 +42,6 @@ app.use("/payrolls", payrollRoutes);
 app.use("/performance-reviews", performanceReviewRoutes);
 app.use("/reports", reportRoutes);
 app.use(errorMiddleware);
+
 
 export default app;
