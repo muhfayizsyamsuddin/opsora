@@ -110,18 +110,39 @@ export class LeaveService {
       throw new AppError("Leave not found", 404);
     }
 
-    if (
-      data.startDate &&
-      data.endDate &&
-      data.startDate > data.endDate
-    ) {
+    const startDate =
+      data.startDate ?? leave.startDate;
+
+    const endDate =
+      data.endDate ?? leave.endDate;
+
+    if (startDate > endDate) {
       throw new AppError(
         "Start date cannot be after end date",
         400,
       );
     }
 
-    return LeaveRepository.update(id, data);
+    const overlappingLeave =
+      await LeaveRepository.findOverlappingLeaveForUpdate(
+        id,
+        leave.employeeId,
+        startDate,
+        endDate,
+      );
+
+    if (overlappingLeave) {
+      throw new AppError(
+        "Leave request overlaps with an existing leave",
+        409,
+      );
+    }
+
+    return LeaveRepository.update(id, {
+      ...data,
+      startDate,
+      endDate,
+    });
   }
 
   static async delete(id: string) {

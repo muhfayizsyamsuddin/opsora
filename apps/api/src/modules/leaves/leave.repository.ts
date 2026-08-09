@@ -205,4 +205,36 @@ export class LeaveRepository {
             },
         });
     }
+
+    static async findOverlappingLeaveForUpdate(
+      id: string,
+      employeeId: string,
+      startDate: Date,
+      endDate: Date,
+    ) {
+      return prisma.leave.findFirst({
+        where: {
+          id: {
+            not: id,
+          },
+
+          employeeId,
+
+          status: {
+            in: [
+              LeaveStatus.PENDING,
+              LeaveStatus.APPROVED,
+            ],
+          },
+
+          startDate: {
+            lte: endDate,
+          },
+
+          endDate: {
+            gte: startDate,
+          },
+        },
+      });
+    }
 }
