@@ -24,7 +24,7 @@ export const getDepartmentByIdSchema = z.object({
   body: z.object({}),
   query: z.object({}),
   params: z.object({
-    id: z.uuid(),
+    id: z.string().uuid(),
   }),
 });
 
