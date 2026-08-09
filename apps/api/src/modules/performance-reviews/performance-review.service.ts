@@ -25,7 +25,8 @@ export class PerformanceReviewService {
     limit: number;
     employeeId?: string;
     reviewer?: string;
-    score?: number;
+    scoreMin?: number;
+    scoreMax?: number;
     search?: string;
     sort: keyof Prisma.PerformanceReviewOrderByWithRelationInput;
     order: Prisma.SortOrder;

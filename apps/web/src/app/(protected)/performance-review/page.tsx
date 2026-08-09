@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import {
@@ -9,46 +9,29 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-import { getPayrolls } from "@/services/payroll.service";
+import { getPerformanceReviews } from "@/services/performance-review.service";
 
-const months = [
-  { value: 1, label: "January" },
-  { value: 2, label: "February" },
-  { value: 3, label: "March" },
-  { value: 4, label: "April" },
-  { value: 5, label: "May" },
-  { value: 6, label: "June" },
-  { value: 7, label: "July" },
-  { value: 8, label: "August" },
-  { value: 9, label: "September" },
-  { value: 10, label: "October" },
-  { value: 11, label: "November" },
-  { value: 12, label: "December" },
-];
-
-export default function PayrollPage() {
+export default function PerformanceReviewPage() {
   const [search, setSearch] = useState("");
-    const [month, setMonth] = useState("");
-    const [year, setYear] = useState(
-        String(new Date().getFullYear()),
-    );
-    const [page, setPage] = useState(1);
-    const [debouncedSearch, setDebouncedSearch] =
-        useState("");
+  const [reviewer, setReviewer] = useState("");
+  const [scoreRange, setScoreRange] = useState("");
+  const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] =
+    useState("");
 
   const pageSize = 10;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-        setDebouncedSearch(search);
+      setDebouncedSearch(search);
     }, 400);
 
     return () => clearTimeout(timer);
-    }, [search]);
+  }, [search]);
 
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedSearch, month, year]);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, reviewer, scoreRange]);
 
   const {
     data,
@@ -56,39 +39,54 @@ export default function PayrollPage() {
     isError,
   } = useQuery({
     queryKey: [
-      "payrolls",
+      "performance-reviews",
       {
         page,
         search: debouncedSearch,
-        month,
-        year,
+        reviewer,
+        scoreRange,
       },
     ],
     queryFn: () =>
-      getPayrolls({
+      getPerformanceReviews({
         page,
         limit: pageSize,
-        search: debouncedSearch || undefined,
-        month: month
-          ? Number(month)
-          : undefined,
-        year: year
-          ? Number(year)
-          : undefined,
-        sort: "createdAt",
-        order: "desc",
-      }),
+        search:
+          debouncedSearch || undefined,
+        reviewer:
+          reviewer || undefined,
+        scoreMin:
+            scoreRange === "90-100"
+                ? 90
+                : scoreRange === "80-89"
+                ? 80
+                : scoreRange === "70-79"
+                    ? 70
+                    : scoreRange === "60-69"
+                    ? 60
+                    : scoreRange === "0-59"
+                        ? 0
+                        : undefined,
+
+            scoreMax:
+            scoreRange === "90-100"
+                ? 100
+                : scoreRange === "80-89"
+                ? 89
+                : scoreRange === "70-79"
+                    ? 79
+                    : scoreRange === "60-69"
+                    ? 69
+                    : scoreRange === "0-59"
+                        ? 59
+                        : undefined,
+                    sort: "reviewDate",
+                    order: "desc",
+                }),
       placeholderData: (previousData) => previousData,
   });
 
-  const currentYear = new Date().getFullYear();
-
-  const years = Array.from(
-    { length: 5 },
-    (_, index) => currentYear - 2 + index,
-  );
-
-  const payrolls = data?.data ?? [];
+  const reviews = data?.data ?? [];
   const meta = data?.meta;
 
   const total = meta?.total ?? 0;
@@ -105,23 +103,23 @@ export default function PayrollPage() {
     total,
   );
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">
-            Payroll
+            Performance Review
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Manage employee payroll.
+            Manage employee performance reviews.
           </p>
         </div>
 
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-sm text-muted-foreground">
-              Loading payrolls...
+              Loading performance reviews...
             </p>
           </CardContent>
         </Card>
@@ -134,18 +132,18 @@ export default function PayrollPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">
-            Payroll
+            Performance Review
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Manage employee payroll.
+            Manage employee performance reviews.
           </p>
         </div>
 
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-sm text-destructive">
-              Failed to load payrolls.
+              Failed to load performance reviews.
             </p>
           </CardContent>
         </Card>
@@ -155,22 +153,22 @@ export default function PayrollPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">
-            Payroll
+            Performance Review
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Manage employee payroll.
+            Manage employee performance reviews.
           </p>
         </div>
 
         <Link
-          href="/payroll/new"
+          href="/performance-review/new"
           className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-xs hover:bg-primary/90"
         >
-          Generate Payroll
+          Add Performance Review
         </Link>
       </div>
 
@@ -186,37 +184,38 @@ export default function PayrollPage() {
               className="h-10 rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
 
-            <select
-              value={month}
+            <input
+              value={reviewer}
               onChange={(event) =>
-                setMonth(event.target.value)
+                setReviewer(event.target.value)
               }
-              className="h-10 rounded-md border bg-background px-3 text-sm"
-            >
-              <option value="">
-                All Months
-              </option>
-
-              {months.map((item) => (
-                <option
-                  key={item.value}
-                  value={item.value}
-                >
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              placeholder="Search reviewer..."
+              className="h-10 rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+            />
 
             <select
-                value={year}
-                onChange={(event) => setYear(event.target.value)}
+                value={scoreRange}
+                onChange={(event) =>
+                    setScoreRange(event.target.value)
+                }
                 className="h-10 rounded-md border bg-background px-3 text-sm"
                 >
-                {years.map((item) => (
-                    <option key={item} value={item}>
-                    {item}
-                    </option>
-                ))}
+                <option value="">All Scores</option>
+                <option value="90-100">
+                    90–100 — Excellent
+                </option>
+                <option value="80-89">
+                    80–89 — Very Good
+                </option>
+                <option value="70-79">
+                    70–79 — Good
+                </option>
+                <option value="60-69">
+                    60–69 — Needs Improvement
+                </option>
+                <option value="0-59">
+                    0–59 — Poor
+                </option>
             </select>
           </div>
         </CardContent>
@@ -233,94 +232,73 @@ export default function PayrollPage() {
                   </th>
 
                   <th className="px-6 py-4 font-medium">
-                    Period
+                    Reviewer
                   </th>
 
                   <th className="px-6 py-4 font-medium">
-                    Base Salary
+                    Score
                   </th>
 
                   <th className="px-6 py-4 font-medium">
-                    Bonus
+                    Review Date
                   </th>
 
                   <th className="px-6 py-4 font-medium">
-                    Deduction
-                  </th>
-
-                  <th className="px-6 py-4 font-medium">
-                    Total Salary
+                    Comments
                   </th>
                 </tr>
               </thead>
 
               <tbody>
-                {payrolls.map((payroll) => (
+                {reviews.map((review) => (
                   <tr
-                    key={payroll.id}
+                    key={review.id}
                     className="border-b last:border-0"
                   >
                     <td className="px-6 py-4 text-sm font-medium">
                       <Link
-                        href={`/payroll/${payroll.id}`}
+                        href={`/performance-review/${review.id}`}
                         className="hover:underline"
                       >
-                        {payroll.employee.name}
+                        {review.employee.name}
                       </Link>
 
                       <p className="text-xs text-muted-foreground">
-                        {payroll.employee.department.name}
+                        {review.employee.department.name}
                       </p>
                     </td>
 
                     <td className="px-6 py-4 text-sm">
-                      {
-                        months.find(
-                          (item) =>
-                            item.value ===
-                            payroll.month,
-                        )?.label
-                      }{" "}
-                      {payroll.year}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm">
-                      Rp{" "}
-                      {payroll.baseSalary.toLocaleString(
-                        "id-ID",
-                      )}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm">
-                      Rp{" "}
-                      {payroll.bonus.toLocaleString(
-                        "id-ID",
-                      )}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm">
-                      Rp{" "}
-                      {payroll.deduction.toLocaleString(
-                        "id-ID",
-                      )}
+                      {review.reviewer}
                     </td>
 
                     <td className="px-6 py-4 text-sm font-medium">
-                      Rp{" "}
-                      {payroll.totalSalary.toLocaleString(
+                      {review.score}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm">
+                      {new Date(
+                        review.reviewDate,
+                      ).toLocaleDateString(
                         "id-ID",
                       )}
+                    </td>
+
+                    <td className="max-w-xs px-6 py-4 text-sm">
+                      <p className="truncate">
+                        {review.comments || "-"}
+                      </p>
                     </td>
                   </tr>
                 ))}
 
-                {payrolls.length === 0 && (
+                {reviews.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={5}
                       className="px-6 py-12 text-center text-sm text-muted-foreground"
                     >
-                      No payroll records found.
+                      No performance reviews found.
                     </td>
                   </tr>
                 )}
@@ -341,7 +319,8 @@ export default function PayrollPage() {
                   disabled={page === 1}
                   onClick={() =>
                     setPage(
-                      (current) => current - 1,
+                      (current) =>
+                        current - 1,
                     )
                   }
                   className="rounded-md border px-3 py-2 text-sm disabled:pointer-events-none disabled:opacity-50"
@@ -360,7 +339,8 @@ export default function PayrollPage() {
                   }
                   onClick={() =>
                     setPage(
-                      (current) => current + 1,
+                      (current) =>
+                        current + 1,
                     )
                   }
                   className="rounded-md border px-3 py-2 text-sm disabled:pointer-events-none disabled:opacity-50"

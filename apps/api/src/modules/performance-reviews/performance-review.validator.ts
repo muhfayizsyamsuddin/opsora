@@ -45,7 +45,19 @@ export const getPerformanceReviewsSchema = z.object({
 
     reviewer: z.string().optional(),
 
-    score: z.coerce.number().int().min(1).max(100).optional(),
+    scoreMin: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .optional(),
+
+    scoreMax: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .optional(),
 
     search: z.string().optional(),
 

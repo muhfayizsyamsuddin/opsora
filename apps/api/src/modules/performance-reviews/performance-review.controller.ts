@@ -21,7 +21,8 @@ export class PerformanceReviewController {
       limit,
       employeeId,
       reviewer,
-      score,
+      scoreMin,
+      scoreMax,
       search,
       sort,
       order,
@@ -32,7 +33,13 @@ export class PerformanceReviewController {
       limit: limit ? Number(limit) : 10,
       employeeId: employeeId as string | undefined,
       reviewer: reviewer as string | undefined,
-      score: score ? Number(score) : undefined,
+      scoreMin: scoreMin
+        ? Number(scoreMin)
+        : undefined,
+
+      scoreMax: scoreMax
+        ? Number(scoreMax)
+        : undefined,
       search: search as string | undefined,
       sort:
         (sort as keyof Prisma.PerformanceReviewOrderByWithRelationInput) ??

@@ -41,7 +41,8 @@ export class PerformanceReviewRepository {
     limit,
     employeeId,
     reviewer,
-    score,
+    scoreMin,
+    scoreMax,
     search,
     sort,
     order,
@@ -50,7 +51,8 @@ export class PerformanceReviewRepository {
     limit: number;
     employeeId?: string;
     reviewer?: string;
-    score?: number;
+    scoreMin?: number;
+    scoreMax?: number;
     search?: string;
     sort: keyof Prisma.PerformanceReviewOrderByWithRelationInput;
     order: Prisma.SortOrder;
@@ -65,7 +67,18 @@ export class PerformanceReviewRepository {
           mode: "insensitive",
         },
       }),
-      ...(score && { score }),
+      ...(scoreMin !== undefined || scoreMax !== undefined
+        ? {
+            score: {
+              ...(scoreMin !== undefined && {
+                gte: scoreMin,
+              }),
+              ...(scoreMax !== undefined && {
+                lte: scoreMax,
+              }),
+            },
+          }
+        : {}),
       ...(search && {
         employee: {
           name: {
