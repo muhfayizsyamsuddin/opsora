@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { getDepartments } from "@/services/department.service";
+import { getDepartments, type Department, } from "@/services/department.service";
 import { EmployeeStatus } from "../types";
 
 type EmployeeToolbarProps = {
@@ -29,12 +29,21 @@ export function EmployeeToolbar({
 }: EmployeeToolbarProps) {
   const router = useRouter();
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+  } = useQuery({
     queryKey: ["departments"],
-    queryFn: getDepartments,
+    queryFn: () =>
+      getDepartments({
+        page: 1,
+        limit: 100,
+        sort: "name",
+        order: "asc",
+      }),
   });
 
-  const departments = data ?? [];
+  const departments: Department[] = data?.data ?? [];
 
   return (
     <div className="flex items-center justify-between gap-4">

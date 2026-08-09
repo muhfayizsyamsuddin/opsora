@@ -28,12 +28,20 @@ export default function NewEmployeePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    data: departments = [],
+    data,
     isLoading: isLoadingDepartments,
   } = useQuery({
     queryKey: ["departments"],
-    queryFn: getDepartments,
+    queryFn: () =>
+      getDepartments({
+        page: 1,
+        limit: 100,
+        sort: "name",
+        order: "asc",
+      }),
   });
+
+const departments = data?.data ?? [];
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
