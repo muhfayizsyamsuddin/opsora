@@ -21,6 +21,7 @@ export const updateEmployeeSchema = z.object({
     salary: z.number().positive().optional(),
     hireDate: z.coerce.date().optional(),
     departmentId: z.string().uuid().optional(),
+    status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
   }),
   params: z.object({
     id: z.string().uuid(),
@@ -44,6 +45,7 @@ export const getEmployeesSchema = z.object({
     limit: z.coerce.number().int().positive().optional(),
     search: z.string().optional(),
     departmentId: z.string().uuid().optional(),
+    status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
     sort: z
       .enum(["name", "salary", "hireDate", "createdAt"])
       .optional(),

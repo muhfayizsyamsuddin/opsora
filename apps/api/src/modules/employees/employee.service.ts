@@ -1,4 +1,5 @@
 import { AppError } from "../../errors/AppError.js";
+import { EmployeeStatus } from "../../generated/prisma/browser.js";
 import { DepartmentRepository } from "../departments/department.repository.js";
 import { EmployeeRepository } from "./employee.repository.js";
 
@@ -31,6 +32,7 @@ export class EmployeeService {
         limit?: number;
         search?: string;
         departmentId?: string;
+        status?: EmployeeStatus;
         sort?: "name" | "salary" | "hireDate" | "createdAt";
         order?: "asc" | "desc";
     }) {
@@ -43,6 +45,7 @@ export class EmployeeService {
             limit,
             query.search,
             query.departmentId,
+            query.status,
             query.sort,
             query.order,
         );
@@ -50,6 +53,7 @@ export class EmployeeService {
         const total = await EmployeeRepository.count(
             query.search,
             query.departmentId,
+            query.status,
         );
 
         return {
@@ -82,6 +86,7 @@ export class EmployeeService {
             salary?: number;
             hireDate?: Date;
             departmentId?: string;
+            status?: EmployeeStatus;
         },
     ) {
         const employee = await EmployeeRepository.findById(id);

@@ -1,3 +1,4 @@
+import { EmployeeStatus } from "../../generated/prisma/browser.js";
 import { prisma } from "../../lib/prisma.js";
 
 export class EmployeeRepository {
@@ -8,6 +9,7 @@ export class EmployeeRepository {
         salary: number;
         hireDate: Date;
         departmentId: string;
+        status?: EmployeeStatus;
     }) {
         return prisma.employee.create({
             data,
@@ -41,6 +43,7 @@ export class EmployeeRepository {
         take: number,
         search?: string,
         departmentId?: string,
+        status?: EmployeeStatus,
         sort: "name" | "salary" | "hireDate" | "createdAt" = "createdAt",
         order: "asc" | "desc" = "desc",
     ) {
@@ -73,6 +76,9 @@ export class EmployeeRepository {
             ...(departmentId && {
                 departmentId,
             }),
+            ...(status && {
+            status,
+            })
             },
             include: {
             department: true,
@@ -92,6 +98,7 @@ export class EmployeeRepository {
             salary?: number;
             hireDate?: Date;
             departmentId?: string;
+            status?: EmployeeStatus;
         },
     ) {
         return prisma.employee.update({
@@ -116,6 +123,7 @@ export class EmployeeRepository {
     static async count(
         search?: string,
         departmentId?: string,
+        status?: EmployeeStatus,
     ) {
         return prisma.employee.count({
             where: {
@@ -143,6 +151,9 @@ export class EmployeeRepository {
             }),
             ...(departmentId && {
                 departmentId,
+            }),
+            ...(status && {
+                status,
             }),
             },
         });

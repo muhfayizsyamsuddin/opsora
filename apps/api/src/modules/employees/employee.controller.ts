@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { created, noContent, success } from "../../utils/response.js";
 import { EmployeeService } from "./employee.service.js";
+import { EmployeeStatus } from "../../generated/prisma/browser.js";
 
 
 export class EmployeeController {
@@ -25,6 +26,7 @@ export class EmployeeController {
             : undefined,
             search: req.query.search?.toString(),
             departmentId: req.query.departmentId?.toString(),
+            status: req.query.status as EmployeeStatus | undefined,
             sort: req.query.sort as
             | "name"
             | "salary"

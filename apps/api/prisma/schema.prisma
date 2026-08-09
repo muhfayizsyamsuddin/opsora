@@ -13,6 +13,11 @@ enum UserRole {
   STAFF
 }
 
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum AttendanceStatus {
   PRESENT
   LATE
@@ -55,6 +60,7 @@ model Employee {
   position     String
   salary       Float
   hireDate     DateTime
+  status EmployeeStatus @default(ACTIVE)
 
   departmentId String
   department   Department  @relation(fields: [departmentId], references: [id])
