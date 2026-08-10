@@ -1,26 +1,38 @@
 # Product Roadmap
 
-Version: 1.0
+Version: 2.0
 
 Status: Draft
 
 Author: Faiz
 
-Last Updated: 2026-07-27
+Last Updated: 2026-08-10
 
 ---
 
 # Overview
 
-This document outlines the planned evolution of Opsora from the Minimum Viable Product (MVP) to future releases.
+This document outlines the planned evolution of Opsora from its core business
+operations MVP to future releases.
 
-The roadmap serves as a planning guide and may change based on business priorities and user feedback.
+The roadmap serves as a planning guide and may change based on business
+priorities, user feedback, technical requirements, and project maturity.
 
 ---
 
 # Product Vision
 
-Build a modern, reliable, and scalable inventory management system for small and medium-sized businesses.
+Build a modern, reliable, and scalable business operations management system
+for small and medium-sized businesses.
+
+Opsora is organized around two major areas:
+
+- Core Business Operations
+- People Operations
+
+Core Business Operations focuses on inventory, purchasing, and sales, while
+People Operations provides workforce management capabilities that complement
+the core business.
 
 ---
 
@@ -28,35 +40,39 @@ Build a modern, reliable, and scalable inventory management system for small and
 
 The project is divided into incremental releases.
 
-Each release delivers valuable functionality while maintaining a stable and deployable system.
+Each release should deliver valuable functionality while maintaining a stable,
+maintainable, and deployable system.
+
+The development priority is to complete the Core Business Operations before
+expanding the platform with additional operational modules.
 
 ---
 
 # MVP (v1.0)
 
-Target
+## Focus
 
-Build a fully functional inventory management system.
+Build a functional Core Business Operations platform.
 
-## Authentication
+## Authentication & Access
 
 - User login
 - JWT authentication
 - Role-based authorization
+- User management
 
 ## Master Data
 
-- User management
-- Categories
-- Products
-- Suppliers
-- Customers
+- Category management
+- Product management
+- Supplier management
+- Customer management
 
 ## Inventory
 
 - Inventory tracking
-- Inventory movement history
-- Low stock indicator
+- Stock movement
+- Inventory history
 
 ## Transactions
 
@@ -66,8 +82,9 @@ Build a fully functional inventory management system.
 ## Dashboard
 
 - Summary cards
+- Business overview
 - Recent transactions
-- Low stock overview
+- Inventory overview
 
 ## Reports
 
@@ -75,35 +92,55 @@ Build a fully functional inventory management system.
 - Purchase report
 - Inventory report
 
-Deployment
+## Deployment
 
 - Frontend
 - Backend API
 - PostgreSQL
-- Cloudinary
+- Production deployment
 
-Status
+## Status
 
-Planned
+Core MVP
 
 ---
 
 # Version 1.1
 
-Focus
+## Focus
 
-Improve usability.
+People Operations.
 
-Features
+## Features
 
-- Product image improvements
-- Barcode support
-- Export reports (Excel/PDF)
-- Search enhancements
-- Advanced filtering
-- Pagination improvements
+### Employee Management
 
-Status
+- Employee management
+- Employee information
+- Employee status
+
+### Department Management
+
+- Department management
+- Employee department assignment
+
+### Attendance
+
+- Attendance management
+- Attendance history
+
+### Leave
+
+- Leave management
+- Leave requests
+- Leave history
+
+### Performance
+
+- Performance review management
+- Performance review history
+
+## Status
 
 Planned
 
@@ -111,19 +148,24 @@ Planned
 
 # Version 1.2
 
-Focus
+## Focus
 
-Inventory accuracy.
+Business and inventory improvements.
 
-Features
+## Features
 
-- Stock adjustment
+- Barcode support
+- Product image improvements
+- Export reports
+- Search enhancements
+- Advanced filtering
+- Pagination improvements
+- Stock adjustment improvements
 - Purchase returns
 - Sales returns
 - Transaction history improvements
-- Inventory audit improvements
 
-Status
+## Status
 
 Planned
 
@@ -131,20 +173,21 @@ Planned
 
 # Version 2.0
 
-Focus
+## Focus
 
-Business scalability.
+Operational scalability.
 
-Features
+## Features
 
-- Multi-warehouse
+- Multi-warehouse management
 - Warehouse transfer
 - Inventory by warehouse
 - Role permission improvements
 - Activity logs
+- Notification system
 - Dashboard enhancements
 
-Status
+## Status
 
 Future
 
@@ -152,13 +195,13 @@ Future
 
 # Version 3.0
 
-Focus
+## Focus
 
-Enterprise readiness.
+Enterprise capabilities.
 
-Features
+## Features
 
-- Multi-company
+- Multi-company support
 - Branch management
 - Approval workflows
 - Advanced reporting
@@ -166,7 +209,7 @@ Features
 - Email notifications
 - Audit trail
 
-Status
+## Status
 
 Future
 
@@ -198,6 +241,10 @@ Features are prioritized based on:
 - Technical complexity
 - Development effort
 - Project timeline
+- Product stability
+
+Core business functionality should be prioritized before optional and
+enterprise features.
 
 ---
 
@@ -207,19 +254,22 @@ The roadmap is considered successful when:
 
 - Each release is stable.
 - Core business processes are fully supported.
+- Inventory data remains accurate and consistent.
 - Documentation remains up to date.
+- The system remains maintainable as new modules are introduced.
 - Backward compatibility is maintained whenever possible.
+- The application can be deployed reliably in a production environment.
 
 ---
 
 # Milestone Overview
 
 | Version | Goal | Status |
-|----------|------|--------|
-| v1.0 | MVP Inventory Management | Planned |
-| v1.1 | User Experience Improvements | Planned |
-| v1.2 | Inventory Enhancements | Planned |
-| v2.0 | Multi-Warehouse Support | Future |
+| ------- | ---- | ------ |
+| v1.0 | Core Business Operations | Core MVP |
+| v1.1 | People Operations | Planned |
+| v1.2 | Business & Inventory Improvements | Planned |
+| v2.0 | Operational Scalability | Future |
 | v3.0 | Enterprise Features | Future |
 
 ---
@@ -236,5 +286,6 @@ The roadmap is considered successful when:
 # Revision History
 
 | Version | Date | Description |
-|----------|------------|-------------|
+| ------- | ---- | ----------- |
 | 1.0 | 2026-07-27 | Initial version |
+| 2.0 | 2026-08-10 | Aligned roadmap with Core Business Operations and People Operations |
