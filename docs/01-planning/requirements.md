@@ -59,9 +59,33 @@ The People Operations scope includes:
 
 # 3. User Roles
 
-Opsora supports the following primary roles.
+Opsora supports the following roles.
 
-## 3.1 Owner
+Roles define the level of access a user has within the system.
+Permissions should be enforced at both the application and API levels.
+
+---
+
+## 3.1 Super Admin
+
+The Super Admin is responsible for system-level administration.
+
+Permissions include:
+
+- Manage users
+- Manage roles
+- Manage permissions
+- Manage system configuration
+- View all business modules
+- View all reports
+- Access all People Operations modules
+- Access all Core Business Operations modules
+
+The Super Admin has the highest level of system access.
+
+---
+
+## 3.2 Owner
 
 The Owner is responsible for monitoring overall business performance.
 
@@ -72,19 +96,47 @@ Permissions include:
 - View inventory
 - View sales
 - View purchases
-- View business information
+- View products
+- View customers
+- View suppliers
+- View business performance
+- View People Operations information
 
-The Owner does not normally modify operational data.
+The Owner normally does not modify operational data.
 
 ---
 
-## 3.2 Admin
+## 3.3 Manager
 
-The Admin is responsible for managing the system and operational data.
+The Manager is responsible for monitoring and supervising business operations.
+
+Permissions may include:
+
+- View dashboard
+- View reports
+- View inventory
+- View sales
+- View purchases
+- View products
+- View customers
+- View suppliers
+- Manage assigned operational activities
+- View employees
+- View departments
+- View attendance
+- Review leave requests
+- View performance reviews
+
+Manager permissions may be configured according to business requirements.
+
+---
+
+## 3.4 Admin
+
+The Admin is responsible for managing operational and business data.
 
 Permissions include:
 
-- Manage users
 - Manage products
 - Manage categories
 - Manage suppliers
@@ -100,9 +152,11 @@ Permissions include:
 - View reports
 - View dashboard
 
+User and system-level management should only be available when explicitly granted.
+
 ---
 
-## 3.3 Staff
+## 3.5 Staff
 
 The Staff role is intended for daily operational activities.
 
@@ -110,14 +164,43 @@ Permissions may include:
 
 - View products
 - View inventory
-- Create sales
 - Create purchases
-- Update operational records
+- Receive purchased goods
+- Create sales
 - View customers
 - View suppliers
+- Perform authorized inventory operations
 - View assigned employee information
+- Record attendance
 
-Staff cannot manage users or system-level configuration.
+Staff cannot manage users, roles, permissions, or system-level configuration.
+
+---
+
+## 3.6 Cashier
+
+The Cashier role is focused on sales operations.
+
+Permissions include:
+
+- View products
+- Search products
+- View customers
+- Create sales
+- View sales transactions
+- Generate invoice information
+- View relevant transaction history
+
+The Cashier cannot:
+
+- Manage users
+- Manage system configuration
+- Manage products
+- Modify inventory directly
+- Manage purchases
+- Manage employee records
+
+Inventory changes caused by sales are handled automatically by the system.
 
 ---
 

@@ -24,10 +24,12 @@ Opsora is organized into two major areas:
 
 | Role | Description |
 | --- | --- |
-| Owner | Monitors business performance and operational information. |
-| Admin | Manages system data and business operations. |
+| Super Admin | Manages users, roles, permissions, and system-level configuration. |
+| Owner | Monitors overall business performance and operational information. |
+| Manager | Monitors and supervises business and people operations. |
+| Admin | Manages business data and operational activities. |
 | Staff | Performs authorized daily operational activities. |
-
+| Cashier | Handles sales transactions and related customer operations. |
 ---
 
 # Authentication Flow
@@ -73,6 +75,100 @@ Dashboard
         ├── Attendance
         ├── Leave
         └── Performance Review
+```
+
+# Role-Based Access Flow
+
+## Super Admin
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Core Business Operations
+  ├── People Operations
+  ├── User Management
+  ├── Role & Permission Management
+  └── System Configuration
+
+## Owner
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Business Overview
+  ├── Sales
+  ├── Purchases
+  ├── Inventory
+  └── Reports
+```
+
+## Manager
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Business Operations
+  ├── Inventory
+  ├── Sales
+  ├── Purchases
+  ├── Reports
+  └── People Operations
+```
+
+## Admin
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Products
+  ├── Categories
+  ├── Suppliers
+  ├── Customers
+  ├── Inventory
+  ├── Purchases
+  ├── Sales
+  └── People Operations
+```
+
+## Staff
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Products
+  ├── Inventory
+  ├── Purchases
+  ├── Sales
+  └── Authorized People Operations
+```
+
+## Cashier
+
+```text
+Login
+  │
+  ▼
+Dashboard
+  │
+  ├── Products
+  ├── Customers
+  ├── Sales
+  └── Sales History
 ```
 
 ---
@@ -491,14 +587,3 @@ Logout
 ```
 
 ---
-
-# Future User Flows
-
-- Barcode scanning
-- Stock adjustment improvements
-- Purchase returns
-- Sales returns
-- Multi-warehouse operations
-- Warehouse transfers
-- Notifications
-- Multi-company operations
