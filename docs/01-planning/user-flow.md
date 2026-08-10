@@ -1,31 +1,38 @@
 # User Flow
 
-> Version: 1.0
-> Project: Opsora
-> Last Updated: July 2026
+Version: 2.0
+
+Project: Opsora
+
+Last Updated: 2026-08-10
 
 ---
 
 # Overview
 
-This document describes how each user interacts with the Opsora system to complete common business processes.
+This document describes how users interact with Opsora to complete common
+business and people operations.
+
+Opsora is organized into two major areas:
+
+- Core Business Operations
+- People Operations
 
 ---
 
 # User Roles
 
 | Role | Description |
-|------|-------------|
-| Super Admin | Full system access and configuration |
-| Admin | Manages inventory and business data |
-| Cashier | Handles sales transactions |
-| Manager | Monitors reports and business performance |
+| --- | --- |
+| Owner | Monitors business performance and operational information. |
+| Admin | Manages system data and business operations. |
+| Staff | Performs authorized daily operational activities. |
 
 ---
 
 # Authentication Flow
 
-```
+```text
 Open Login Page
         │
         ▼
@@ -34,33 +41,38 @@ Enter Email & Password
         ▼
 Validate Credentials
         │
-   ┌────┴────┐
-   │         │
-Success    Failed
-   │         │
-   ▼         ▼
-Dashboard  Show Error
-```
-
+   ┌────┴─────┐
+   │          │
+Success     Failed
+   │          │
+   ▼          ▼
+Dashboard   Show Error
 ---
 
 # Dashboard Flow
 
 ```
 Login
-   │
-   ▼
+  │
+  ▼
 Dashboard
-   │
-   ├── Products
-   ├── Categories
-   ├── Suppliers
-   ├── Customers
-   ├── Purchases
-   ├── Sales
-   ├── Inventory
-   ├── Reports
-   └── Settings
+  │
+  ├── Core Business Operations
+  │     ├── Products
+  │     ├── Categories
+  │     ├── Suppliers
+  │     ├── Customers
+  │     ├── Inventory
+  │     ├── Purchases
+  │     ├── Sales
+  │     └── Reports
+  │
+  └── People Operations
+        ├── Employees
+        ├── Departments
+        ├── Attendance
+        ├── Leave
+        └── Performance Review
 ```
 
 ---
@@ -70,24 +82,25 @@ Dashboard
 ```
 Category List
       │
-      ▼
-Click Add
+      ├── Search
       │
-      ▼
-Fill Form
-      │
-      ▼
-Save
-      │
-      ▼
-Validation
-      │
- ┌────┴─────┐
- │          │
-Success   Failed
- │          │
- ▼          ▼
-List     Show Error
+      └── Add Category
+              │
+              ▼
+        Fill Category Form
+              │
+              ▼
+          Validate Data
+              │
+         ┌────┴─────┐
+         │          │
+       Valid      Invalid
+         │          │
+         ▼          ▼
+       Save      Show Error
+         │
+         ▼
+     Category List
 ```
 
 ---
@@ -97,27 +110,77 @@ List     Show Error
 ```
 Product List
       │
-      ▼
-Add Product
+      ├── Search / Filter
       │
-      ▼
-Fill Product Form
-      │
-      ▼
-Save Product
-      │
-      ▼
-Validation
-      │
- ┌────┴────┐
- │         │
-Valid   Invalid
- │         │
- ▼         ▼
-Saved   Error Message
+      └── Add Product
+              │
+              ▼
+        Fill Product Form
+              │
+              ▼
+          Validate Data
+              │
+         ┌────┴─────┐
+         │          │
+       Valid      Invalid
+         │          │
+         ▼          ▼
+       Save      Show Error
+         │
+         ▼
+     Product List
 ```
 
 ---
+# Supplier Management
+
+```
+Supplier List
+      │
+      ▼
+Add / Edit Supplier
+      │
+      ▼
+Fill Supplier Information
+      │
+      ▼
+Validate Data
+      │
+ ┌────┴─────┐
+ │          │
+Valid     Invalid
+ │          │
+ ▼          ▼
+Save     Show Error
+ │
+ ▼
+Supplier List
+```
+
+# Customer Management
+
+```
+Customer List
+      │
+      ▼
+Add / Edit Customer
+      │
+      ▼
+Fill Customer Information
+      │
+      ▼
+Validate Data
+      │
+ ┌────┴─────┐
+ │          │
+Valid     Invalid
+ │          │
+ ▼          ▼
+Save     Show Error
+ │
+ ▼
+Customer List
+```
 
 # Purchase Flow
 
@@ -131,16 +194,22 @@ Create Purchase
 Select Supplier
       │
       ▼
-Select Products
+Add Products
       │
       ▼
-Enter Quantity
+Enter Quantities & Prices
       │
       ▼
 Save Purchase
       │
       ▼
+Receive Goods
+      │
+      ▼
 Update Inventory
+      │
+      ▼
+Record Inventory Movement
       │
       ▼
 Purchase Completed
@@ -151,31 +220,44 @@ Purchase Completed
 # Sales Flow
 
 ```
-Sales Page
-     │
-     ▼
+Sales List
+      │
+      ▼
+Create Sale
+      │
+      ▼
 Select Customer
-     │
-     ▼
+      │
+      ▼
 Add Products
-     │
-     ▼
-Input Quantity
-     │
-     ▼
+      │
+      ▼
+Enter Quantities
+      │
+      ▼
+Check Stock Availability
+      │
+ ┌────┴─────┐
+ │          │
+Available  Insufficient
+ │          │
+ ▼          ▼
+Continue   Show Error
+ │
+ ▼
 Calculate Total
-     │
-     ▼
-Choose Payment Method
-     │
-     ▼
-Confirm Transaction
-     │
-     ▼
-Reduce Stock
-     │
-     ▼
-Generate Invoice
+ │
+ ▼
+Confirm Sale
+ │
+ ▼
+Reduce Inventory
+ │
+ ▼
+Record Inventory Movement
+ │
+ ▼
+Sale Completed
 ```
 
 ---
@@ -184,14 +266,161 @@ Generate Invoice
 
 ```
 Inventory
-     │
-     ├── View Stock
-     ├── Search Product
-     ├── Filter Product
-     ├── Stock Adjustment
-     └── Stock Movement
+    │
+    ├── View Stock
+    │
+    ├── Search Product
+    │
+    ├── Filter Product
+    │
+    ├── View Stock Movement
+    │
+    ├── View Inventory History
+    │
+    └── Stock Adjustment
+            │
+            ▼
+       Enter Adjustment
+            │
+            ▼
+       Validate Quantity
+            │
+            ▼
+       Update Inventory
+            │
+            ▼
+    Record Stock Movement
 ```
 
+# Employee Management Flow
+
+```
+Employee List
+      │
+      ├── Search / Filter
+      │
+      └── Add Employee
+              │
+              ▼
+        Fill Employee Form
+              │
+              ▼
+          Select Department
+              │
+              ▼
+          Validate Data
+              │
+         ┌────┴─────┐
+         │          │
+       Valid      Invalid
+         │          │
+         ▼          ▼
+       Save      Show Error
+         │
+         ▼
+     Employee List
+```
+
+# Department Management Flow
+
+```
+Department List
+      │
+      ▼
+Add / Edit Department
+      │
+      ▼
+Fill Department Information
+      │
+      ▼
+Validate Data
+      │
+ ┌────┴─────┐
+ │          │
+Valid     Invalid
+ │          │
+ ▼          ▼
+Save     Show Error
+ │
+ ▼
+Department List
+```
+
+# Attendance Management Flow
+
+```
+Attendance
+    │
+    ▼
+Select Employee
+    │
+    ▼
+Record Attendance
+    │
+    ▼
+Select Attendance Status
+    │
+    ▼
+Save Attendance
+    │
+    ▼
+Attendance History
+```
+
+# Leave Management Flow
+
+```
+Leave List
+    │
+    ▼
+Create Leave Request
+    │
+    ▼
+Select Employee
+    │
+    ▼
+Enter Leave Information
+    │
+    ▼
+Submit Request
+    │
+    ▼
+Validate Request
+    │
+ ┌──┴──────┐
+ │         │
+Valid    Invalid
+ │         │
+ ▼         ▼
+Save     Show Error
+ │
+ ▼
+Leave History
+```
+
+# Performance Review Flow
+
+```
+Performance Review
+        │
+        ▼
+Select Employee
+        │
+        ▼
+Select Review Period
+        │
+        ▼
+Enter Performance Score
+        │
+        ▼
+Enter Review Notes
+        │
+        ▼
+Save Review
+        │
+        ▼
+Performance Review History
+```
 ---
 
 # Report Flow
@@ -201,18 +430,16 @@ Reports
     │
     ├── Sales Report
     ├── Purchase Report
-    ├── Inventory Report
-    └── Profit Report
-         │
-         ▼
-Select Date Range
-         │
-         ▼
-Generate Report
-         │
-         ├── View
-         ├── Export PDF
-         └── Export Excel
+    └── Inventory Report
+           │
+           ▼
+     Select Date Range
+           │
+           ▼
+      Generate Report
+           │
+           ▼
+       View Report
 ```
 
 ---
@@ -220,15 +447,18 @@ Generate Report
 # Logout Flow
 
 ```
-Click Profile
-      │
-      ▼
+Application
+     │
+     ▼
+Open User Menu
+     │
+     ▼
 Logout
-      │
-      ▼
-Remove Session
-      │
-      ▼
+     │
+     ▼
+Clear Session
+     │
+     ▼
 Redirect to Login
 ```
 
@@ -242,18 +472,19 @@ Login
   ▼
 Dashboard
   │
-  ├─────────────┐
-  │             │
-Manage Data     Transactions
-  │             │
-  │             ├── Purchase
-  │             └── Sales
-  │
-  ▼
-Inventory Updated
-  │
-  ▼
-Reports
+  ├───────────────────────────┐
+  │                           │
+  ▼                           ▼
+Core Business            People Operations
+  │                           │
+  ├── Products                ├── Employees
+  ├── Categories              ├── Departments
+  ├── Suppliers               ├── Attendance
+  ├── Customers               ├── Leave
+  ├── Purchases               └── Performance Review
+  ├── Sales
+  ├── Inventory
+  └── Reports
   │
   ▼
 Logout
@@ -263,8 +494,11 @@ Logout
 
 # Future User Flows
 
-- Barcode Scanning
-- QR Inventory
-- Multi Warehouse
-- AI Demand Forecast
-- Notification Center
+- Barcode scanning
+- Stock adjustment improvements
+- Purchase returns
+- Sales returns
+- Multi-warehouse operations
+- Warehouse transfers
+- Notifications
+- Multi-company operations
