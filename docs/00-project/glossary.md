@@ -1,24 +1,37 @@
 # Glossary
 
-Version: 1.0
+Version: 2.0
 
 Status: Draft
 
 Author: Faiz
 
-Last Updated: 2026-07-27
+Last Updated: 2026-08-10
 
 ---
 
 # Overview
 
-This glossary defines the business and technical terms used throughout the Opsora documentation.
+This glossary defines the business and technical terms used throughout the Opsora
+documentation.
 
-It ensures consistent terminology across planning, design, engineering, and operations documents.
+It ensures consistent terminology across planning, design, engineering, and
+operations documents.
+
+Opsora uses two major business areas:
+
+- Core Business Operations
+- People Operations
 
 ---
 
 # Business Terms
+
+## Attendance
+
+A record of an employee's presence and attendance activity.
+
+---
 
 ## Barcode
 
@@ -30,7 +43,7 @@ A machine-readable code used to uniquely identify a product.
 
 A classification used to group similar products.
 
-Example:
+Examples:
 
 - Electronics
 - Furniture
@@ -46,13 +59,27 @@ An individual or organization that purchases products.
 
 ## Dashboard
 
-The main page that summarizes important business information such as sales, purchases, and inventory.
+The main page that summarizes important business information such as sales,
+purchases, inventory, and operational activity.
+
+---
+
+## Department
+
+An organizational unit used to group employees within a business.
+
+---
+
+## Employee
+
+A person who works for the business and is managed through the People
+Operations module.
 
 ---
 
 ## Inventory
 
-The total quantity of products currently available for sale or storage.
+The quantity of products currently available for sale or storage.
 
 ---
 
@@ -62,16 +89,29 @@ Any event that changes product stock.
 
 Examples:
 
-- Purchase
+- Purchase receiving
 - Sale
-- Stock Adjustment
+- Stock adjustment
 - Return
+
+---
+
+## Leave
+
+An employee's approved or requested absence from work.
 
 ---
 
 ## Low Stock
 
-A condition where the available stock is below the configured minimum stock level.
+A condition where available stock is below the configured minimum stock level.
+
+---
+
+## Performance Review
+
+A formal evaluation of an employee's performance during a defined review
+period.
 
 ---
 
@@ -90,6 +130,19 @@ A transaction where products are acquired from a supplier.
 ## Purchase Item
 
 A single product included in a purchase transaction.
+
+---
+
+## Role
+
+A set of permissions that determines what actions a user can perform within
+the system.
+
+Opsora currently defines the following primary roles:
+
+- Owner
+- Admin
+- Staff
 
 ---
 
@@ -129,7 +182,8 @@ A company or individual providing products to the business.
 
 ## Transaction
 
-Any business operation that changes inventory or financial records.
+A recorded business operation that affects inventory, purchasing, sales, or
+other operational records.
 
 ---
 
@@ -153,6 +207,29 @@ A customer who makes a purchase without being registered in the system.
 
 ---
 
+# Business Areas
+
+## Core Business Operations
+
+The primary business area of Opsora covering inventory, products, purchasing,
+sales, customers, suppliers, and reporting.
+
+---
+
+## People Operations
+
+The business area covering employee and workforce management.
+
+People Operations includes:
+
+- Employees
+- Departments
+- Attendance
+- Leave
+- Performance Review
+
+---
+
 # Technical Terms
 
 ## API
@@ -171,7 +248,8 @@ The process of verifying a user's identity.
 
 ## Authorization
 
-The process of determining what actions an authenticated user is allowed to perform.
+The process of determining what actions an authenticated user is allowed to
+perform.
 
 ---
 
@@ -257,20 +335,22 @@ A layer responsible for implementing business logic.
 
 ## Soft Delete
 
-A deletion strategy where data is marked as deleted instead of being permanently removed.
+A deletion strategy where data is marked as deleted instead of being
+permanently removed.
 
 ---
 
 ## Validation
 
-The process of checking whether incoming data satisfies business and technical rules.
+The process of checking whether incoming data satisfies business and
+technical rules.
 
 ---
 
 # Acronyms
 
 | Acronym | Meaning |
-|----------|---------|
+| ------- | ------- |
 | API | Application Programming Interface |
 | CRUD | Create, Read, Update, Delete |
 | DB | Database |
@@ -293,8 +373,16 @@ Throughout the documentation:
 - "Product" refers to an inventory item.
 - "Purchase" refers to buying from a supplier.
 - "Sale" refers to selling to a customer.
-- "Inventory" refers to current stock.
-- "Transaction" refers to purchases, sales, or inventory adjustments.
+- "Inventory" refers to current product stock.
+- "Transaction" refers to a recorded business operation.
+- "Employee" refers to a person managed through People Operations.
+- "Department" refers to an organizational unit containing employees.
+- "Attendance" refers to employee attendance records.
+- "Leave" refers to employee absence requests or records.
+- "Performance Review" refers to an employee performance evaluation.
+- "Core Business Operations" refers to the primary inventory and business
+  transaction capabilities of Opsora.
+- "People Operations" refers to employee and workforce management capabilities.
 
 These terms should be used consistently across all documents.
 
@@ -302,15 +390,18 @@ These terms should be used consistently across all documents.
 
 # Related Documents
 
-- requirements.md
-- data-dictionary.md
-- api-design.md
-- architecture.md
+- [Vision](./vision.md)
+- [Roadmap](./roadmap.md)
+- [Requirements](../01-planning/requirements.md)
+- [Data Dictionary](../02-design/data-dictionary.md)
+- [API Design](../02-design/api-design.md)
+- [Architecture](../02-design/architecture.md)
 
 ---
 
 # Revision History
 
 | Version | Date | Description |
-|----------|------------|-------------|
-| 1.0 | 2026-07-27 | Initial version |
+| ------- | ---- | ----------- |
+| 1.0 | 2026-07-27 | Initial glossary |
+| 2.0 | 2026-08-10 | Aligned terminology with Core Business Operations and People Operations |
