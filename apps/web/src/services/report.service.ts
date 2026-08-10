@@ -11,10 +11,25 @@ export type DashboardReport = {
   rejectedLeaves: number;
   totalSalary: number;
   averageSalary: number;
+
   employeesByDepartment: {
     id: string;
     name: string;
     totalEmployees: number;
+  }[];
+
+  attendanceWeekly: {
+    day: string;
+    date: string;
+    attendance: number;
+  }[];
+  recentActivities: DashboardActivity[];
+  upcomingLeaves: {
+    id: string;
+    name: string;
+    type: string;
+    startDate: string;
+    endDate: string;
   }[];
 };
 
@@ -58,6 +73,19 @@ export type PerformanceReport = {
     employee: string;
     score: number;
   } | null;
+};
+
+export type DashboardActivity = {
+  id: string;
+  type:
+    | "EMPLOYEE"
+    | "ATTENDANCE"
+    | "LEAVE"
+    | "PAYROLL"
+    | "PERFORMANCE";
+  title: string;
+  description: string;
+  createdAt: string;
 };
 
 export async function getDashboardReport() {

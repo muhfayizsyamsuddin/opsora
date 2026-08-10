@@ -5,35 +5,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const departments = [
-  {
-    name: "Engineering",
-    employees: 84,
-    percentage: 42,
-  },
-  {
-    name: "Operations",
-    employees: 56,
-    percentage: 28,
-  },
-  {
-    name: "HR",
-    employees: 24,
-    percentage: 12,
-  },
-  {
-    name: "Finance",
-    employees: 18,
-    percentage: 9,
-  },
-  {
-    name: "Marketing",
-    employees: 18,
-    percentage: 9,
-  },
-];
+type EmployeeDistributionProps = {
+  departments: {
+    id: string;
+    name: string;
+    totalEmployees: number;
+  }[];
+};
 
-export function EmployeeDistribution() {
+export function EmployeeDistribution({
+  departments,
+}: EmployeeDistributionProps) {
+  const totalEmployees = departments.reduce(
+    (total, department) =>
+      total + department.totalEmployees,
+    0,
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -41,26 +29,44 @@ export function EmployeeDistribution() {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {departments.map((department) => (
-          <div key={department.name} className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>{department.name}</span>
+        {departments.map((department) => {
+          const percentage =
+            totalEmployees === 0
+              ? 0
+              : (department.totalEmployees /
+                  totalEmployees) *
+                100;
 
-              <span className="text-muted-foreground">
-                {department.employees}
-              </span>
-            </div>
+          return (
+            <div
+              key={department.id}
+              className="space-y-2"
+            >
+              <div className="flex items-center justify-between text-sm">
+                <span>{department.name}</span>
 
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{
-                  width: `${department.percentage}%`,
-                }}
-              />
+                <span className="text-muted-foreground">
+                  {department.totalEmployees}
+                </span>
+              </div>
+
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{
+                    width: `${percentage}%`,
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+
+        {departments.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No employee distribution data.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

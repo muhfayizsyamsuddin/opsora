@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   Card,
   CardContent,
@@ -15,18 +17,22 @@ import {
 const actions = [
   {
     title: "Add Employee",
+    href: "/employees/new",
     icon: UserPlus,
   },
   {
     title: "Add Department",
+    href: "/departments/new",
     icon: Building2,
   },
   {
     title: "Create Leave",
+    href: "/leave/new",
     icon: CalendarPlus,
   },
   {
     title: "Attendance",
+    href: "/attendance",
     icon: ClipboardList,
   },
 ];
@@ -43,8 +49,9 @@ export function QuickActions() {
           const Icon = action.icon;
 
           return (
-            <button
+            <Link
               key={action.title}
+              href={action.href}
               className="flex flex-col items-center justify-center rounded-lg border p-6 transition hover:bg-muted"
             >
               <Icon className="mb-3 h-6 w-6" />
@@ -52,7 +59,7 @@ export function QuickActions() {
               <span className="text-sm font-medium">
                 {action.title}
               </span>
-            </button>
+            </Link>
           );
         })}
       </CardContent>

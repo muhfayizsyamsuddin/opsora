@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -9,41 +11,65 @@ import {
   UserPlus,
   Clock,
   CalendarCheck,
-  Building2,
+  Wallet,
+  Star,
 } from "lucide-react";
 
-const activities = [
-  {
-    id: 1,
-    title: "New employee added",
-    description: "John Doe joined Engineering",
-    time: "5 minutes ago",
-    icon: UserPlus,
-  },
-  {
-    id: 2,
-    title: "Attendance checked in",
-    description: "Sarah checked in",
-    time: "18 minutes ago",
-    icon: Clock,
-  },
-  {
-    id: 3,
-    title: "Leave request submitted",
-    description: "Michael requested Annual Leave",
-    time: "1 hour ago",
-    icon: CalendarCheck,
-  },
-  {
-    id: 4,
-    title: "Department updated",
-    description: "Finance department updated",
-    time: "3 hours ago",
-    icon: Building2,
-  },
-];
+import type { DashboardActivity } from "@/services/report.service";
 
-export function RecentActivities() {
+type RecentActivitiesProps = {
+  activities: DashboardActivity[];
+};
+
+function getRelativeTime(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+
+  const minutes = Math.floor(diff / 1000 / 60);
+
+  if (minutes < 1) {
+    return "Just now";
+  }
+
+  if (minutes < 60) {
+    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) {
+    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+function getActivityIcon(type: DashboardActivity["type"]) {
+  switch (type) {
+    case "EMPLOYEE":
+      return UserPlus;
+
+    case "ATTENDANCE":
+      return Clock;
+
+    case "LEAVE":
+      return CalendarCheck;
+
+    case "PAYROLL":
+      return Wallet;
+
+    case "PERFORMANCE":
+      return Star;
+
+    default:
+      return Clock;
+  }
+}
+
+export function RecentActivities({
+  activities,
+}: RecentActivitiesProps) {
   return (
     <Card>
       <CardHeader>
@@ -52,11 +78,11 @@ export function RecentActivities() {
 
       <CardContent className="space-y-5">
         {activities.map((activity) => {
-          const Icon = activity.icon;
+          const Icon = getActivityIcon(activity.type);
 
           return (
             <div
-              key={activity.id}
+              key={`${activity.type}-${activity.id}`}
               className="flex items-start gap-3"
             >
               <div className="rounded-lg bg-muted p-2">
@@ -73,12 +99,18 @@ export function RecentActivities() {
                 </p>
               </div>
 
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {activity.time}
+              <span className="whitespace-nowrap text-xs text-muted-foreground">
+                {getRelativeTime(activity.createdAt)}
               </span>
             </div>
           );
         })}
+
+        {activities.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No recent activities.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

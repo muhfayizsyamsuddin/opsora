@@ -7,28 +7,49 @@ import {
 
 import { CalendarDays } from "lucide-react";
 
-const leaves = [
-  {
-    id: 1,
-    name: "John Doe",
-    type: "Annual Leave",
-    date: "Aug 8",
-  },
-  {
-    id: 2,
-    name: "Sarah Smith",
-    type: "Sick Leave",
-    date: "Aug 10",
-  },
-  {
-    id: 3,
-    name: "Michael Lee",
-    type: "Annual Leave",
-    date: "Aug 12",
-  },
-];
+type UpcomingLeaveItem = {
+  id: string;
+  name: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+};
 
-export function UpcomingLeave() {
+type UpcomingLeaveProps = {
+  leaves: UpcomingLeaveItem[];
+};
+
+function formatDateRange(
+  startDate: string,
+  endDate: string,
+) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const startText = start.toLocaleDateString(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "short",
+    },
+  );
+
+  const endText = end.toLocaleDateString(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "short",
+    },
+  );
+
+  return startText === endText
+    ? startText
+    : `${startText} - ${endText}`;
+}
+
+export function UpcomingLeave({
+  leaves,
+}: UpcomingLeaveProps) {
   return (
     <Card>
       <CardHeader>
@@ -58,10 +79,19 @@ export function UpcomingLeave() {
             </div>
 
             <span className="text-xs text-muted-foreground">
-              {leave.date}
+              {formatDateRange(
+                leave.startDate,
+                leave.endDate,
+              )}
             </span>
           </div>
         ))}
+
+        {leaves.length === 0 && (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            No upcoming leave.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

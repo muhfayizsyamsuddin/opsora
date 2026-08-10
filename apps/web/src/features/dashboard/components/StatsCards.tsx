@@ -12,32 +12,44 @@ import {
   CalendarCheck,
 } from "lucide-react";
 
-const stats = [
-  {
-    title: "Employees",
-    value: "248",
-    icon: Users,
-  },
-  {
-    title: "Departments",
-    value: "12",
-    icon: Building2,
-  },
-  {
-    title: "Attendance Today",
-    value: "231",
-    icon: UserCheck,
-  },
-  {
-    title: "Leave Requests",
-    value: "8",
-    icon: CalendarCheck,
-  },
-];
+type StatsCardsProps = {
+  totalEmployees: number;
+  totalDepartments: number;
+  presentToday: number;
+  pendingLeaves: number;
+};
 
-export function StatsCards() {
+export function StatsCards({
+  totalEmployees,
+  totalDepartments,
+  presentToday,
+  pendingLeaves,
+}: StatsCardsProps) {
+  const stats = [
+    {
+      title: "Employees",
+      value: totalEmployees,
+      icon: Users,
+    },
+    {
+      title: "Departments",
+      value: totalDepartments,
+      icon: Building2,
+    },
+    {
+      title: "Attendance Today",
+      value: presentToday,
+      icon: UserCheck,
+    },
+    {
+      title: "Leave Requests",
+      value: pendingLeaves,
+      icon: CalendarCheck,
+    },
+  ];
+
   return (
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((item) => {
         const Icon = item.icon;
 
@@ -53,7 +65,7 @@ export function StatsCards() {
 
             <CardContent className="pt-2 pb-6">
               <p className="text-4xl font-bold tracking-tight">
-                {item.value}
+                {item.value.toLocaleString("id-ID")}
               </p>
             </CardContent>
           </Card>

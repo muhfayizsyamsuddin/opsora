@@ -17,17 +17,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const data = [
-  { day: "Mon", attendance: 210 },
-  { day: "Tue", attendance: 225 },
-  { day: "Wed", attendance: 220 },
-  { day: "Thu", attendance: 235 },
-  { day: "Fri", attendance: 231 },
-  { day: "Sat", attendance: 180 },
-  { day: "Sun", attendance: 120 },
-];
+type AttendanceChartProps = {
+  data: {
+    day: string;
+    date: string;
+    attendance: number;
+  }[];
+};
 
-export function AttendanceChart() {
+export function AttendanceChart({
+  data,
+}: AttendanceChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -38,9 +38,24 @@ export function AttendanceChart() {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
-              <linearGradient id="attendance" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="currentColor" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="currentColor" stopOpacity={0.05} />
+              <linearGradient
+                id="attendance"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="5%"
+                  stopColor="currentColor"
+                  stopOpacity={0.4}
+                />
+
+                <stop
+                  offset="95%"
+                  stopColor="currentColor"
+                  stopOpacity={0.05}
+                />
               </linearGradient>
             </defs>
 
@@ -48,7 +63,10 @@ export function AttendanceChart() {
 
             <XAxis dataKey="day" />
 
-            <YAxis />
+            <YAxis
+              allowDecimals={false}
+              domain={[0, "dataMax"]}
+            />
 
             <Tooltip />
 
