@@ -1,708 +1,1118 @@
-# Database Design (ERD)
+# Entity Relationship Diagram (ERD)
 
-Version: 1.0
+Version: 2.0
 
 Status: Draft
 
 Author: Faiz
 
-Last Updated: 2026-07-27
+Last Updated: 2026-08-11
 
 ---
 
-## Overview
+# Overview
 
-This document defines the logical database design for Opsora.
+This document defines the database entities and relationships used by Opsora.
 
-It describes the entities, relationships, constraints, and business rules that support the application's core business processes.
+Opsora is organized into three major areas:
 
-This document serves as the primary reference for database implementation.
+- Access & Administration
+- Core Business Operations
+- People Operations
 
----
-
-# Objectives
-
-- Design a normalized database structure.
-- Ensure data integrity.
-- Support inventory management workflows.
-- Support purchase and sales transactions.
-- Provide a scalable foundation for future development.
+The ERD is designed for the current MVP scope while keeping the structure extensible for future business requirements.
 
 ---
 
-## Database Standards
+# System Domains
 
-| Item              | Standard          |
-|------             |----------         |
-| Database          | PostgreSQL        |
-| ORM               | Prisma ORM        |
-| Primary Key       | UUID              |
-| Naming Convention | snake_case        |
-| Timestamp         | UTC               |
-| Soft Delete       | Master data only  |
-| Character Encoding| UTF-8             |
-
-## Database Design Principles
-
-### Transaction Snapshot Principle
-
-Transaction records must preserve business data as it existed when the transaction occurred.
-
-Master data may change over time, but completed transactions must remain immutable.
-
-Examples
-
-- Product selling price may change.
-- Product purchase price may change.
-- Supplier information may change.
-- Customer information may change.
-
-However,
-
-- Purchase Item purchase_price must never change.
-- Sale Item selling_price must never change.
-- Historical reports must always reflect original transaction values.
-
-## Entity List
-
-| Entity              | Purpose                      |
-| ------------------- | -----------------------------|
-| users               | System users                 |
-| categories          | Product categories           |
-| products            | Products available for sale  |
-| suppliers           | Supplier information         |
-| customers           | Customer information         |
-| purchases           | Purchase transaction headers |
-| purchase_items      | Purchase transaction details |
-| sales               | Sales transaction headers    |
-| sale_items          | Sales transaction details    |
-| inventory_movements | Inventory movement history   |
-
-
-## Entity Specifications
-
-| Field      | Type         | Required | Notes                                   |
-| ---------- | ------------ | -------- | --------------------------------------- |
-| id         | UUID         | ✅        | Primary Key                             |
-| name       | VARCHAR(100) | ✅        | Full name                               |
-| email      | VARCHAR(255) | ✅        | Unique                                  |
-| password   | TEXT         | ✅        | Hashed                                  |
-| role       | ENUM         | ✅        | SUPER_ADMIN / ADMIN / CASHIER / MANAGER |
-| created_at | TIMESTAMP    | ✅        | Audit                                   |
-| updated_at | TIMESTAMP    | ✅        | Audit                                   |
-| deleted_at | TIMESTAMP    | ❌        | Soft delete                             |
-
-### Entity: users
-
-#### Purpose
-
-Stores user accounts that can access the Opsora system.
-
----
-#### Fields
-
-| Field         | Type          | Required  | Description           |
-|---------      |------         |---------- |-------------          |
-| id            | UUID          | Yes       | Primary key           |
-| name          | VARCHAR(100)  | Yes       | User full name        |
-| email         | VARCHAR(255)  | Yes       | Login email           |
-| password      | TEXT          | Yes       | Hashed password       |
-| role          | ENUM          | Yes       | User role             |
-| created_at    | TIMESTAMP     | Yes       | Record creation time  |
-| updated_at    | TIMESTAMP     | Yes       | Record update time    |
-| deleted_at    | TIMESTAMP     | No        | Soft delete timestamp |
+```text
+OPSORA
+│
+├── ACCESS & ADMINISTRATION
+│   ├── Users
+│   ├── Roles
+│   ├── Permissions
+│   ├── User Roles
+│   └── Role Permissions
+│
+├── CORE BUSINESS OPERATIONS
+│   ├── Categories
+│   ├── Products
+│   ├── Suppliers
+│   ├── Customers
+│   ├── Purchases
+│   ├── Purchase Items
+│   ├── Sales
+│   ├── Sale Items
+│   └── Inventory Movements
+│
+└── PEOPLE OPERATIONS
+    ├── Departments
+    ├── Employees
+    ├── Attendance
+    ├── Leave Requests
+    └── Performance Reviews
+```
 
 ---
 
-#### Constraints
+# ERD Overview
 
-Primary Key
+```text
+                              ┌──────────────┐
+                              │    USERS     │
+                              └──────┬───────┘
+                                     │
+                                USER_ROLES
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │    ROLES     │
+                              └──────┬───────┘
+                                     │
+                              ROLE_PERMISSIONS
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │ PERMISSIONS  │
+                              └──────────────┘
 
-- id
 
-Unique
+┌──────────────┐
+│  CATEGORIES  │
+└──────┬───────┘
+       │ 1:N
+       ▼
+┌──────────────┐
+│   PRODUCTS   │
+└──────┬───────┘
+       │
+       ├──────────────────────┐
+       │                      │
+       │ 1:N                  │ 1:N
+       ▼                      ▼
+┌──────────────┐       ┌─────────────────────┐
+│ PURCHASE_    │       │ INVENTORY_MOVEMENTS │
+│ ITEMS        │       └─────────────────────┘
+└──────┬───────┘
+       │ N:1
+       ▼
+┌──────────────┐
+│  PURCHASES   │
+└──────┬───────┘
+       │ N:1
+       ▼
+┌──────────────┐
+│  SUPPLIERS   │
+└──────────────┘
 
-- email
 
----
+┌──────────────┐
+│   PRODUCTS   │
+└──────┬───────┘
+       │ 1:N
+       ▼
+┌──────────────┐
+│ SALE_ITEMS   │
+└──────┬───────┘
+       │ N:1
+       ▼
+┌──────────────┐
+│    SALES     │
+└──────┬───────┘
+       │ N:1
+       ▼
+┌──────────────┐
+│  CUSTOMERS   │
+└──────────────┘
 
-#### Indexes
 
-- email
-- role
-
----
-
-#### Relationships
-
-- One user can create many purchases.
-- One user can create many sales.
-
----
-
-#### Business Rules
-
-- Email must be unique.
-- Password must be stored in hashed format.
-- Soft-deleted users cannot access the system.
-
----
-
-### Entity: categories
-
-Stores product categories used to organize products.
-
----
-#### Fields
-
-| Field         | Type          | Required  | Description           |
-|---------------|---------------|-----------|-----------------------|
-| id            | UUID          | Yes       | Primary key           |
-| name          | VARCHAR(100)  | Yes       | Category name         |
-| description   | TEXT          | No        | Category description  |
-| created_at    | TIMESTAMP     | Yes       | Record creation time  |
-| updated_at    | TIMESTAMP     | Yes       | Record update time    |
-| deleted_at    | TIMESTAMP     | No        | Soft delete timestamp |
-
----
-
-#### Constraints
-
-Primary Key
-
-- id
-
-Unique
-
-- name
-
----
-
-#### Indexes
-
-- name
-
----
-
-#### Relationships
-
-- One category can have many products.
-
----
-
-#### Business Rules
-
-- Category name must be unique.
-- Soft-deleted categories cannot be assigned to new products.
-- Categories that are referenced by active products cannot be permanently deleted.
----
-
-### Entity: products
-#### Purpose
-Stores all products available for purchase and sale.
-
----
-#### Fields
-| Field         | Type          | Required | Description            |
-|---------------|---------------|----------|------------------------|
-| id            | UUID          | Yes      | Primary key            |
-| category_id   | UUID          | Yes      | Product category       |
-| sku           | VARCHAR(50)   | Yes      | Stock Keeping Unit     |
-| barcode       | VARCHAR(100)  | No       | Product barcode        |
-| name          | VARCHAR(150)  | Yes      | Product name           |
-| description   | TEXT          | No       | Product description    |
-| purchase_price| DECIMAL(15,2) | Yes      | Purchase price         |
-| selling_price | DECIMAL(15,2) | Yes      | Selling price          |
-| stock         | INTEGER       | Yes      | Current stock          |
-| minimum_stock | INTEGER       | Yes      | Minimum stock alert    |
-| unit          | VARCHAR(20)   | Yes      | Product unit           |
-| image_url     | TEXT          | No       | Product image URL      |
-| created_at    | TIMESTAMP     | Yes      | Record creation time   |
-| updated_at    | TIMESTAMP     | Yes      | Record update time     |
-| deleted_at    | TIMESTAMP     | No       | Soft delete timestamp  |
+┌──────────────┐
+│ DEPARTMENTS  │
+└──────┬───────┘
+       │ 1:N
+       ▼
+┌──────────────┐
+│  EMPLOYEES   │
+└──────┬───────┘
+       │
+       ├───────────────┐
+       │ 1:N           │ 1:N
+       ▼               ▼
+┌──────────────┐  ┌──────────────────┐
+│ ATTENDANCE   │  │ LEAVE_REQUESTS   │
+└──────────────┘  └──────────────────┘
+       │
+       │ 1:N
+       ▼
+┌──────────────────────┐
+│ PERFORMANCE_REVIEWS  │
+└──────────────────────┘
+```
 
 ---
 
-#### Constraints
+# Access & Administration
 
-Primary Key
+# Users
 
-- id
+Stores user accounts that can authenticate and access Opsora.
 
-Foreign Key
+### Fields
 
-- category_id → categories.id
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique user identifier |
+| name | VARCHAR | NOT NULL | User display name |
+| email | VARCHAR | UNIQUE, NOT NULL | Login email |
+| password_hash | VARCHAR | NOT NULL | Hashed password |
+| status | ENUM | NOT NULL | Account status |
+| employee_id | UUID | FK, NULL | Optional employee reference |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
-Unique
+### Status
 
-- sku
-- barcode
+- ACTIVE
+- INACTIVE
 
----
+### Relationships
 
-#### Indexes
+```text
+Users
+  │
+  ├── 1:N ── User Roles
+  │
+  └── 0:1 ── Employee
+```
 
-- sku
-- barcode
-- name
-- category_id
+A user account may optionally be associated with an employee.
 
----
-
-#### Relationships
-
-- One category has many products.
-- One product can appear in many purchase items.
-- One product can appear in many sale items.
-- One product has many inventory movements.
-
----
-
-#### Business Rules
-
-- Product name is required.
-- SKU must be unique.
-- Barcode must be unique when provided.
-- Selling price must be greater than or equal to purchase price.
-- Stock cannot be negative.
-- Soft-deleted products cannot be used in new transactions.
-
-### Entity: suppliers
-#### Purpose
-Stores supplier information used in purchase transactions.
-
----
-#### Fields
-| Field         | Type          | Required  | Description           |
-|---------------|---------------|-----------|-----------------------|
-| id            | UUID          | Yes       | Primary key           |
-| name          | VARCHAR(150)  | Yes       | Supplier name         |
-| contact_person| VARCHAR(100)  | No        | Primary contact       |
-| email         | VARCHAR(255)  | No        | Supplier email        |
-| phone         | VARCHAR(30)   | No        | Phone number          |
-| address       | TEXT          | No        | Supplier address      |
-| created_at    | TIMESTAMP     | Yes       | Record creation time  |
-| updated_at    | TIMESTAMP     | Yes       | Record update time    |
-| deleted_at    | TIMESTAMP     | No        | Soft delete timestamp |
+Not every employee must have a user account.
 
 ---
 
-#### Constraints
+# Roles
 
-Primary Key
+Defines access roles within Opsora.
 
-- id
+### Default Roles
 
----
+- Super Admin
+- Owner
+- Admin
+- Manager
+- Staff
+- Cashier
 
-#### Indexes
+### Fields
 
-- name
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique role identifier |
+| name | VARCHAR | UNIQUE, NOT NULL | Role name |
+| description | TEXT | NULL | Role description |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
----
+### Relationships
 
-#### Relationships
-
-- One supplier can have many purchases.
-
----
-
-#### Business Rules
-
-- Supplier name is required.
-- Soft-deleted suppliers cannot be selected for new purchases.
-
-### Entity: customers
-#### Purpose
-Stores customer information used in sales transactions.
-
----
-#### Fields
-| Field     | Type          | Required  | Description           |
-|---------  |------         |---------- |-------------          |
-| id        | UUID          | Yes       | Primary key           |
-| name      | VARCHAR(150)  | Yes       | Customer name         |
-| email     | VARCHAR(255)  | No        | Customer email        |
-| phone     | VARCHAR(30)   | No        | Phone number          |
-| address   | TEXT          | No        | Customer address      |
-| created_at| TIMESTAMP     | Yes       | Record creation time  |
-| updated_at| TIMESTAMP     | Yes       | Record update time    |
-| deleted_at| TIMESTAMP     | No        | Soft delete timestamp |
+```text
+Roles
+  │
+  ├── N:M ── Users
+  │
+  └── N:M ── Permissions
+```
 
 ---
 
-#### Constraints
+# Permissions
 
-Primary Key
+Defines individual actions that can be performed in the system.
 
-- id
+### Examples
 
----
+- products.view
+- products.create
+- products.update
+- products.delete
+- sales.view
+- sales.create
+- purchases.view
+- purchases.create
+- inventory.view
+- inventory.adjust
+- employees.view
+- employees.create
+- attendance.view
+- attendance.create
+- leave.view
+- leave.create
+- leave.approve
+- performance.view
+- performance.create
 
-#### Indexes
+### Fields
 
-- name
-- phone
-
----
-
-#### Relationships
-
-- One customer can have many sales.
-
----
-
-#### Business Rules
-
-- Customer name is required.
-- Walk-in Customer is created during database seeding.
-- Soft-deleted customers cannot be selected for new sales.
-
-### Entity: purchases
-#### Purpose
-Stores purchase transaction headers.
-
----
-#### Fields
-| Field             | Type          | Required | Description                    |
-|---------          |------         |----------|-------------                   |
-| id                | UUID          | Yes      | Primary key                    |
-| purchase_number   | VARCHAR(50)   | Yes      | Purchase document number       |
-| supplier_id       | UUID          | Yes      | Supplier reference             |
-| user_id           | UUID          | Yes      | User who created the purchase  |
-| transaction_date  | DATE          | Yes      | Purchase date                  |
-| status            | ENUM          | Yes      | Purchase status                |
-| total_amount      | DECIMAL(15,2) | Yes      | Total purchase amount          |
-| notes             | TEXT          | No       | Additional notes               |
-| created_at        | TIMESTAMP     | Yes      | Record creation time           |
-| updated_at        | TIMESTAMP     | Yes      | Record update time             |
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique permission identifier |
+| name | VARCHAR | UNIQUE, NOT NULL | Permission identifier |
+| description | TEXT | NULL | Permission description |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 
 ---
 
-#### Constraints
+# User Roles
 
-Primary Key
+Junction table connecting users and roles.
 
-- id
+### Fields
 
-Foreign Keys
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| user_id | UUID | PK, FK | User reference |
+| role_id | UUID | PK, FK | Role reference |
+| created_at | TIMESTAMP | NOT NULL | Assignment timestamp |
 
-- supplier_id → suppliers.id
-- user_id → users.id
+### Relationship
 
-Unique
+```text
+Users N:M Roles
+```
 
-- purchase_number
-
----
-
-#### Indexes
-
-- purchase_number
-- supplier_id
-- purchase_date
-- status
+A user may have one or more roles.
 
 ---
 
-#### Relationships
+# Role Permissions
 
-- One purchase belongs to one supplier.
-- One purchase belongs to one user.
-- One purchase has many purchase items.
+Junction table connecting roles and permissions.
 
----
+### Fields
 
-#### Business Rules
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| role_id | UUID | PK, FK | Role reference |
+| permission_id | UUID | PK, FK | Permission reference |
+| created_at | TIMESTAMP | NOT NULL | Assignment timestamp |
 
-- Purchase number must be unique.
-- Purchase must contain at least one item.
-- Total amount equals the sum of all purchase item subtotals.
-- Only completed purchases update inventory.
-- Cancelled purchases do not affect inventory.
+### Relationship
 
-### Entity: purchase_items
-#### Purpose
-Stores the detail lines of a purchase transaction.
-
----
-#### Fields
-| Field         | Type          | Required | Description                |
-|---------      |------         |----------|-------------               |
-| id            | UUID          | Yes      | Primary key                |
-| purchase_id   | UUID          | Yes      | Purchase reference         |
-| product_id    | UUID          | Yes      | Purchased product          |
-| quantity      | INTEGER       | Yes      | Quantity purchased         |
-| purchase_price| DECIMAL(15,2) | Yes      | Snapshot purchase price    |
-| subtotal      | DECIMAL(15,2) | Yes      | Quantity × Purchase Price  |
+```text
+Roles N:M Permissions
+```
 
 ---
 
-#### Constraints
+# Core Business Operations
 
-Primary Key
+# Categories
 
-- id
+Stores product categories.
 
-Foreign Keys
+### Fields
 
-- purchase_id → purchases.id
-- product_id → products.id
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique category identifier |
+| name | VARCHAR | UNIQUE, NOT NULL | Category name |
+| description | TEXT | NULL | Category description |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
----
+### Relationships
 
-#### Indexes
-
-- purchase_id
-- product_id
-
----
-
-#### Relationships
-
-- Many purchase items belong to one purchase.
-- Many purchase items reference one product.
+```text
+Category 1:N Products
+```
 
 ---
 
-#### Business Rules
+# Products
 
-- Quantity must be greater than zero.
-- Purchase price must be greater than zero.
-- Subtotal is calculated automatically.
-- Purchase price is stored as a transaction snapshot.
+Stores products managed by the inventory system.
 
-### Entity: sales
-#### Purpose
-Stores sales transaction headers.
+### Fields
 
----
-#### Fields
-| Field         | Type          | Required | Description                        |
-|---------      |------         |----------|-------------                       |
-| id            | UUID          | Yes      | Primary key                        |
-| invoice_number| VARCHAR(50)   | Yes      | Sales invoice number               |
-| customer_id   | UUID          | Yes      | Customer reference                 |
-| user_id       | UUID          | Yes      | Cashier/Admin who created the sale |
-| transaction_date     | DATE          | Yes      | Transaction date                   |
-| status        | ENUM          | Yes      | Sales status                       |
-| total_amount  | DECIMAL(15,2) | Yes      | Total sales amount                 |
-| notes         | TEXT          | No       | Additional notes                   |
-| created_at    | TIMESTAMP     | Yes      | Record creation time               |
-| updated_at    | TIMESTAMP     | Yes      | Record update time                 |
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique product identifier |
+| category_id | UUID | FK, NOT NULL | Product category |
+| name | VARCHAR | NOT NULL | Product name |
+| sku | VARCHAR | UNIQUE, NOT NULL | Stock Keeping Unit |
+| barcode | VARCHAR | UNIQUE, NULL | Product barcode |
+| purchase_price | DECIMAL | NOT NULL | Default purchase price |
+| selling_price | DECIMAL | NOT NULL | Default selling price |
+| stock | DECIMAL | NOT NULL | Current stock quantity |
+| minimum_stock | DECIMAL | NOT NULL | Minimum stock threshold |
+| unit | VARCHAR | NOT NULL | Product unit |
+| image_url | VARCHAR | NULL | Product image URL |
+| status | ENUM | NOT NULL | Product status |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
----
+### Status
 
-#### Constraints
+- ACTIVE
+- INACTIVE
 
-Primary Key
+### Relationships
 
-- id
-
-Foreign Keys
-
-- customer_id → customers.id
-- user_id → users.id
-
-Unique
-
-- invoice_number
+```text
+Category 1:N Products
+Product 1:N Purchase Items
+Product 1:N Sale Items
+Product 1:N Inventory Movements
+```
 
 ---
 
-#### Indexes
+# Suppliers
 
-- invoice_number
-- customer_id
-- sale_date
-- status
+Stores supplier information.
 
----
+### Fields
 
-#### Relationships
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique supplier identifier |
+| name | VARCHAR | NOT NULL | Supplier name |
+| phone | VARCHAR | NULL | Supplier phone |
+| email | VARCHAR | NULL | Supplier email |
+| address | TEXT | NULL | Supplier address |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
-- One customer can have many sales.
-- One user can create many sales.
-- One sale has many sale items.
+### Relationships
 
----
-
-#### Business Rules
-
-- Invoice number must be unique.
-- Sale must contain at least one item.
-- Total amount equals the sum of all sale item subtotals.
-- Completed sales reduce product stock.
-- Void sales do not affect inventory.
-
-### Entity: sale_items
-#### Purpose
-Stores the detail lines of a sales transaction.
-
----
-#### Fields
-| Field         | Type          | Required | Description                        |
-|---------      |------         |----------|-------------                       |
-| id            | UUID          | Yes      | Primary key                        |
-| sale_id       | UUID          | Yes      | Sales reference                    |
-| product_id    | UUID          | Yes      | Sold product                       |
-| quantity      | INTEGER       | Yes      | Quantity sold                      |
-| selling_price | DECIMAL(15,2) | Yes      | Snapshot selling price             |
-| subtotal      | DECIMAL(15,2) | Yes      | Quantity × Selling Price           |
+```text
+Supplier 1:N Purchases
+```
 
 ---
 
-#### Constraints
+# Customers
 
-Primary Key
+Stores customer information.
 
-- id
+### Fields
 
-Foreign Keys
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique customer identifier |
+| name | VARCHAR | NOT NULL | Customer name |
+| phone | VARCHAR | NULL | Customer phone |
+| email | VARCHAR | NULL | Customer email |
+| address | TEXT | NULL | Customer address |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
-- sale_id → sales.id
-- product_id → products.id
+### Relationships
 
----
+```text
+Customer 1:N Sales
+```
 
-#### Indexes
-
-- sale_id
-- product_id
-
----
-
-#### Relationships
-
-- Many sale items belong to one sale.
-- Many sale items reference one product.
-
----
-
-#### Business Rules
-
-- Quantity must be greater than zero.
-- Selling price must be greater than zero.
-- Subtotal is calculated automatically.
-- Selling price is stored as a transaction snapshot.
-
-### Entity: inventory_movements
-#### Purpose
-Stores every inventory movement for auditing and stock tracking.
-
----
-#### Fields
-| Field         | Type      | Required  | Description               |
-|---------      |------     |---------- |-------------              |
-| id            | UUID      | Yes       | Primary key               |
-| product_id    | UUID      | Yes       | Product reference         |
-| reference_type| ENUM      | Yes       | PURCHASE, SALE, ADJUSTMENT|
-| reference_id  | UUID      | Yes       | Related transaction ID    |
-| quantity      | INTEGER   | Yes       | Quantity moved            |
-| before_stock  | INTEGER   | Yes       | IN or OUT                 |
-| after_stock   | INTEGER   | Yes       | IN or OUT                 |
-| notes         | TEXT      | No        | Additional notes          |
-| created_at    | TIMESTAMP | Yes       | Movement timestamp        |
+Walk-in customers may be represented by a designated customer record or by an optional customer relationship depending on the final implementation.
 
 ---
 
-#### Constraints
+# Purchases
 
-Primary Key
+Stores purchase transactions from suppliers.
 
-- id
+### Fields
 
-Foreign Key
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique purchase identifier |
+| supplier_id | UUID | FK, NOT NULL | Supplier reference |
+| user_id | UUID | FK, NOT NULL | User who created the purchase |
+| purchase_date | DATE | NOT NULL | Purchase date |
+| total_amount | DECIMAL | NOT NULL | Total purchase amount |
+| status | ENUM | NOT NULL | Purchase status |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
-- product_id → products.id
-
----
-
-#### Indexes
-
-- product_id
-- reference_type
-- created_at
-
----
-
-#### Relationships
-
-- One product has many inventory movements.
-
----
-
-#### Business Rules
-
-- Every completed purchase creates an IN movement.
-- Every completed sale creates an OUT movement.
-- Every stock adjustment creates a movement.
-- Inventory movements cannot be edited.
-- Inventory movements cannot be deleted.
-
-## Enums
-
-### UserRole
-
-- SUPER_ADMIN
-- ADMIN
-- MANAGER
-- CASHIER
-
-### PurchaseStatus
+### Status
 
 - DRAFT
 - COMPLETED
 - CANCELLED
 
-### SaleStatus
+### Relationships
 
-- PENDING
-- PAID
-- VOID
+```text
+Supplier 1:N Purchases
+User 1:N Purchases
+Purchase 1:N Purchase Items
+```
 
-### InventoryReferenceType
+---
+
+# Purchase Items
+
+Stores individual products included in a purchase.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique purchase item identifier |
+| purchase_id | UUID | FK, NOT NULL | Purchase reference |
+| product_id | UUID | FK, NOT NULL | Product reference |
+| quantity | DECIMAL | NOT NULL | Purchased quantity |
+| unit_price | DECIMAL | NOT NULL | Purchase price per unit |
+| subtotal | DECIMAL | NOT NULL | Quantity × unit price |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+
+### Relationships
+
+```text
+Purchase 1:N Purchase Items
+Product 1:N Purchase Items
+```
+
+---
+
+# Sales
+
+Stores sales transactions.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique sale identifier |
+| customer_id | UUID | FK, NULL | Customer reference |
+| user_id | UUID | FK, NOT NULL | User who created the sale |
+| sale_date | DATE | NOT NULL | Sale date |
+| subtotal | DECIMAL | NOT NULL | Total before discount |
+| discount | DECIMAL | NOT NULL | Discount amount |
+| total_amount | DECIMAL | NOT NULL | Final sale amount |
+| payment_method | ENUM | NOT NULL | Payment method |
+| status | ENUM | NOT NULL | Sale status |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+
+### Payment Methods
+
+- CASH
+- TRANSFER
+- QRIS
+
+Additional payment methods may be added later.
+
+### Status
+
+- COMPLETED
+- CANCELLED
+
+### Relationships
+
+```text
+Customer 1:N Sales
+User 1:N Sales
+Sale 1:N Sale Items
+```
+
+---
+
+# Sale Items
+
+Stores individual products included in a sale.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique sale item identifier |
+| sale_id | UUID | FK, NOT NULL | Sale reference |
+| product_id | UUID | FK, NOT NULL | Product reference |
+| quantity | DECIMAL | NOT NULL | Sold quantity |
+| unit_price | DECIMAL | NOT NULL | Selling price per unit |
+| discount | DECIMAL | NOT NULL | Item discount |
+| subtotal | DECIMAL | NOT NULL | Calculated item subtotal |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+
+### Relationships
+
+```text
+Sale 1:N Sale Items
+Product 1:N Sale Items
+```
+
+---
+
+# Inventory Movements
+
+Records every inventory change.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique movement identifier |
+| product_id | UUID | FK, NOT NULL | Product reference |
+| user_id | UUID | FK, NOT NULL | User responsible for movement |
+| movement_type | ENUM | NOT NULL | IN or OUT |
+| reference_type | ENUM | NOT NULL | Source of movement |
+| reference_id | UUID | NULL | Related transaction identifier |
+| quantity | DECIMAL | NOT NULL | Quantity changed |
+| before_stock | DECIMAL | NOT NULL | Stock before movement |
+| after_stock | DECIMAL | NOT NULL | Stock after movement |
+| reason | TEXT | NULL | Reason for manual adjustment |
+| created_at | TIMESTAMP | NOT NULL | Movement timestamp |
+
+### Movement Type
+
+- IN
+- OUT
+
+### Reference Type
 
 - PURCHASE
 - SALE
 - ADJUSTMENT
 
-## Entity Relationship Diagram
+### Relationships
 
-```mermaid
-erDiagram
-
-USERS ||--o{ PURCHASES : creates
-USERS ||--o{ SALES : creates
-
-CATEGORIES ||--o{ PRODUCTS : contains
-
-SUPPLIERS ||--o{ PURCHASES : supplies
-
-CUSTOMERS ||--o{ SALES : places
-
-PURCHASES ||--|{ PURCHASE_ITEMS : contains
-
-SALES ||--|{ SALE_ITEMS : contains
-
-PRODUCTS ||--o{ PURCHASE_ITEMS : purchased
-
-PRODUCTS ||--o{ SALE_ITEMS : sold
-
-PRODUCTS ||--o{ INVENTORY_MOVEMENTS : tracks
+```text
+Product 1:N Inventory Movements
+User 1:N Inventory Movements
 ```
 
-## Assumptions & Limitations
+`reference_id` identifies the related business transaction when applicable.
 
-Current database design assumes:
+The exact reference resolution strategy will be defined in the API and implementation design.
 
-- Single company
-- Single warehouse
-- Single currency
-- Single language
-- No tax module
-- No product variants
-- No warehouse transfer
-- No return transaction
+---
 
-These features may be added in future versions without changing the core transaction structure.
+# People Operations
+
+# Departments
+
+Stores organizational departments.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique department identifier |
+| name | VARCHAR | UNIQUE, NOT NULL | Department name |
+| description | TEXT | NULL | Department description |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
+
+### Relationships
+
+```text
+Department 1:N Employees
+```
+
+A department should not be permanently deleted while referenced by active or historical employee records.
+
+---
+
+# Employees
+
+Stores employee information.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique employee identifier |
+| department_id | UUID | FK, NOT NULL | Department reference |
+| employee_code | VARCHAR | UNIQUE, NOT NULL | Employee identifier |
+| full_name | VARCHAR | NOT NULL | Employee full name |
+| email | VARCHAR | NULL | Employee email |
+| phone | VARCHAR | NULL | Employee phone |
+| position | VARCHAR | NULL | Employee position |
+| join_date | DATE | NOT NULL | Employment start date |
+| status | ENUM | NOT NULL | Employment status |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
+
+### Status
+
+- ACTIVE
+- INACTIVE
+
+### Relationships
+
+```text
+Department 1:N Employees
+Employee 1:N Attendance
+Employee 1:N Leave Requests
+Employee 1:N Performance Reviews
+Employee 0:1 User
+```
+
+An employee may optionally have one user account.
+
+---
+
+# Attendance
+
+Stores employee attendance records.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique attendance identifier |
+| employee_id | UUID | FK, NOT NULL | Employee reference |
+| attendance_date | DATE | NOT NULL | Attendance date |
+| check_in | TIME | NULL | Check-in time |
+| check_out | TIME | NULL | Check-out time |
+| status | ENUM | NOT NULL | Attendance status |
+| notes | TEXT | NULL | Attendance notes |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+
+### Status
+
+- PRESENT
+- LATE
+- ABSENT
+- LEAVE
+
+### Relationships
+
+```text
+Employee 1:N Attendance
+```
+
+### Business Constraint
+
+An employee should have at most one attendance record for a given date unless the implementation explicitly supports multiple attendance sessions.
+
+---
+
+# Leave Requests
+
+Stores employee leave requests and their approval status.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique leave request identifier |
+| employee_id | UUID | FK, NOT NULL | Employee reference |
+| leave_type | ENUM | NOT NULL | Leave category |
+| start_date | DATE | NOT NULL | Leave start date |
+| end_date | DATE | NOT NULL | Leave end date |
+| reason | TEXT | NULL | Leave reason |
+| status | ENUM | NOT NULL | Request status |
+| reviewed_by | UUID | FK, NULL | User who reviewed request |
+| reviewed_at | TIMESTAMP | NULL | Review timestamp |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+
+### Leave Types
+
+- ANNUAL
+- SICK
+- PERSONAL
+- OTHER
+
+### Status
+
+- PENDING
+- APPROVED
+- REJECTED
+- CANCELLED
+
+### Relationships
+
+```text
+Employee 1:N Leave Requests
+User 1:N Leave Requests
+```
+
+`reviewed_by` references the user who approved or rejected the request.
+
+### Business Rules
+
+- Start date cannot be later than end date.
+- Only authorized users may approve or reject requests.
+- A user should not approve their own leave request.
+- Historical leave decisions should remain available.
+
+---
+
+# Performance Reviews
+
+Stores employee performance review records.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Unique performance review identifier |
+| employee_id | UUID | FK, NOT NULL | Employee reference |
+| reviewer_id | UUID | FK, NOT NULL | User who performed the review |
+| review_period | VARCHAR | NOT NULL | Review period |
+| performance_score | DECIMAL | NOT NULL | Performance score |
+| review_notes | TEXT | NULL | Review notes |
+| review_date | DATE | NOT NULL | Review date |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+
+### Relationships
+
+```text
+Employee 1:N Performance Reviews
+User 1:N Performance Reviews
+```
+
+`reviewer_id` references the user who created the performance review.
+
+### Business Rules
+
+- Employee is required.
+- Review period is required.
+- Performance score must be within the configured valid range.
+- Only authorized users may create or edit reviews.
+
+---
+
+# Relationship Summary
+
+| Entity | Relationship | Entity |
+|---|---|---|
+| User | N:M | Role |
+| Role | N:M | Permission |
+| User | 0:1 | Employee |
+| Category | 1:N | Product |
+| Supplier | 1:N | Purchase |
+| Purchase | 1:N | Purchase Item |
+| Product | 1:N | Purchase Item |
+| Customer | 1:N | Sale |
+| User | 1:N | Sale |
+| Sale | 1:N | Sale Item |
+| Product | 1:N | Sale Item |
+| Product | 1:N | Inventory Movement |
+| User | 1:N | Inventory Movement |
+| Department | 1:N | Employee |
+| Employee | 1:N | Attendance |
+| Employee | 1:N | Leave Request |
+| User | 1:N | Leave Request |
+| Employee | 1:N | Performance Review |
+| User | 1:N | Performance Review |
+
+---
+
+# Data Integrity Rules
+
+## Products
+
+- SKU must be unique.
+- Barcode must be unique when provided.
+- Product stock cannot be negative.
+- Purchase price cannot be negative.
+- Selling price cannot be negative.
+- Minimum stock cannot be negative.
+
+---
+
+## Categories
+
+- Category name must be unique.
+- Categories referenced by products should not be permanently deleted.
+
+---
+
+## Suppliers
+
+- Suppliers referenced by purchase history should not be permanently deleted.
+
+---
+
+## Customers
+
+- Customers referenced by sales history should not be permanently deleted.
+
+---
+
+## Purchases
+
+- A purchase must reference a valid supplier.
+- A purchase must contain at least one purchase item.
+- Purchase item quantity must be greater than zero.
+- Purchase item price cannot be negative.
+
+---
+
+## Sales
+
+- A sale must contain at least one sale item.
+- Sale quantity must be greater than zero.
+- Sale quantity cannot exceed available stock.
+- Sale total must be calculated from sale items and discount.
+- A completed sale creates an inventory movement.
+
+---
+
+## Inventory
+
+Inventory changes must be recorded through inventory movements.
+
+```text
+Purchase
+   │
+   ▼
+IN Movement
+   │
+   ▼
+Increase Product Stock
+
+
+Sale
+   │
+   ▼
+OUT Movement
+   │
+   ▼
+Decrease Product Stock
+
+
+Adjustment
+   │
+   ▼
+IN / OUT Movement
+   │
+   ▼
+Update Product Stock
+```
+
+The `before_stock` and `after_stock` values provide an audit trail for stock changes.
+
+---
+
+## Employees
+
+- Employee code must be unique.
+- Every employee belongs to a department.
+- Employee records referenced by historical People Operations data should not be permanently deleted.
+
+---
+
+## Attendance
+
+- Employee must exist.
+- Attendance date is required.
+- An employee should normally have one attendance record per date.
+
+---
+
+## Leave Requests
+
+- Employee must exist.
+- Start date must not be later than end date.
+- Only authorized users may approve or reject requests.
+- Approved and rejected requests should preserve their decision history.
+
+---
+
+## Performance Reviews
+
+- Employee must exist.
+- Reviewer must be an authorized user.
+- Performance score must use the configured valid range.
+- Review history should remain available.
+
+---
+
+# Soft Delete Strategy
+
+The following entities support soft deletion where historical references may exist:
+
+- Users
+- Categories
+- Products
+- Suppliers
+- Customers
+- Departments
+- Employees
+
+Soft-deleted records remain in the database but are excluded from normal active queries.
+
+Transactional and historical records should not be physically deleted when doing so would compromise business history.
+
+---
+
+# Audit Considerations
+
+The current ERD records responsible users for important operational activities through `user_id` or equivalent fields.
+
+Examples:
+
+- Purchase creator
+- Sale creator
+- Inventory movement creator
+- Leave reviewer
+- Performance review reviewer
+
+A dedicated audit log may be introduced in a future release if more detailed system auditing is required.
+
+---
+
+# MVP Scope
+
+The current ERD supports:
+
+### Access & Administration
+
+- Authentication users
+- Roles
+- Permissions
+- User-role assignments
+- Role-permission assignments
+
+### Core Business Operations
+
+- Categories
+- Products
+- Suppliers
+- Customers
+- Purchases
+- Sales
+- Inventory movements
+- Business reports based on transactional data
+
+### People Operations
+
+- Employees
+- Departments
+- Attendance
+- Leave
+- Performance reviews
+
+---
+
+# Out of Scope
+
+The following entities are intentionally excluded from the current MVP ERD:
+
+- Payroll
+- Multi-company
+- Multi-warehouse
+- Warehouse transfers
+- Purchase returns
+- Sales returns
+- Product variants
+- Accounting
+- Tax management
+- CRM
+- E-commerce integrations
+- AI forecasting
+
+These may require additional entities and relationships in future versions.
+
+---
+
+# Future Extension
+
+The ERD should remain extensible for future modules.
+
+Possible future relationships include:
+
+```text
+Future
+│
+├── Warehouses
+│   └── Warehouse Transfers
+│
+├── Returns
+│   ├── Purchase Returns
+│   └── Sales Returns
+│
+├── Payroll
+│   └── Employee Payroll
+│
+├── Multi Company
+│   └── Company / Organization
+│
+└── Product Variants
+    └── Product Variant Inventory
+```
+
+These structures should not be implemented in the MVP unless the product scope is explicitly expanded.
+
+---
+
+# Design Decisions
+
+## Separate User and Employee Entities
+
+Users represent system accounts.
+
+Employees represent people working within the business.
+
+An employee may have a user account, but a user account is not required for every employee.
+
+---
+
+## Role-Based Access Control
+
+Opsora uses roles and permissions rather than relying only on hard-coded role checks.
+
+This allows permissions to evolve as the system grows.
+
+Default roles remain:
+
+- Super Admin
+- Owner
+- Admin
+- Manager
+- Staff
+- Cashier
+
+---
+
+## Inventory Movement History
+
+Inventory changes are recorded as movements rather than relying only on the current product stock value.
+
+This allows the system to maintain a history of stock changes.
+
+---
+
+## Transaction History Preservation
+
+Business transactions should remain available for historical reporting.
+
+Records referenced by transactions should therefore use soft deletion or another preservation strategy instead of destructive deletion.
+
+---
+
+# Related Documents
+
+- vision.md
+- requirements.md
+- user-stories.md
+- user-flow.md
+- wireframes.md
+- data-dictionary.md
+- api-design.md
+- architecture.md
+
+---
+
+# Revision History
+
+| Version | Date | Description |
+|---|---|---|
+| 1.0 | 2026-07-27 | Initial ERD |
+| 2.0 | 2026-08-11 | Expanded ERD for Access & Administration, Core Business Operations, and People Operations |
