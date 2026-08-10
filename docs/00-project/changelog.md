@@ -13,11 +13,19 @@ This project follows:
 
 ## Added
 
-- Upcoming features under development.
+- People Operations direction covering Employees, Departments, Attendance,
+  Leave, and Performance Review.
 
 ## Changed
 
--
+- Product vision aligned with Opsora as a Business Operations Management
+  System.
+- Product direction separated into Core Business Operations and People
+  Operations.
+- Product roadmap reorganized into incremental releases from Core Business
+  Operations to future enterprise capabilities.
+- Product glossary expanded with People Operations terminology.
+- Product requirements aligned with the updated product vision and roadmap.
 
 ## Fixed
 
