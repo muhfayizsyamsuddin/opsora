@@ -31,12 +31,49 @@ enum LeaveStatus {
   REJECTED
 }
 
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PurchaseStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  QRIS
+}
+
+enum SaleStatus {
+  COMPLETED
+  CANCELLED
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum InventoryReferenceType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
   password  String
   role      UserRole @default(STAFF)
+
+  purchases Purchase[]
+  sales     Sale[]
+  inventoryMovements InventoryMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -143,4 +180,151 @@ model PerformanceReview {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+
+  products    Product[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}
+
+model Product {
+  id            String        @id @default(uuid())
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+
+  name          String
+  sku           String        @unique
+  barcode       String?       @unique
+  purchasePrice Decimal
+  sellingPrice  Decimal
+  stock         Decimal
+  minimumStock  Decimal
+  unit          String
+  imageUrl      String?
+  status        ProductStatus @default(ACTIVE)
+
+  purchaseItems PurchaseItem[]
+  saleItems     SaleItem[]
+  inventoryMovements InventoryMovement[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+}
+
+model Supplier {
+  id        String     @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+
+  purchases Purchase[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+
+  sales     Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Purchase {
+  id           String         @id @default(uuid())
+  supplierId   String
+  userId       String
+  purchaseDate DateTime
+  totalAmount  Decimal
+  status       PurchaseStatus @default(DRAFT)
+
+  supplier     Supplier       @relation(fields: [supplierId], references: [id])
+  user         User            @relation(fields: [userId], references: [id])
+  items        PurchaseItem[]
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model PurchaseItem {
+  id         String   @id @default(uuid())
+  purchaseId String
+  productId  String
+  quantity   Decimal
+  unitPrice  Decimal
+  subtotal   Decimal
+
+  purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+
+  createdAt  DateTime @default(now())
+}
+
+model Sale {
+  id            String        @id @default(uuid())
+  customerId    String?
+  userId        String
+  saleDate      DateTime
+  subtotal      Decimal
+  discount      Decimal
+  totalAmount   Decimal
+  paymentMethod PaymentMethod
+  status        SaleStatus    @default(COMPLETED)
+
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  items         SaleItem[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model SaleItem {
+  id        String   @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Decimal
+  unitPrice Decimal
+  discount  Decimal
+  subtotal  Decimal
+
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model InventoryMovement {
+  id            String                  @id @default(uuid())
+  productId     String
+  userId        String
+  movementType  MovementType
+  referenceType InventoryReferenceType
+  referenceId   String?
+  quantity      Decimal
+  beforeStock   Decimal
+  afterStock    Decimal
+  reason        String?
+
+  product       Product                 @relation(fields: [productId], references: [id])
+  user          User                    @relation(fields: [userId], references: [id])
+
+  createdAt     DateTime                @default(now())
 }
