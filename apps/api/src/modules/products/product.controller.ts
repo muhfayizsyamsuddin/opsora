@@ -1,0 +1,77 @@
+import { Request, Response } from 'express';
+import { asyncHandler } from '../../utils/asyncHandler.js';
+import { created, noContent, success } from '../../utils/response.js';
+import { ProductService } from './product.service.js';
+
+export class ProductController {
+  static create = asyncHandler(async (req: Request, res: Response) => {
+    const product = await ProductService.create(req.body);
+
+    return created(
+      res,
+      product,
+      'Product created successfully',
+    );
+  });
+
+  static getAll = asyncHandler(async (req: Request, res: Response) => {
+    const page = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 10);
+    const search = req.query.search?.toString();
+    const categoryId = req.query.categoryId?.toString();
+
+    const status = req.query.status?.toString() as
+      | 'ACTIVE'
+      | 'INACTIVE'
+      | undefined;
+
+    const sort = (
+      req.query.sort?.toString() ?? 'createdAt'
+    ) as 'name' | 'sku' | 'createdAt';
+
+    const order = (
+      req.query.order?.toString() ?? 'desc'
+    ) as 'asc' | 'desc';
+
+    const products = await ProductService.getAllProducts(
+      page,
+      limit,
+      search,
+      categoryId,
+      status,
+      sort,
+      order,
+    );
+
+    return success(res, products);
+  });
+
+  static getById = asyncHandler(async (req: Request, res: Response) => {
+    const product = await ProductService.getById(
+      req.params.id.toString(),
+    );
+
+    return success(res, product);
+  });
+
+  static update = asyncHandler(async (req: Request, res: Response) => {
+    const product = await ProductService.update(
+      req.params.id.toString(),
+      req.body,
+    );
+
+    return success(
+      res,
+      product,
+      'Product updated successfully',
+    );
+  });
+
+  static delete = asyncHandler(async (req: Request, res: Response) => {
+    await ProductService.delete(
+      req.params.id.toString(),
+    );
+
+    return noContent(res);
+  });
+}
