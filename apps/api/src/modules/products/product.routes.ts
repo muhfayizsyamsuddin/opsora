@@ -13,6 +13,7 @@ import {
   getProductByIdSchema,
   updateProductSchema,
 } from './product.schema.js';
+import { upload } from '../../middlewares/upload.middleware.js';
 
 const router = Router();
 
@@ -30,6 +31,14 @@ router.get(
   authorize(UserRole.ADMIN, UserRole.MANAGER),
   validate(getProductsSchema),
   ProductController.getAll,
+);
+
+router.post(
+  '/:id/image',
+  authenticate,
+  authorize(UserRole.ADMIN),
+  upload.single('image'),
+  ProductController.uploadImage,
 );
 
 router.get(

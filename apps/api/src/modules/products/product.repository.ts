@@ -149,6 +149,7 @@ export class ProductRepository {
       minimumStock?: number;
       unit?: string;
       status?: 'ACTIVE' | 'INACTIVE';
+      imageUrl?: string;
     },
   ) {
     return prisma.product.update({

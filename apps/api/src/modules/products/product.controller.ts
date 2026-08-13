@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { created, noContent, success } from '../../utils/response.js';
 import { ProductService } from './product.service.js';
+import { AppError } from '../../errors/AppError.js';
 
 export class ProductController {
   static create = asyncHandler(async (req: Request, res: Response) => {
@@ -74,4 +75,23 @@ export class ProductController {
 
     return noContent(res);
   });
+
+  static uploadImage = asyncHandler(
+    async (req: Request, res: Response) => {
+        if (!req.file) {
+        throw new AppError('Image file is required', 400);
+        }
+
+        const product = await ProductService.uploadImage(
+        req.params.id.toString(),
+        req.file,
+        );
+
+        return success(
+        res,
+        product,
+        'Product image uploaded successfully',
+        );
+    },
+  );
 }

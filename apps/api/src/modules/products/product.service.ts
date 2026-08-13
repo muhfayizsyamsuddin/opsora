@@ -1,5 +1,6 @@
 import { AppError } from '../../errors/AppError.js';
 import { ProductRepository } from './product.repository.js';
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary.js';
 
 export class ProductService {
   static async create(data: {
@@ -101,6 +102,7 @@ export class ProductService {
       minimumStock?: number;
       unit?: string;
       status?: 'ACTIVE' | 'INACTIVE';
+      imageUrl?: string;
     },
   ) {
     const product = await ProductRepository.findById(id);
@@ -166,5 +168,25 @@ export class ProductService {
     }
 
     await ProductRepository.softDelete(id);
+  }
+
+  static async uploadImage(
+    id: string,
+    file: Express.Multer.File,
+  ) {
+    const product = await ProductRepository.findById(id);
+
+    if (!product) {
+        throw new AppError('Product not found', 404);
+    }
+
+    const result = await uploadToCloudinary(
+        file.buffer,
+        'opsora/products',
+    );
+
+    return ProductRepository.update(id, {
+        imageUrl: result.secure_url,
+    });
   }
 }
