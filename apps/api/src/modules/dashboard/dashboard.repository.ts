@@ -1,4 +1,9 @@
-import { AttendanceStatus, LeaveStatus } from "../../generated/prisma/client.js";
+import {
+  AttendanceStatus,
+  LeaveStatus,
+  PurchaseStatus,
+  SaleStatus,
+} from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 
 export class DashboardRepository {
@@ -12,6 +17,7 @@ export class DashboardRepository {
     endOfDay.setHours(23, 59, 59, 999);
 
     const [
+      // People Operations
       totalEmployees,
       totalDepartments,
       presentToday,
@@ -22,7 +28,37 @@ export class DashboardRepository {
       rejectedLeaves,
       employeesByDepartment,
       salaryStatistics,
+
+      // Sales
+      totalSalesCount,
+      totalSalesAmount,
+      salesTodayCount,
+      salesTodayAmount,
+      completedSales,
+      cancelledSales,
+
+      // Purchases
+      totalPurchasesCount,
+      totalPurchasesAmount,
+      purchasesTodayCount,
+      purchasesTodayAmount,
+      completedPurchases,
+      draftPurchases,
+      cancelledPurchases,
+
+      // Products / Inventory
+      totalProducts,
+      totalActiveProducts,
+      totalStockQuantity,
+      activeProducts,
+
+      // Recent inventory activity
+      recentInventoryMovements,
     ] = await Promise.all([
+      // =========================
+      // PEOPLE OPERATIONS
+      // =========================
+
       prisma.employee.count(),
 
       prisma.department.count(),
@@ -74,31 +110,206 @@ export class DashboardRepository {
           status: LeaveStatus.REJECTED,
         },
       }),
+
       prisma.department.findMany({
+        select: {
+          id: true,
+          name: true,
+          _count: {
             select: {
-            id: true,
-            name: true,
-            _count: {
-                select: {
-                employees: true,
-                },
+              employees: true,
             },
+          },
+        },
+        orderBy: {
+          name: "asc",
+        },
+      }),
+
+      prisma.employee.aggregate({
+        _sum: {
+          salary: true,
+        },
+        _avg: {
+          salary: true,
+        },
+      }),
+
+      // =========================
+      // SALES
+      // =========================
+
+      prisma.sale.count(),
+
+      prisma.sale.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: SaleStatus.COMPLETED,
+        },
+      }),
+
+      prisma.sale.count({
+        where: {
+          status: SaleStatus.COMPLETED,
+          saleDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      }),
+
+      prisma.sale.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: SaleStatus.COMPLETED,
+          saleDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      }),
+
+      prisma.sale.count({
+        where: {
+          status: SaleStatus.COMPLETED,
+        },
+      }),
+
+      prisma.sale.count({
+        where: {
+          status: SaleStatus.CANCELLED,
+        },
+      }),
+
+      // =========================
+      // PURCHASES
+      // =========================
+
+      prisma.purchase.count(),
+
+      prisma.purchase.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: PurchaseStatus.COMPLETED,
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          status: PurchaseStatus.COMPLETED,
+          purchaseDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      }),
+
+      prisma.purchase.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: PurchaseStatus.COMPLETED,
+          purchaseDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          status: PurchaseStatus.COMPLETED,
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          status: PurchaseStatus.DRAFT,
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          status: PurchaseStatus.CANCELLED,
+        },
+      }),
+
+      // =========================
+      // PRODUCTS / INVENTORY
+      // =========================
+
+      prisma.product.count(),
+
+      prisma.product.count({
+        where: {
+          status: "ACTIVE",
+          deletedAt: null,
+        },
+      }),
+
+      prisma.product.aggregate({
+        _sum: {
+          stock: true,
+        },
+        where: {
+          status: "ACTIVE",
+          deletedAt: null,
+        },
+      }),
+
+      prisma.product.findMany({
+        where: {
+          status: "ACTIVE",
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          stock: true,
+          minimumStock: true,
+        },
+      }),
+
+      // =========================
+      // RECENT INVENTORY
+      // =========================
+
+      prisma.inventoryMovement.findMany({
+        take: 10,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              sku: true,
             },
-            orderBy: {
-            name: "asc",
-            },
-        }),
-        prisma.employee.aggregate({
-            _sum: {
-                salary: true,
-            },
-            _avg: {
-                salary: true,
-            },
-        }),
+          },
+        },
+      }),
     ]);
 
+    const lowStockProducts = activeProducts.filter(
+      (product) =>
+        product.stock.lte(product.minimumStock),
+    );
+
     return {
+      // =========================
+      // PEOPLE
+      // =========================
+
+      people: {
         totalEmployees,
         totalDepartments,
         presentToday,
@@ -107,13 +318,76 @@ export class DashboardRepository {
         pendingLeaves,
         approvedLeaves,
         rejectedLeaves,
-        totalSalary: salaryStatistics._sum.salary ?? 0,
-        averageSalary: Math.round((salaryStatistics._avg.salary ?? 0) * 100) / 100,
-        employeesByDepartment: employeesByDepartment.map((department) => ({
+
+        totalSalary:
+          salaryStatistics._sum.salary ?? 0,
+
+        averageSalary: Math.round(
+          (salaryStatistics._avg.salary ?? 0) * 100,
+        ) / 100,
+
+        employeesByDepartment:
+          employeesByDepartment.map((department) => ({
             id: department.id,
             name: department.name,
-            totalEmployees: department._count.employees,
-        })),
+            totalEmployees:
+              department._count.employees,
+          })),
+      },
+
+      // =========================
+      // SALES
+      // =========================
+
+      sales: {
+        totalSalesCount,
+        totalSalesAmount:
+          totalSalesAmount._sum.totalAmount ?? 0,
+
+        salesTodayCount,
+        salesTodayAmount:
+          salesTodayAmount._sum.totalAmount ?? 0,
+
+        completedSales,
+        cancelledSales,
+      },
+
+      // =========================
+      // PURCHASES
+      // =========================
+
+      purchases: {
+        totalPurchasesCount,
+        totalPurchasesAmount:
+          totalPurchasesAmount._sum.totalAmount ?? 0,
+
+        purchasesTodayCount,
+        purchasesTodayAmount:
+          purchasesTodayAmount._sum.totalAmount ?? 0,
+
+        completedPurchases,
+        draftPurchases,
+        cancelledPurchases,
+      },
+
+      // =========================
+      // INVENTORY
+      // =========================
+
+      inventory: {
+        totalProducts,
+        totalActiveProducts,
+
+        totalStockQuantity:
+          totalStockQuantity._sum.stock ?? 0,
+
+        lowStockCount:
+          lowStockProducts.length,
+
+        lowStockProducts,
+
+        recentInventoryMovements,
+      },
     };
   }
 }
