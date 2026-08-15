@@ -45,4 +45,22 @@ export class InventoryMovementController {
       return success(res, movement);
     },
   );
+
+  static adjust = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await InventoryMovementService.adjust(
+          req.body.productId,
+          req.user!.id,
+          req.body.quantity,
+          req.body.reason,
+        );
+
+      return success(
+        res,
+        result,
+        "Inventory adjusted successfully",
+      );
+    },
+  );
 }

@@ -6,6 +6,7 @@ import { UserRole } from "../../generated/prisma/enums.js";
 
 import { InventoryMovementController } from "./inventory-movement.controller.js";
 import {
+  adjustInventorySchema,
   getInventoryMovementByIdSchema,
   getInventoryMovementsSchema,
 } from "./inventory-movement.schema.js";
@@ -18,6 +19,14 @@ router.get(
   authorize(UserRole.ADMIN, UserRole.MANAGER),
   validate(getInventoryMovementsSchema),
   InventoryMovementController.getAll,
+);
+
+router.post(
+  "/adjust",
+  authenticate,
+  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  validate(adjustInventorySchema),
+  InventoryMovementController.adjust,
 );
 
 router.get(

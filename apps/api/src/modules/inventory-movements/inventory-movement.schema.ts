@@ -21,3 +21,17 @@ export const getInventoryMovementByIdSchema = z.object({
     id: z.string().uuid(),
   }),
 });
+
+export const adjustInventorySchema = z.object({
+  body: z.object({
+    productId: z.string().uuid(),
+    quantity: z.coerce
+      .number()
+      .refine((value) => value !== 0, {
+        message: "Adjustment quantity cannot be zero",
+      }),
+    reason: z.string().min(3).max(500),
+  }),
+  params: z.object({}),
+  query: z.object({}),
+});
