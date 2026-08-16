@@ -2,6 +2,7 @@ import { AppError } from "../../errors/AppError.js";
 import { InventoryMovementRepository } from "./inventory-movement.repository.js";
 import { prisma } from "../../lib/prisma.js";
 import { Prisma } from "../../generated/prisma/client.js";
+import { InventoryStockService } from "./inventory-stock.service.js";
 
 export class InventoryMovementService {
   static async getById(id: string) {
@@ -57,63 +58,43 @@ export class InventoryMovementService {
     reason: string,
   ) {
     return prisma.$transaction(async (tx) => {
-      const product = await tx.product.findFirst({
-        where: {
-          id: productId,
-          deletedAt: null,
-        },
-      });
-
-      if (!product) {
-        throw new AppError("Product not found", 404);
-      }
-
       const adjustment = new Prisma.Decimal(quantity);
-      const beforeStock = product.stock;
-      const afterStock = beforeStock.add(adjustment);
 
-      if (afterStock.lt(0)) {
+      if (adjustment.isZero()) {
         throw new AppError(
-          "Adjustment would make stock negative",
+          "Adjustment quantity cannot be zero",
           400,
         );
       }
 
-      const movementType =
-        adjustment.gt(0) ? "IN" : "OUT";
-
-      const movementQuantity = adjustment.abs();
-
-      await tx.product.update({
-        where: {
-          id: product.id,
-        },
-        data: {
-          stock: afterStock,
-        },
-      });
+      const stockChange = adjustment.gt(0)
+        ? await InventoryStockService.increaseStock(
+            tx,
+            productId,
+            adjustment,
+          )
+        : await InventoryStockService.decreaseStock(
+            tx,
+            productId,
+            adjustment.abs(),
+          );
 
       const movement = await tx.inventoryMovement.create({
         data: {
-          productId: product.id,
+          productId,
           userId,
-          movementType,
+          movementType: adjustment.gt(0) ? "IN" : "OUT",
           referenceType: "ADJUSTMENT",
           referenceId: null,
-          quantity: movementQuantity,
-          beforeStock,
-          afterStock,
+          quantity: adjustment.abs(),
+          beforeStock: stockChange.beforeStock,
+          afterStock: stockChange.afterStock,
           reason,
         },
       });
 
       return {
-        product: {
-          id: product.id,
-          name: product.name,
-          sku: product.sku,
-          stock: afterStock,
-        },
+        product: stockChange.product,
         movement,
       };
     });

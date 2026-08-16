@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../errors/AppError.js";
 import { Prisma } from "../../generated/prisma/client.js";
+import { InventoryStockService } from "../inventory-movements/inventory-stock.service.js";
 
 type PurchaseItemInput = {
   productId: string;
@@ -156,45 +157,25 @@ export class PurchaseService {
       }
 
       for (const item of purchase.items) {
-        const product = await tx.product.findFirst({
-          where: {
-            id: item.productId,
-            deletedAt: null,
-          },
-        });
+        const quantity = new Prisma.Decimal(item.quantity);
 
-        if (!product) {
-          throw new AppError(
-            `Product not found: ${item.productId}`,
-            404,
+        const stockChange =
+          await InventoryStockService.increaseStock(
+            tx,
+            item.productId,
+            quantity,
           );
-        }
-
-        const beforeStock = product.stock;
-
-        const afterStock = beforeStock.add(
-          new Prisma.Decimal(item.quantity),
-        );
-
-        await tx.product.update({
-          where: {
-            id: product.id,
-          },
-          data: {
-            stock: afterStock,
-          },
-        });
 
         await tx.inventoryMovement.create({
           data: {
-            productId: product.id,
+            productId: item.productId,
             userId: purchase.userId,
             movementType: "IN",
             referenceType: "PURCHASE",
             referenceId: purchase.id,
-            quantity: item.quantity,
-            beforeStock,
-            afterStock,
+            quantity,
+            beforeStock: stockChange.beforeStock,
+            afterStock: stockChange.afterStock,
           },
         });
       }

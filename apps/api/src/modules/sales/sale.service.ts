@@ -2,6 +2,7 @@ import { prisma } from "../../lib/prisma.js";
 import { AppError } from "../../errors/AppError.js";
 import { Prisma } from "../../generated/prisma/client.js";
 import { SaleRepository } from "./sale.repository.js";
+import { InventoryStockService } from "../inventory-movements/inventory-stock.service.js";
 
 type PaymentMethod = "CASH" | "TRANSFER" | "QRIS";
 
@@ -80,8 +81,6 @@ export class SaleService {
         ]),
       );
 
-      const stockByProduct = new Map<string, Prisma.Decimal>();
-
       const saleItems = data.items.map((item) => {
         if (item.quantity <= 0) {
             throw new AppError(
@@ -123,17 +122,6 @@ export class SaleService {
         }
 
         const subtotal = gross.sub(discount);
-        const currentStock = stockByProduct.get(product.id) ?? product.stock;
-        const afterStock = currentStock.sub(quantity);
-
-        if (afterStock.lt(0)) {
-          throw new AppError(
-            `Insufficient stock for product: ${product.name}`,
-            400,
-          );
-        }
-        stockByProduct.set(product.id, afterStock);
-
         return {
           product,
           productId: product.id,
@@ -141,8 +129,6 @@ export class SaleService {
           unitPrice,
           discount,
           subtotal,
-          beforeStock: currentStock,
-          afterStock,
         };
       });
 
@@ -192,14 +178,12 @@ export class SaleService {
       });
 
       for (const item of saleItems) {
-        await tx.product.update({
-          where: {
-            id: item.productId,
-          },
-          data: {
-            stock: item.afterStock,
-          },
-        });
+        const stockChange =
+          await InventoryStockService.decreaseStock(
+            tx,
+            item.productId,
+            item.quantity,
+          );
 
         await tx.inventoryMovement.create({
           data: {
@@ -209,8 +193,8 @@ export class SaleService {
             referenceType: "SALE",
             referenceId: sale.id,
             quantity: item.quantity,
-            beforeStock: item.beforeStock,
-            afterStock: item.afterStock,
+            beforeStock: stockChange.beforeStock,
+            afterStock: stockChange.afterStock,
           },
         });
       }
@@ -260,46 +244,25 @@ export class SaleService {
       }
 
       for (const item of sale.items) {
-        const product = await tx.product.findFirst({
-          where: {
-            id: item.productId,
-            deletedAt: null,
-          },
-        });
+        const quantity = new Prisma.Decimal(item.quantity);
 
-        if (!product) {
-          throw new AppError(
-            `Product not found: ${item.productId}`,
-            404,
+        const stockChange =
+          await InventoryStockService.increaseStock(
+            tx,
+            item.productId,
+            quantity,
           );
-        }
-
-        const quantity = new Prisma.Decimal(
-          item.quantity,
-        );
-
-        const beforeStock = product.stock;
-        const afterStock = beforeStock.add(quantity);
-
-        await tx.product.update({
-          where: {
-            id: product.id,
-          },
-          data: {
-            stock: afterStock,
-          },
-        });
 
         await tx.inventoryMovement.create({
           data: {
-            productId: product.id,
+            productId: item.productId,
             userId: sale.userId,
             movementType: "IN",
             referenceType: "SALE",
             referenceId: sale.id,
             quantity,
-            beforeStock,
-            afterStock,
+            beforeStock: stockChange.beforeStock,
+            afterStock: stockChange.afterStock,
             reason: "Sale cancellation",
           },
         });
