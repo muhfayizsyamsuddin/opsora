@@ -31,41 +31,45 @@ import { swaggerSpec } from "./docs/swagger.js";
 
 const app = express();
 
+
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+
+const API_PREFIX = "/api/v1";
 
 app.use(
   "/docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec),
 );
-
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
 app.use("/health", healthRoutes);
-app.use("/departments", departmentRoutes);
-app.use("/categories", categoryRoutes);
-app.use('/products', productRoutes);
-app.use('/suppliers', supplierRoutes);
-app.use("/purchases", purchaseRoutes);
-app.use("/inventory", inventoryRoutes);
-app.use("/inventory-movements", inventoryMovementRoutes);
-app.use("/inventory/movements", inventoryMovementRoutes);
-app.use("/sales", saleRoutes);
-app.use("/customers", customerRoutes);
-app.use("/roles", roleRoutes);
-app.use("/permissions", permissionRoutes);
-app.use("/settings", settingRoutes);
-app.use("/employees", employeeRoutes);
-app.use("/attendances", attendanceRoutes);
-app.use("/attendance", attendanceRoutes);
-app.use("/leaves", leaveRoutes);
-app.use("/leave-requests", leaveRoutes);
-app.use("/dashboard", dashboardRoutes);
-app.use("/payrolls", payrollRoutes);
-app.use("/performance-reviews", performanceReviewRoutes);
-app.use("/reports", reportRoutes);
+
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/users`, userRoutes);
+app.use(`${API_PREFIX}/departments`, departmentRoutes);
+app.use(`${API_PREFIX}/categories`, categoryRoutes);
+app.use(`${API_PREFIX}/products`, productRoutes);
+app.use(`${API_PREFIX}/suppliers`, supplierRoutes);
+app.use(`${API_PREFIX}/purchases`, purchaseRoutes);
+app.use(`${API_PREFIX}/inventory`, inventoryRoutes);
+app.use(`${API_PREFIX}/inventory-movements`, inventoryMovementRoutes);
+app.use(`${API_PREFIX}/inventory/movements`, inventoryMovementRoutes);
+app.use(`${API_PREFIX}/sales`, saleRoutes);
+app.use(`${API_PREFIX}/customers`, customerRoutes);
+app.use(`${API_PREFIX}/roles`, roleRoutes);
+app.use(`${API_PREFIX}/permissions`, permissionRoutes);
+app.use(`${API_PREFIX}/settings`, settingRoutes);
+app.use(`${API_PREFIX}/employees`, employeeRoutes);
+app.use(`${API_PREFIX}/attendances`, attendanceRoutes);
+app.use(`${API_PREFIX}/attendance`, attendanceRoutes);
+app.use(`${API_PREFIX}/leaves`, leaveRoutes);
+app.use(`${API_PREFIX}/leave-requests`, leaveRoutes);
+app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
+app.use(`${API_PREFIX}/payrolls`, payrollRoutes);
+app.use(`${API_PREFIX}/performance-reviews`, performanceReviewRoutes);
+app.use(`${API_PREFIX}/reports`, reportRoutes);
+
 app.use(errorMiddleware);
 
 
