@@ -71,9 +71,9 @@ const permissions = [
   ["sales.create", "Create sales"],
   ["sales.cancel", "Cancel sales"],
 
-  // Inventory
-  ["inventory.read", "View inventory"],
-  ["inventory.adjust", "Adjust inventory"],
+  // Inventory Movements
+  ["inventory-movements.read", "View inventory movements"],
+  ["inventory-movements.adjust", "Adjust inventory movements"],
 
   // Dashboard / Reports
   ["dashboard.read", "View dashboard"],
@@ -92,15 +92,15 @@ const permissions = [
   ["departments.delete", "Delete departments"],
 
   // Attendance
-  ["attendance.read", "View attendance"],
-  ["attendance.create", "Create attendance"],
-  ["attendance.update", "Update attendance"],
+  ["attendances.read", "View attendance"],
+  ["attendances.create", "Create attendance"],
+  ["attendances.update", "Update attendance"],
 
   // Leave
-  ["leave.read", "View leave requests"],
-  ["leave.create", "Create leave requests"],
-  ["leave.approve", "Approve leave requests"],
-  ["leave.reject", "Reject leave requests"],
+  ["leaves.read", "View leave requests"],
+  ["leaves.create", "Create leave requests"],
+  ["leaves.approve", "Approve leave requests"],
+  ["leaves.reject", "Reject leave requests"],
 
   // Performance Reviews
   ["performance_reviews.read", "View performance reviews"],
@@ -147,7 +147,7 @@ const rolePermissions: RolePermissionMap = {
   OWNER: [
     "dashboard.read",
     "reports.read",
-    "inventory.read",
+    "inventory-movements.read",
     "sales.read",
     "purchases.read",
     "products.read",
@@ -155,8 +155,8 @@ const rolePermissions: RolePermissionMap = {
     "suppliers.read",
     "employees.read",
     "departments.read",
-    "attendance.read",
-    "leave.read",
+    "attendances.read",
+    "leaves.read",
     "performance_reviews.read",
   ],
 
@@ -172,23 +172,23 @@ const rolePermissions: RolePermissionMap = {
     "categories.read",
     "suppliers.read",
     "customers.read",
-    "inventory.read",
+    "inventory-movements.read",
 
     "sales.read",
     "purchases.read",
 
     "employees.read",
     "departments.read",
-    "attendance.read",
-    "leave.read",
-    "leave.approve",
-    "leave.reject",
+    "attendances.read",
+    "leaves.read",
+    "leaves.approve",
+    "leaves.reject",
     "performance_reviews.read",
   ],
 
   STAFF: [
     "products.read",
-    "inventory.read",
+    "inventory-movements.read",
 
     "purchases.read",
     "purchases.create",
@@ -200,9 +200,9 @@ const rolePermissions: RolePermissionMap = {
     "customers.read",
     "suppliers.read",
 
-    "attendance.read",
-    "attendance.create",
-    "attendance.update",
+    "attendances.read",
+    "attendances.create",
+    "attendances.update",
   ],
 
   CASHIER: [
