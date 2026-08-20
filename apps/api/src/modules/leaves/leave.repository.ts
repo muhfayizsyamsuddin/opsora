@@ -21,83 +21,115 @@ export class LeaveRepository {
     });
   }
 
-    static async findMany(
-        skip: number,
-        take: number,
-        search?: string,
-        status?: LeaveStatus,
-        employeeId?: string,
-        sort: "startDate" | "endDate" | "createdAt" = "createdAt",
-        order: "asc" | "desc" = "desc",
-    ) {
-        return prisma.leave.findMany({
-            skip,
-            take,
-            where: {
-            ...(status && { status }),
-            ...(employeeId && { employeeId }),
-            ...(search && {
-                employee: {
-                OR: [
-                    {
-                    name: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                    {
-                    email: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                ],
-                },
-            }),
-            },
-            include: {
-            employee: {
-                include: {
-                department: true,
-                },
-            },
-            },
-            orderBy: {
-            [sort]: order,
-            },
-        });
-    }
+  static async findMany(
+    skip: number,
+    take: number,
+    search?: string,
+    status?: LeaveStatus,
+    employeeId?: string,
+    startDate?: Date,
+    endDate?: Date,
+    sort: "startDate" | "endDate" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
+  ) {
+    return prisma.leave.findMany({
+      skip,
+      take,
+      where: {
+        ...(status && { status }),
+        ...(employeeId && { employeeId }),
 
-    static async count(
-        search?: string,
-        status?: LeaveStatus,
-        employeeId?: string,
-    ) {
-        return prisma.leave.count({
-            where: {
-            ...(status && { status }),
-            ...(employeeId && { employeeId }),
-            ...(search && {
-                employee: {
-                OR: [
-                    {
-                    name: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                    {
-                    email: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                ],
+        ...(startDate && {
+          startDate: {
+            gte: startDate,
+          },
+        }),
+
+        ...(endDate && {
+          endDate: {
+            lte: endDate,
+          },
+        }),
+
+        ...(search && {
+          employee: {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
                 },
-            }),
-            },
-        });
-    }
+              },
+              {
+                email: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+        }),
+      },
+
+      include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
+      },
+
+      orderBy: {
+        [sort]: order,
+      },
+    });
+  }
+
+  static async count(
+    search?: string,
+    status?: LeaveStatus,
+    employeeId?: string,
+    startDate?: Date,
+    endDate?: Date,
+  ) {
+    return prisma.leave.count({
+      where: {
+        ...(status && { status }),
+        ...(employeeId && { employeeId }),
+
+        ...(startDate && {
+          startDate: {
+            gte: startDate,
+          },
+        }),
+
+        ...(endDate && {
+          endDate: {
+            lte: endDate,
+          },
+        }),
+
+        ...(search && {
+          employee: {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+              {
+                email: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+        }),
+      },
+    });
+  }
 
   static async findById(id: string) {
     return prisma.leave.findUnique({

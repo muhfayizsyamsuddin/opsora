@@ -256,30 +256,47 @@ export class SaleService {
     });
   }
 
-  static async getAll(
-    page = 1,
-    limit = 10,
-    search?: string,
-  ) {
-    const skip = (page - 1) * limit;
+  static async getAll(query: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    customerId?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    sortBy?: "saleDate" | "createdAt" | "totalAmount";
+    sortOrder?: "asc" | "desc";
+  }) {
+    const page = query.page ?? 1;
+    const perPage = query.perPage ?? 20;
 
-    const [data, total] = await Promise.all([
-      SaleRepository.findMany(
-        skip,
-        limit,
-        search,
-      ),
-      SaleRepository.count(search),
-    ]);
+    const skip = (page - 1) * perPage;
+
+    const result = await SaleRepository.findMany(
+      skip,
+      perPage,
+      query.search,
+      query.customerId,
+      query.dateFrom,
+      query.dateTo,
+      query.sortBy ?? "saleDate",
+      query.sortOrder ?? "desc",
+    );
+
+    const total = await SaleRepository.count(
+      query.search,
+      query.customerId,
+      query.dateFrom,
+      query.dateTo,
+    );
 
     return {
-      data,
+      data: result,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(
-          total / limit,
+        total_pages: Math.ceil(
+          total / perPage,
         ),
       },
     };

@@ -15,40 +15,49 @@ export class PerformanceReviewController {
     );
   });
 
-  static getAll = asyncHandler(async (req: Request, res: Response) => {
-    const {
-      page,
-      limit,
-      employeeId,
-      reviewer,
-      scoreMin,
-      scoreMax,
-      search,
-      sort,
-      order,
-    } = req.query;
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const reviews =
+        await PerformanceReviewService.getAll({
+          page: Number(req.query.page ?? 1),
 
-    const reviews = await PerformanceReviewService.getAll({
-      page: page ? Number(page) : 1,
-      limit: limit ? Number(limit) : 10,
-      employeeId: employeeId as string | undefined,
-      reviewer: reviewer as string | undefined,
-      scoreMin: scoreMin
-        ? Number(scoreMin)
-        : undefined,
+          limit: Number(
+            req.query.per_page ?? 20,
+          ),
 
-      scoreMax: scoreMax
-        ? Number(scoreMax)
-        : undefined,
-      search: search as string | undefined,
-      sort:
-        (sort as keyof Prisma.PerformanceReviewOrderByWithRelationInput) ??
-        "reviewDate",
-      order: (order as Prisma.SortOrder) ?? "desc",
-    });
+          employeeId:
+            req.query.employee_id?.toString(),
 
-    return success(res, reviews);
-  });
+          reviewer:
+            req.query.reviewer?.toString(),
+
+          scoreMin: req.query.score_min
+            ? Number(req.query.score_min)
+            : undefined,
+
+          scoreMax: req.query.score_max
+            ? Number(req.query.score_max)
+            : undefined,
+
+          search:
+            req.query.search?.toString(),
+
+          sort:
+            (req.query.sort_by as
+              | keyof Prisma.PerformanceReviewOrderByWithRelationInput
+              | undefined) ??
+            "reviewDate",
+
+          order:
+            (req.query.sort_order as
+              | Prisma.SortOrder
+              | undefined) ??
+            "desc",
+        });
+
+      return success(res, reviews);
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const review = await PerformanceReviewService.getById(
@@ -83,26 +92,32 @@ export class PerformanceReviewController {
         await PerformanceReviewService.getEmployeeHistory(
           req.params.employee_id.toString(),
           {
-            page: req.query.page
-              ? Number(req.query.page)
-              : undefined,
-            limit: req.query.limit
-              ? Number(req.query.limit)
-              : undefined,
+            page: Number(
+              req.query.page ?? 1,
+            ),
+
+            limit: Number(
+              req.query.per_page ?? 20,
+            ),
+
             reviewer:
               req.query.reviewer?.toString(),
-            scoreMin: req.query.scoreMin
-              ? Number(req.query.scoreMin)
+
+            scoreMin: req.query.score_min
+              ? Number(req.query.score_min)
               : undefined,
-            scoreMax: req.query.scoreMax
-              ? Number(req.query.scoreMax)
+
+            scoreMax: req.query.score_max
+              ? Number(req.query.score_max)
               : undefined,
+
             sort:
-              (req.query.sort as
+              (req.query.sort_by as
                 | keyof Prisma.PerformanceReviewOrderByWithRelationInput
                 | undefined),
+
             order:
-              (req.query.order as
+              (req.query.sort_order as
                 | Prisma.SortOrder
                 | undefined),
           },

@@ -59,10 +59,12 @@ export class EmployeeService {
         return {
             data: employees,
             meta: {
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit),
+                page,
+                per_page: limit,
+                total,
+                total_pages: Math.ceil(
+                total / limit,
+                ),
             },
         };
     }

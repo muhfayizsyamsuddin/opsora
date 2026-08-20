@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authenticate } from "../../middlewares/auth.middleware.js";
 import { ReportController } from "./report.controller.js";
 import { requirePermission } from "../../middlewares/permission.middleware.js";
+import { validate } from "../../validators/validate.js";
+import { getReportSchema } from "./report.schema.js";
 
 const router = Router();
 
@@ -38,6 +40,38 @@ router.get(
   authenticate,
   requirePermission("reports.read"),
   ReportController.getPerformanceReport,
+);
+
+router.get(
+  "/sales",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.getSalesReport,
+);
+
+router.get(
+  "/purchases",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.getPurchasesReport,
+);
+
+router.get(
+  "/inventory",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.getInventoryReport,
+);
+
+router.get(
+  "/profit",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.getProfitReport,
 );
 
 export default router;

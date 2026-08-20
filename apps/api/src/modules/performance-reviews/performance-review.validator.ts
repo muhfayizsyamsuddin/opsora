@@ -39,20 +39,25 @@ export const getPerformanceReviewsSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
 
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
 
-    employeeId: z.string().uuid().optional(),
+    employee_id: z.string().uuid().optional(),
 
     reviewer: z.string().optional(),
 
-    scoreMin: z.coerce
+    score_min: z.coerce
       .number()
       .int()
       .min(0)
       .max(100)
       .optional(),
 
-    scoreMax: z.coerce
+    score_max: z.coerce
       .number()
       .int()
       .min(0)
@@ -61,7 +66,7 @@ export const getPerformanceReviewsSchema = z.object({
 
     search: z.string().optional(),
 
-    sort: z
+    sort_by: z
       .enum([
         "reviewDate",
         "score",
@@ -69,7 +74,9 @@ export const getPerformanceReviewsSchema = z.object({
       ])
       .default("reviewDate"),
 
-    order: z.enum(["asc", "desc"]).default("desc"),
+    sort_order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
   }),
 });
 
@@ -88,13 +95,40 @@ export const getPerformanceReviewEmployeeSchema = z.object({
   }),
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
+
     reviewer: z.string().optional(),
-    scoreMin: z.coerce.number().int().min(0).max(100).optional(),
-    scoreMax: z.coerce.number().int().min(0).max(100).optional(),
-    sort: z
-      .enum(["reviewDate", "score", "createdAt"])
+
+    score_min: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .optional(),
+
+    score_max: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .optional(),
+
+    sort_by: z
+      .enum([
+        "reviewDate",
+        "score",
+        "createdAt",
+      ])
       .default("reviewDate"),
-    order: z.enum(["asc", "desc"]).default("desc"),
+
+    sort_order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
   }),
 });

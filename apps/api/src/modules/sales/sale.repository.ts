@@ -41,39 +41,90 @@ export class SaleRepository {
     skip: number,
     take: number,
     search?: string,
+    customerId?: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+    sortBy:
+      | "saleDate"
+      | "createdAt"
+      | "totalAmount" = "saleDate",
+    sortOrder: "asc" | "desc" = "desc",
   ) {
+    const where = {
+      ...(customerId && {
+        customerId,
+      }),
+
+      ...(search && {
+        customer: {
+          name: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+      }),
+
+      ...(dateFrom || dateTo
+        ? {
+            saleDate: {
+              ...(dateFrom && {
+                gte: dateFrom,
+              }),
+              ...(dateTo && {
+                lte: dateTo,
+              }),
+            },
+          }
+        : {}),
+    };
+
     return prisma.sale.findMany({
       skip,
       take,
-      where: search
-        ? {
-            customer: {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          }
-        : undefined,
+      where,
       include: saleInclude,
       orderBy: {
-        saleDate: "desc",
+        [sortBy]: sortOrder,
       },
     });
   }
 
-  static async count(search?: string) {
-    return prisma.sale.count({
-      where: search
+  static async count(
+    search?: string,
+    customerId?: string,
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const where = {
+      ...(customerId && {
+        customerId,
+      }),
+
+      ...(search && {
+        customer: {
+          name: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+      }),
+
+      ...(dateFrom || dateTo
         ? {
-            customer: {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
+            saleDate: {
+              ...(dateFrom && {
+                gte: dateFrom,
+              }),
+              ...(dateTo && {
+                lte: dateTo,
+              }),
             },
           }
-        : undefined,
+        : {}),
+    };
+
+    return prisma.sale.count({
+      where,
     });
   }
 }

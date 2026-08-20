@@ -23,15 +23,47 @@ export class PurchaseController {
 
   static getAll = asyncHandler(
     async (req: Request, res: Response) => {
-      const page = Number(req.query.page ?? 1);
-      const limit = Number(req.query.limit ?? 10);
-      const search = req.query.search?.toString();
+      const purchases =
+        await PurchaseService.getAll({
+          page: Number(
+            req.query.page ?? 1,
+          ),
 
-      const purchases = await PurchaseService.getAll(
-        page,
-        limit,
-        search,
-      );
+          perPage: Number(
+            req.query.per_page ?? 20,
+          ),
+
+          search:
+            req.query.search?.toString(),
+
+          supplierId:
+            req.query.supplier_id?.toString(),
+
+          dateFrom: req.query.date_from
+            ? new Date(
+                req.query.date_from.toString(),
+              )
+            : undefined,
+
+          dateTo: req.query.date_to
+            ? new Date(
+                req.query.date_to.toString(),
+              )
+            : undefined,
+
+          sortBy:
+            (req.query.sort_by?.toString() ??
+              "purchaseDate") as
+              | "purchaseDate"
+              | "createdAt"
+              | "totalAmount",
+
+          sortOrder:
+            (req.query.sort_order?.toString() ??
+              "desc") as
+              | "asc"
+              | "desc",
+        });
 
       return success(res, purchases);
     },

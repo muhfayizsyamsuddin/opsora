@@ -96,7 +96,7 @@ export class PerformanceReviewService {
 
     return PerformanceReviewRepository.findMany({
       page: query.page ?? 1,
-      limit: query.limit ?? 10,
+      limit: query.limit ?? 20,
       employeeId,
       reviewer: query.reviewer,
       scoreMin: query.scoreMin,

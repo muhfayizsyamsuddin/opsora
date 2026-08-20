@@ -21,8 +21,29 @@ export const getPurchasesSchema = z.object({
   params: z.object({}),
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
+
     search: z.string().optional(),
+
+    supplier_id: z.string().uuid().optional(),
+
+    date_from: z.coerce.date().optional(),
+
+    date_to: z.coerce.date().optional(),
+
+    sort_by: z
+      .enum(["purchaseDate", "createdAt", "totalAmount"])
+      .default("purchaseDate"),
+
+    sort_order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
   }),
 });
 

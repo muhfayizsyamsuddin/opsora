@@ -15,37 +15,53 @@ export class ProductController {
     );
   });
 
-  static getAll = asyncHandler(async (req: Request, res: Response) => {
-    const page = Number(req.query.page ?? 1);
-    const limit = Number(req.query.limit ?? 10);
-    const search = req.query.search?.toString();
-    const categoryId = req.query.categoryId?.toString();
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const page = Number(req.query.page ?? 1);
 
-    const status = req.query.status?.toString() as
-      | 'ACTIVE'
-      | 'INACTIVE'
-      | undefined;
+      const perPage = Number(
+        req.query.per_page ?? 20,
+      );
 
-    const sort = (
-      req.query.sort?.toString() ?? 'createdAt'
-    ) as 'name' | 'sku' | 'createdAt';
+      const search =
+        req.query.search?.toString();
 
-    const order = (
-      req.query.order?.toString() ?? 'desc'
-    ) as 'asc' | 'desc';
+      const categoryId =
+        req.query.category_id?.toString();
 
-    const products = await ProductService.getAllProducts(
-      page,
-      limit,
-      search,
-      categoryId,
-      status,
-      sort,
-      order,
-    );
+      const status =
+        req.query.status?.toString() as
+          | "ACTIVE"
+          | "INACTIVE"
+          | undefined;
 
-    return success(res, products);
-  });
+      const sortBy =
+        (req.query.sort_by?.toString() ??
+          "createdAt") as
+          | "name"
+          | "sku"
+          | "createdAt";
+
+      const sortOrder =
+        (req.query.sort_order?.toString() ??
+          "desc") as
+          | "asc"
+          | "desc";
+
+      const products =
+        await ProductService.getAllProducts(
+          page,
+          perPage,
+          search,
+          categoryId,
+          status,
+          sortBy,
+          sortOrder,
+        );
+
+      return success(res, products);
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const product = await ProductService.getById(

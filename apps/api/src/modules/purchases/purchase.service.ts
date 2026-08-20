@@ -263,64 +263,87 @@ export class PurchaseService {
     });
   }
 
-  static async getAll(
-    page = 1,
-    limit = 10,
-    search?: string,
-  ) {
-    const skip = (page - 1) * limit;
+  static async getAll(query: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    supplierId?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    sortBy?: "purchaseDate" | "createdAt" | "totalAmount";
+    sortOrder?: "asc" | "desc";
+  }) {
+    const page = query.page ?? 1;
+    const perPage = query.perPage ?? 20;
+
+    const skip = (page - 1) * perPage;
+
+    const purchaseDateFilter =
+      query.dateFrom || query.dateTo
+        ? {
+            purchaseDate: {
+              ...(query.dateFrom && {
+                gte: query.dateFrom,
+              }),
+              ...(query.dateTo && {
+                lte: query.dateTo,
+              }),
+            },
+          }
+        : {};
+
+    const where = {
+      ...(query.supplierId && {
+        supplierId: query.supplierId,
+      }),
+
+      ...(query.search && {
+        supplier: {
+          name: {
+            contains: query.search,
+            mode: "insensitive" as const,
+          },
+        },
+      }),
+
+      ...purchaseDateFilter,
+    };
 
     const [data, total] = await Promise.all([
-        prisma.purchase.findMany({
+      prisma.purchase.findMany({
         skip,
-        take: limit,
-        where: search
-            ? {
-                supplier: {
-                name: {
-                    contains: search,
-                    mode: "insensitive",
-                },
-                },
-            }
-            : undefined,
+        take: perPage,
+        where,
         include: {
-            supplier: true,
-            user: {
-              select: userSelect,
-            },
-            items: {
+          supplier: true,
+          user: {
+            select: userSelect,
+          },
+          items: {
             include: {
-                product: true,
+              product: true,
             },
-            },
+          },
         },
         orderBy: {
-            purchaseDate: "desc",
+          [query.sortBy ?? "purchaseDate"]:
+            query.sortOrder ?? "desc",
         },
-        }),
-        prisma.purchase.count({
-        where: search
-            ? {
-                supplier: {
-                name: {
-                    contains: search,
-                    mode: "insensitive",
-                },
-                },
-            }
-            : undefined,
-        }),
+      }),
+
+      prisma.purchase.count({
+        where,
+      }),
     ]);
 
     return {
-        data,
-        meta: {
+      data,
+      meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
-        },
+        total_pages: Math.ceil(total / perPage),
+      },
     };
   }
 

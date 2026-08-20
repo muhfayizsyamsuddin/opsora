@@ -8,6 +8,7 @@ import {
   cancelLeaveSchema,
   createLeaveSchema,
   getLeaveByIdSchema,
+  getLeavesSchema,
   updateLeaveSchema,
 } from "./leave.schema.js";
 
@@ -25,6 +26,13 @@ router.post(
 router.get(
   "/",
   requirePermission("leaves.read"),
+  LeaveController.getAll,
+);
+
+router.get(
+  "/",
+  requirePermission("leaves.read"),
+  validate(getLeavesSchema),
   LeaveController.getAll,
 );
 

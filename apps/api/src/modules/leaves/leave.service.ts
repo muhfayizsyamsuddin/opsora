@@ -44,46 +44,54 @@ export class LeaveService {
     });
   }
 
-    static async getAll(query: {
-        page?: number;
-        limit?: number;
-        search?: string;
-        status?: LeaveStatus;
-        employeeId?: string;
-        sort?: "startDate" | "endDate" | "createdAt";
-        order?: "asc" | "desc";
-    }) {
-        const page = query.page ?? 1;
-        const limit = query.limit ?? 10;
+  static async getAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: LeaveStatus;
+    employeeId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    sort?: "startDate" | "endDate" | "createdAt";
+    order?: "asc" | "desc";
+  }) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
 
-        const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-        const leaves = await LeaveRepository.findMany(
-            skip,
-            limit,
-            query.search,
-            query.status,
-            query.employeeId,
-            query.sort,
-            query.order,
-        );
+    const leaves = await LeaveRepository.findMany(
+      skip,
+      limit,
+      query.search,
+      query.status,
+      query.employeeId,
+      query.startDate,
+      query.endDate,
+      query.sort,
+      query.order,
+    );
 
-        const total = await LeaveRepository.count(
-            query.search,
-            query.status,
-            query.employeeId,
-        );
+    const total = await LeaveRepository.count(
+      query.search,
+      query.status,
+      query.employeeId,
+      query.startDate,
+      query.endDate,
+    );
 
-        return {
-            data: leaves,
-            meta: {
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit),
-            },
-        };
-    }
+    return {
+      data: leaves,
+      meta: {
+        page,
+        per_page: limit,
+        total,
+        total_pages: Math.ceil(
+          total / limit,
+        ),
+      },
+    };
+  }
 
   static async getById(id: string) {
     const leave = await LeaveRepository.findById(id);

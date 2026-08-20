@@ -23,14 +23,29 @@ export const getProductsSchema = z.object({
   params: z.object({}),
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
+
     search: z.string().optional(),
-    categoryId: z.string().uuid().optional(),
-    status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
-    sort: z
-      .enum(['name', 'sku', 'createdAt'])
-      .default('createdAt'),
-    order: z.enum(['asc', 'desc']).default('desc'),
+
+    category_id: z.string().uuid().optional(),
+
+    status: z
+      .enum(["ACTIVE", "INACTIVE"])
+      .optional(),
+
+    sort_by: z
+      .enum(["name", "sku", "createdAt"])
+      .default("createdAt"),
+
+    sort_order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
   }),
 });
 

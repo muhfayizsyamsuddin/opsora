@@ -15,36 +15,55 @@ export class LeaveController {
     );
   });
 
-    static getAll = asyncHandler(async (req: Request, res: Response) => {
-        const leaves = await LeaveService.getAll({
-            page: req.query.page
-            ? Number(req.query.page)
-            : undefined,
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const leaves = await LeaveService.getAll({
+        page: Number(req.query.page ?? 1),
 
-            limit: req.query.limit
-            ? Number(req.query.limit)
-            : undefined,
+        limit: Number(
+          req.query.per_page ?? 20,
+        ),
 
-            search: req.query.search?.toString(),
+        search:
+          req.query.search?.toString(),
 
-            employeeId: req.query.employeeId?.toString(),
+        employeeId:
+          req.query.employee_id?.toString(),
 
-            status: req.query.status as LeaveStatus | undefined,
+        status:
+          req.query.status as
+            | LeaveStatus
+            | undefined,
 
-            sort: req.query.sort as
+        startDate: req.query.start_date
+          ? new Date(
+              req.query.start_date.toString(),
+            )
+          : undefined,
+
+        endDate: req.query.end_date
+          ? new Date(
+              req.query.end_date.toString(),
+            )
+          : undefined,
+
+        sort:
+          req.query.sort_by as
             | "startDate"
             | "endDate"
             | "createdAt"
             | undefined,
 
-            order: req.query.order as
+        order:
+          req.query.sort_order as
             | "asc"
             | "desc"
             | undefined,
-        });
+      });
 
-        return success(res, leaves);
-    });
+      return success(res, leaves);
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const leave = await LeaveService.getById(

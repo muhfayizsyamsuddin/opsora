@@ -42,35 +42,43 @@ export class AttendanceController {
     return noContent(res);
   });
 
-    static getAll = asyncHandler(async (req: Request, res: Response) => {
-        const attendances = await AttendanceService.getAll({
-            page: req.query.page
-            ? Number(req.query.page)
-            : undefined,
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const attendances =
+        await AttendanceService.getAll({
+          page: Number(req.query.page ?? 1),
 
-            limit: req.query.limit
-            ? Number(req.query.limit)
-            : undefined,
+          limit: Number(
+            req.query.per_page ?? 20,
+          ),
 
-            search: req.query.search?.toString(),
+          search:
+            req.query.search?.toString(),
 
-            employeeId: req.query.employeeId?.toString(),
+          employeeId:
+            req.query.employee_id?.toString(),
 
-            status: req.query.status as AttendanceStatus | undefined,
+          status:
+            req.query.status as
+              | AttendanceStatus
+              | undefined,
 
-            sort: req.query.sort as
-            | "checkIn"
-            | "createdAt"
-            | undefined,
+          sort:
+            req.query.sort_by as
+              | "checkIn"
+              | "createdAt"
+              | undefined,
 
-            order: req.query.order as
-            | "asc"
-            | "desc"
-            | undefined,
+          order:
+            req.query.sort_order as
+              | "asc"
+              | "desc"
+              | undefined,
         });
 
-        return success(res, attendances);
-    });
+      return success(res, attendances);
+    },
+  );
 
   static getEmployeeHistory = asyncHandler(
     async (req: Request, res: Response) => {
@@ -78,23 +86,30 @@ export class AttendanceController {
         await AttendanceService.getEmployeeHistory(
           req.params.employee_id.toString(),
           {
-            page: req.query.page
-              ? Number(req.query.page)
-              : undefined,
-            limit: req.query.limit
-              ? Number(req.query.limit)
-              : undefined,
-            status: req.query.status as
-              | AttendanceStatus
-              | undefined,
-            sort: req.query.sort as
-              | "checkIn"
-              | "createdAt"
-              | undefined,
-            order: req.query.order as
-              | "asc"
-              | "desc"
-              | undefined,
+            page: Number(
+              req.query.page ?? 1,
+            ),
+
+            limit: Number(
+              req.query.per_page ?? 20,
+            ),
+
+            status:
+              req.query.status as
+                | AttendanceStatus
+                | undefined,
+
+            sort:
+              req.query.sort_by as
+                | "checkIn"
+                | "createdAt"
+                | undefined,
+
+            order:
+              req.query.sort_order as
+                | "asc"
+                | "desc"
+                | undefined,
           },
         );
 

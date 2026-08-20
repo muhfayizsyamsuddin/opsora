@@ -18,25 +18,36 @@ export class EmployeeController {
 
     static getAll = asyncHandler(async (req: Request, res: Response) => {
         const employees = await EmployeeService.getAll({
-            page: req.query.page
-            ? Number(req.query.page)
-            : undefined,
-            limit: req.query.limit
-            ? Number(req.query.limit)
-            : undefined,
-            search: req.query.search?.toString(),
-            departmentId: req.query.departmentId?.toString(),
-            status: req.query.status as EmployeeStatus | undefined,
-            sort: req.query.sort as
-            | "name"
-            | "salary"
-            | "hireDate"
-            | "createdAt"
-            | undefined,
-            order: req.query.order as
-            | "asc"
-            | "desc"
-            | undefined,
+            page: Number(req.query.page ?? 1),
+
+            limit: Number(
+            req.query.per_page ?? 20,
+            ),
+
+            search:
+            req.query.search?.toString(),
+
+            departmentId:
+            req.query.department_id?.toString(),
+
+            status:
+            req.query.status as
+                | EmployeeStatus
+                | undefined,
+
+            sort:
+            req.query.sort_by as
+                | "name"
+                | "salary"
+                | "hireDate"
+                | "createdAt"
+                | undefined,
+
+            order:
+            req.query.sort_order as
+                | "asc"
+                | "desc"
+                | undefined,
         });
 
         return success(res, employees);

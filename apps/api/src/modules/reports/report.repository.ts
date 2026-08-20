@@ -1,3 +1,4 @@
+import { Prisma } from "../../generated/prisma/browser.js";
 import { prisma } from "../../lib/prisma.js";
 
 type RecentActivity = {
@@ -16,6 +17,11 @@ type RecentActivity = {
 export class ReportRepository {
   static async getDashboardReport() {
     const today = new Date();
+    const startOfDay = new Date(today);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const startDate = new Date(today);
     startDate.setHours(0, 0, 0, 0);
@@ -45,18 +51,30 @@ export class ReportRepository {
 
       prisma.attendance.count({
         where: {
+          checkIn: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
           status: "PRESENT",
         },
       }),
 
       prisma.attendance.count({
         where: {
+          checkIn: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
           status: "LATE",
         },
       }),
 
       prisma.attendance.count({
         where: {
+          checkIn: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
           status: "ABSENT",
         },
       }),
@@ -512,4 +530,284 @@ export class ReportRepository {
             : null,
         };
     }
+
+  static async getSalesReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const dateFilter =
+      dateFrom || dateTo
+        ? {
+            saleDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
+    const [
+      totalSales,
+      completedSales,
+      cancelledSales,
+      revenueAggregate,
+    ] = await Promise.all([
+      prisma.sale.count({
+        where: dateFilter,
+      }),
+
+      prisma.sale.count({
+        where: {
+          ...dateFilter,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.sale.count({
+        where: {
+          ...dateFilter,
+          status: "CANCELLED",
+        },
+      }),
+
+      prisma.sale.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...dateFilter,
+          status: "COMPLETED",
+        },
+      }),
+    ]);
+
+    return {
+      totalSales,
+      completedSales,
+      cancelledSales,
+      totalRevenue:
+        revenueAggregate._sum.totalAmount ?? 0,
+    };
+  }
+
+  static async getPurchasesReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const dateFilter =
+      dateFrom || dateTo
+        ? {
+            purchaseDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
+    const [
+      totalPurchases,
+      completedPurchases,
+      draftPurchases,
+      cancelledPurchases,
+      amountAggregate,
+    ] = await Promise.all([
+      prisma.purchase.count({
+        where: dateFilter,
+      }),
+
+      prisma.purchase.count({
+        where: {
+          ...dateFilter,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          ...dateFilter,
+          status: "DRAFT",
+        },
+      }),
+
+      prisma.purchase.count({
+        where: {
+          ...dateFilter,
+          status: "CANCELLED",
+        },
+      }),
+
+      prisma.purchase.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...dateFilter,
+          status: "COMPLETED",
+        },
+      }),
+    ]);
+
+    return {
+      totalPurchases,
+      completedPurchases,
+      draftPurchases,
+      cancelledPurchases,
+      totalPurchaseAmount:
+        amountAggregate._sum.totalAmount ?? 0,
+    };
+  }
+
+  static async getInventoryReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const productFilter = {
+      status: "ACTIVE" as const,
+      deletedAt: null,
+    };
+
+    const movementDateFilter =
+      dateFrom || dateTo
+        ? {
+            createdAt: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
+    const [
+      totalProducts,
+      totalActiveProducts,
+      totalStock,
+      lowStockProducts,
+      stockIn,
+      stockOut,
+    ] = await Promise.all([
+      prisma.product.count(),
+
+      prisma.product.count({
+        where: productFilter,
+      }),
+
+      prisma.product.aggregate({
+        _sum: {
+          stock: true,
+        },
+        where: productFilter,
+      }),
+
+      prisma.product.findMany({
+        where: productFilter,
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          stock: true,
+          minimumStock: true,
+        },
+      }),
+
+      prisma.inventoryMovement.aggregate({
+        _sum: {
+          quantity: true,
+        },
+        where: {
+          ...movementDateFilter,
+          movementType: "IN",
+        },
+      }),
+
+      prisma.inventoryMovement.aggregate({
+        _sum: {
+          quantity: true,
+        },
+        where: {
+          ...movementDateFilter,
+          movementType: "OUT",
+        },
+      }),
+    ]);
+
+    return {
+      totalProducts,
+      totalActiveProducts,
+      totalStockQuantity:
+        totalStock._sum.stock ?? 0,
+
+      lowStockCount: lowStockProducts.filter(
+        (product) =>
+          product.stock.lte(
+            product.minimumStock,
+          ),
+      ).length,
+
+      totalStockIn:
+        stockIn._sum.quantity ?? 0,
+
+      totalStockOut:
+        stockOut._sum.quantity ?? 0,
+    };
+  }
+
+  static async getProfitReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const saleDateFilter =
+      dateFrom || dateTo
+        ? {
+            saleDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
+    const purchaseDateFilter =
+      dateFrom || dateTo
+        ? {
+            purchaseDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
+    const [salesAggregate, purchasesAggregate] =
+      await Promise.all([
+        prisma.sale.aggregate({
+          _sum: {
+            totalAmount: true,
+          },
+          where: {
+            ...saleDateFilter,
+            status: "COMPLETED",
+          },
+        }),
+
+        prisma.purchase.aggregate({
+          _sum: {
+            totalAmount: true,
+          },
+          where: {
+            ...purchaseDateFilter,
+            status: "COMPLETED",
+          },
+        }),
+      ]);
+
+    const revenue =
+      salesAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const purchaseCost =
+      purchasesAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    return {
+      revenue,
+      purchaseCost,
+      profit: revenue.sub(purchaseCost),
+    };
+  }
 }
