@@ -12,8 +12,11 @@ export function errorMiddleware(
   if (err instanceof ZodError) {
     return res.status(400).json({
       success: false,
-      message: "Validation failed",
-      errors: err.flatten().fieldErrors,
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Validation failed.",
+        details: err.flatten().fieldErrors,
+      },
     });
   }
 
@@ -21,20 +24,29 @@ export function errorMiddleware(
     if (err.code === "LIMIT_FILE_SIZE") {
       return res.status(413).json({
         success: false,
-        message: "File size must not exceed 5 MB",
+        error: {
+          code: "FILE_TOO_LARGE",
+          message: "File size must not exceed 5 MB.",
+        },
       });
     }
 
     return res.status(400).json({
       success: false,
-      message: err.message,
+      error: {
+        code: "UPLOAD_ERROR",
+        message: err.message,
+      },
     });
   }
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,
-      message: err.message,
+      error: {
+        code: err.code,
+        message: err.message,
+      },
     });
   }
 
@@ -42,6 +54,9 @@ export function errorMiddleware(
 
   return res.status(500).json({
     success: false,
-    message: "Internal Server Error",
+    error: {
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Internal Server Error",
+    },
   });
 }
