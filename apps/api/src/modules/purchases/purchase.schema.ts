@@ -41,3 +41,15 @@ export const purchaseActionSchema = z.object({
     id: z.string().uuid(),
   }),
 });
+
+export const updatePurchaseSchema = z.object({
+  body: z.object({
+    supplierId: z.string().uuid().optional(),
+    purchaseDate: z.coerce.date().optional(),
+    items: z.array(purchaseItemSchema).min(1).optional(),
+  }),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  query: z.object({}),
+});

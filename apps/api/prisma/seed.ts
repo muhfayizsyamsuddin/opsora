@@ -58,6 +58,7 @@ const permissions = [
   // Purchases
   ["purchases.read", "View purchases"],
   ["purchases.create", "Create purchases"],
+  ["purchases.update", "Update purchases"],
   ["purchases.complete", "Complete purchases"],
   ["purchases.cancel", "Cancel purchases"],
 

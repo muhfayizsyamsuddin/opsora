@@ -74,4 +74,20 @@ export class PurchaseController {
       );
     },
   );
+
+  static update = asyncHandler(
+    async (req: Request, res: Response) => {
+      const purchase =
+        await PurchaseService.update(
+          req.params.id.toString(),
+          req.body,
+        );
+
+      return success(
+        res,
+        purchase,
+        "Purchase updated successfully",
+      );
+    },
+  );
 }

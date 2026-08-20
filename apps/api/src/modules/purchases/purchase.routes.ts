@@ -9,6 +9,7 @@ import {
   getPurchaseByIdSchema,
   getPurchasesSchema,
   purchaseActionSchema,
+  updatePurchaseSchema,
 } from "./purchase.schema.js";
 import { requirePermission } from "../../middlewares/permission.middleware.js";
 
@@ -28,6 +29,14 @@ router.get(
   requirePermission("purchases.read"),
   validate(getPurchasesSchema),
   PurchaseController.getAll,
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("purchases.update"),
+  validate(updatePurchaseSchema),
+  PurchaseController.update,
 );
 
 router.post(

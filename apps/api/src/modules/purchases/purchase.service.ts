@@ -20,7 +20,15 @@ const userSelect = {
   id: true,
   name: true,
   email: true,
-  role: true,
+  roleId: true,
+  isActive: true,
+  roleRef: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+  },
   createdAt: true,
   updatedAt: true,
 };
@@ -337,5 +345,160 @@ export class PurchaseService {
     }
 
     return purchase;
+  }
+
+  static async update(
+    id: string,
+    data: {
+      supplierId?: string;
+      purchaseDate?: Date;
+      items?: PurchaseItemInput[];
+    },
+  ) {
+    return prisma.$transaction(async (tx) => {
+      const purchase = await tx.purchase.findUnique({
+        where: { id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!purchase) {
+        throw new AppError(
+          "Purchase not found",
+          404,
+        );
+      }
+
+      if (purchase.status !== "DRAFT") {
+        throw new AppError(
+          "Only DRAFT purchases can be updated",
+          400,
+        );
+      }
+
+      if (data.supplierId !== undefined) {
+        const supplier = await tx.supplier.findFirst({
+          where: {
+            id: data.supplierId,
+            deletedAt: null,
+          },
+        });
+
+        if (!supplier) {
+          throw new AppError(
+            "Supplier not found",
+            404,
+          );
+        }
+      }
+
+      let totalAmount = purchase.totalAmount;
+
+      if (data.items) {
+        const productIds = data.items.map(
+          (item) => item.productId,
+        );
+
+        const products = await tx.product.findMany({
+          where: {
+            id: {
+              in: productIds,
+            },
+            deletedAt: null,
+          },
+        });
+
+        if (products.length !== productIds.length) {
+          throw new AppError(
+            "One or more products not found",
+            404,
+          );
+        }
+
+        const purchaseItems = data.items.map(
+          (item) => {
+            if (item.quantity <= 0) {
+              throw new AppError(
+                "Purchase quantity must be greater than zero",
+                400,
+              );
+            }
+
+            if (item.unitPrice < 0) {
+              throw new AppError(
+                "Purchase unit price cannot be negative",
+                400,
+              );
+            }
+
+            const subtotal =
+              item.quantity * item.unitPrice;
+
+            return {
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              subtotal,
+            };
+          },
+        );
+
+        totalAmount = new Prisma.Decimal(
+          purchaseItems.reduce(
+            (total, item) => total + item.subtotal,
+            0,
+          ),
+        );
+
+        await tx.purchaseItem.deleteMany({
+          where: {
+            purchaseId: id,
+          },
+        });
+
+        await tx.purchaseItem.createMany({
+          data: purchaseItems.map((item) => ({
+            purchaseId: id,
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.subtotal,
+          })),
+        });
+      }
+
+      await tx.purchase.update({
+        where: {
+          id,
+        },
+        data: {
+          supplierId:
+            data.supplierId ??
+            purchase.supplierId,
+          purchaseDate:
+            data.purchaseDate ??
+            purchase.purchaseDate,
+          totalAmount,
+        },
+      });
+
+      return tx.purchase.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          supplier: true,
+          user: {
+            select: userSelect,
+          },
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+    });
   }
 }
