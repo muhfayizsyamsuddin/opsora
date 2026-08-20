@@ -76,6 +76,7 @@ model User {
   inventoryMovements InventoryMovement[]
   refreshTokens RefreshToken[]
   leaveReviews Leave[] @relation("LeaveReviewer")
+  performanceReviewsGiven PerformanceReview[] @relation("PerformanceReviewReviewer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -232,12 +233,15 @@ model PerformanceReview {
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
-  reviewer String
+  reviewerLegacy String? @map("reviewer")
+
+  reviewerId String?
+  reviewer   User? @relation("PerformanceReviewReviewer", fields: [reviewerId], references: [id])
+
+  reviewPeriod String?
 
   score Int
-
   comments String?
-
   reviewDate DateTime
 
   createdAt DateTime @default(now())

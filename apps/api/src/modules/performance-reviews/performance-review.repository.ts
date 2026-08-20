@@ -4,17 +4,28 @@ import { Prisma } from "../../generated/prisma/client.js";
 export class PerformanceReviewRepository {
   static async create(data: {
     employeeId: string;
-    reviewer: string;
+    reviewerId: string;
+    reviewPeriod: string;
     score: number;
     comments?: string;
     reviewDate: Date;
   }) {
     return prisma.performanceReview.create({
-      data,
+      data: {
+        employeeId: data.employeeId,
+        reviewerId: data.reviewerId,
+        reviewPeriod: data.reviewPeriod,
+        score: data.score,
+        comments: data.comments,
+        reviewDate: data.reviewDate,
+      },
       include: {
-        employee: {
-          include: {
-            department: true,
+        employee: true,
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },
@@ -32,6 +43,13 @@ export class PerformanceReviewRepository {
             department: true,
           },
         },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -40,7 +58,8 @@ export class PerformanceReviewRepository {
     page,
     limit,
     employeeId,
-    reviewer,
+    reviewerId,
+    reviewPeriod,
     scoreMin,
     scoreMax,
     search,
@@ -50,7 +69,8 @@ export class PerformanceReviewRepository {
     page: number;
     limit: number;
     employeeId?: string;
-    reviewer?: string;
+    reviewerId?: string;
+    reviewPeriod?: string;
     scoreMin?: number;
     scoreMax?: number;
     search?: string;
@@ -61,12 +81,15 @@ export class PerformanceReviewRepository {
 
     const where: Prisma.PerformanceReviewWhereInput = {
       ...(employeeId && { employeeId }),
-      ...(reviewer && {
-        reviewer: {
-          contains: reviewer,
-          mode: "insensitive",
-        },
+
+      ...(reviewerId && {
+        reviewerId,
       }),
+
+      ...(reviewPeriod && {
+        reviewPeriod,
+      }),
+
       ...(scoreMin !== undefined || scoreMax !== undefined
         ? {
             score: {
@@ -79,6 +102,7 @@ export class PerformanceReviewRepository {
             },
           }
         : {}),
+
       ...(search && {
         employee: {
           name: {
@@ -101,6 +125,13 @@ export class PerformanceReviewRepository {
           employee: {
             include: {
               department: true,
+            },
+          },
+          reviewer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
             },
           },
         },
@@ -127,21 +158,42 @@ export class PerformanceReviewRepository {
   static async update(
     id: string,
     data: {
-      reviewer?: string;
+      reviewerId?: string;
+      reviewPeriod?: string;
       score?: number;
       comments?: string;
-      reviewDate?: Date;
     },
   ) {
     return prisma.performanceReview.update({
-      where: {
-        id,
+      where: { id },
+      data: {
+        ...(data.reviewerId !== undefined && {
+          reviewer: {
+            connect: {
+              id: data.reviewerId,
+            },
+          },
+        }),
+
+        ...(data.reviewPeriod !== undefined && {
+          reviewPeriod: data.reviewPeriod,
+        }),
+
+        ...(data.score !== undefined && {
+          score: data.score,
+        }),
+
+        ...(data.comments !== undefined && {
+          comments: data.comments,
+        }),
       },
-      data,
       include: {
-        employee: {
-          include: {
-            department: true,
+        employee: true,
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },

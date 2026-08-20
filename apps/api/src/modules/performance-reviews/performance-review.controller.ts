@@ -5,15 +5,24 @@ import { PerformanceReviewService } from "./performance-review.service.js";
 import { Prisma } from "../../generated/prisma/client.js";
 
 export class PerformanceReviewController {
-  static create = asyncHandler(async (req: Request, res: Response) => {
-    const review = await PerformanceReviewService.create(req.body);
+  static create = asyncHandler(
+    async (req: Request, res: Response) => {
+      const review =
+        await PerformanceReviewService.create({
+          employeeId: req.body.employee_id,
+          reviewerId: req.body.reviewer_id,
+          reviewPeriod: req.body.review_period,
+          score: req.body.score,
+          comments: req.body.comments,
+        });
 
-    return created(
-      res,
-      review,
-      "Performance review created successfully",
-    );
-  });
+      return created(
+        res,
+        review,
+        "Performance review created successfully",
+      );
+    },
+  );
 
   static getAll = asyncHandler(
     async (req: Request, res: Response) => {
@@ -28,8 +37,8 @@ export class PerformanceReviewController {
           employeeId:
             req.query.employee_id?.toString(),
 
-          reviewer:
-            req.query.reviewer?.toString(),
+          reviewerId:
+            req.query.reviewer_id?.toString(),
 
           scoreMin: req.query.score_min
             ? Number(req.query.score_min)
@@ -67,18 +76,32 @@ export class PerformanceReviewController {
     return success(res, review);
   });
 
-  static update = asyncHandler(async (req: Request, res: Response) => {
-    const review = await PerformanceReviewService.update(
-      req.params.id.toString(),
-      req.body,
-    );
+  static update = asyncHandler(
+    async (req: Request, res: Response) => {
+      const review =
+        await PerformanceReviewService.update(
+          req.params.id.toString(),
+          {
+            reviewerId:
+              req.body.reviewer_id,
 
-    return success(
-      res,
-      review,
-      "Performance review updated successfully",
-    );
-  });
+            reviewPeriod:
+              req.body.review_period,
+
+            score: req.body.score,
+
+            comments:
+              req.body.comments,
+          },
+        );
+
+      return success(
+        res,
+        review,
+        "Performance review updated successfully",
+      );
+    },
+  );
 
   static delete = asyncHandler(async (req: Request, res: Response) => {
     await PerformanceReviewService.delete(req.params.id.toString());
@@ -100,8 +123,11 @@ export class PerformanceReviewController {
               req.query.per_page ?? 20,
             ),
 
-            reviewer:
-              req.query.reviewer?.toString(),
+            reviewerId:
+              req.query.reviewer_id?.toString(),
+
+            reviewPeriod:
+              req.query.review_period?.toString(),
 
             scoreMin: req.query.score_min
               ? Number(req.query.score_min)

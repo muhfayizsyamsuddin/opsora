@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export const createPerformanceReviewSchema = z.object({
   body: z.object({
-    employeeId: z.string().uuid(),
-    reviewer: z.string().min(1),
-    score: z.number().int().min(1).max(100),
+    employee_id: z.string().uuid(),
+    reviewer_id: z.string().uuid(),
+    review_period: z.string().min(1).max(20),
+    score: z.coerce.number().int().min(1).max(100),
     comments: z.string().optional(),
-    reviewDate: z.coerce.date(),
   }),
   params: z.object({}),
   query: z.object({}),
@@ -14,10 +14,10 @@ export const createPerformanceReviewSchema = z.object({
 
 export const updatePerformanceReviewSchema = z.object({
   body: z.object({
-    reviewer: z.string().min(1).optional(),
-    score: z.number().int().min(1).max(100).optional(),
+    reviewer_id: z.string().uuid().optional(),
+    review_period: z.string().min(1).max(20).optional(),
+    score: z.coerce.number().int().min(1).max(100).optional(),
     comments: z.string().optional(),
-    reviewDate: z.coerce.date().optional(),
   }),
   params: z.object({
     id: z.string().uuid(),
@@ -37,7 +37,11 @@ export const getPerformanceReviewsSchema = z.object({
   body: z.object({}),
   params: z.object({}),
   query: z.object({
-    page: z.coerce.number().int().min(1).default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .default(1),
 
     per_page: z.coerce
       .number()
@@ -48,7 +52,9 @@ export const getPerformanceReviewsSchema = z.object({
 
     employee_id: z.string().uuid().optional(),
 
-    reviewer: z.string().optional(),
+    reviewer_id: z.string().uuid().optional(),
+
+    review_period: z.string().optional(),
 
     score_min: z.coerce
       .number()
@@ -94,7 +100,11 @@ export const getPerformanceReviewEmployeeSchema = z.object({
     employee_id: z.string().uuid(),
   }),
   query: z.object({
-    page: z.coerce.number().int().min(1).default(1),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .default(1),
 
     per_page: z.coerce
       .number()
@@ -103,7 +113,9 @@ export const getPerformanceReviewEmployeeSchema = z.object({
       .max(100)
       .default(20),
 
-    reviewer: z.string().optional(),
+    reviewer_id: z.string().uuid().optional(),
+
+    review_period: z.string().optional(),
 
     score_min: z.coerce
       .number()
