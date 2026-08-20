@@ -211,6 +211,7 @@ const rolePermissions: RolePermissionMap = {
   ],
 
   STAFF: [
+    "dashboard.read",
     "products.read",
     "inventory-movements.read",
 
@@ -231,6 +232,7 @@ const rolePermissions: RolePermissionMap = {
   ],
 
   CASHIER: [
+    "dashboard.read",
     "products.read",
     "customers.read",
     "sales.read",

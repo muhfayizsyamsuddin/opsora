@@ -12,4 +12,32 @@ router.get(
   DashboardController.getStatistics,
 );
 
+router.get(
+  "/summary",
+  authenticate,
+  requirePermission("dashboard.read"),
+  DashboardController.getSummary,
+);
+
+router.get(
+  "/recent-transactions",
+  authenticate,
+  requirePermission("dashboard.read"),
+  DashboardController.getRecentTransactions,
+);
+
+router.get(
+  "/low-stock",
+  authenticate,
+  requirePermission("dashboard.read"),
+  DashboardController.getLowStock,
+);
+
+router.get(
+  "/people-summary",
+  authenticate,
+  requirePermission("dashboard.read"),
+  DashboardController.getPeopleSummary,
+);
+
 export default router;
