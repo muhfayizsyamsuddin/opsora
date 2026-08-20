@@ -1,4 +1,5 @@
 import { AppError } from "../../errors/AppError.js";
+import { InventoryMovementService } from "../inventory-movements/inventory-movement.service.js";
 import { InventoryRepository } from "./inventory.repository.js";
 
 export class InventoryService {
@@ -45,6 +46,30 @@ export class InventoryService {
       productId,
       movementType,
       referenceType,
+    );
+  }
+
+  static async getMovementById(id: string) {
+    return InventoryMovementService.getById(id);
+  }
+
+  static async createAdjustment(
+    productId: string,
+    userId: string,
+    movementType: "IN" | "OUT",
+    quantity: number,
+    reason: string,
+  ) {
+    const signedQuantity =
+      movementType === "IN"
+        ? quantity
+        : -quantity;
+
+    return InventoryMovementService.adjust(
+      productId,
+      userId,
+      signedQuantity,
+      reason,
     );
   }
 }

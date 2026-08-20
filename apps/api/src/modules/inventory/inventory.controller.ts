@@ -49,4 +49,34 @@ export class InventoryController {
       return success(res, result);
     },
   );
+
+  static getMovementById = asyncHandler(
+    async (req: Request, res: Response) => {
+      const movement =
+        await InventoryService.getMovementById(
+          req.params.id.toString(),
+        );
+
+      return success(res, movement);
+    },
+  );
+
+  static createAdjustment = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await InventoryService.createAdjustment(
+          req.body.product_id,
+          req.user!.id,
+          req.body.movement_type,
+          req.body.quantity,
+          req.body.reason,
+        );
+
+      return success(
+        res,
+        result,
+        "Inventory adjustment created successfully",
+      );
+    },
+  );
 }

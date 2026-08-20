@@ -31,3 +31,22 @@ export const getInventoryMovementsSchema = z.object({
       .optional(),
   }),
 });
+
+export const getInventoryMovementByIdSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  query: z.object({}),
+});
+
+export const createInventoryAdjustmentSchema = z.object({
+  body: z.object({
+    product_id: z.string().uuid(),
+    movement_type: z.enum(["IN", "OUT"]),
+    quantity: z.coerce.number().positive(),
+    reason: z.string().min(3).max(500),
+  }),
+  params: z.object({}),
+  query: z.object({}),
+});

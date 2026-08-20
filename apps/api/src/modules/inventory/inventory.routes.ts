@@ -6,6 +6,8 @@ import { validate } from "../../validators/validate.js";
 
 import { InventoryController } from "./inventory.controller.js";
 import {
+  createInventoryAdjustmentSchema,
+  getInventoryMovementByIdSchema,
   getInventoryMovementsSchema,
   getInventoryStockByProductSchema,
   getInventoryStockSchema,
@@ -20,6 +22,20 @@ router.get(
   requirePermission("inventory-movements.read"),
   validate(getInventoryStockSchema),
   InventoryController.getStock,
+);
+
+router.get(
+  "/movements/:id",
+  requirePermission("inventory-movements.read"),
+  validate(getInventoryMovementByIdSchema),
+  InventoryController.getMovementById,
+);
+
+router.post(
+  "/adjustments",
+  requirePermission("inventory-movements.adjust"),
+  validate(createInventoryAdjustmentSchema),
+  InventoryController.createAdjustment,
 );
 
 router.get(
