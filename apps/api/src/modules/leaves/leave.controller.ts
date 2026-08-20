@@ -94,29 +94,37 @@ export class LeaveController {
     return noContent(res);
   });
 
-    static approve = asyncHandler(async (req: Request, res: Response) => {
-        const leave = await LeaveService.approve(
-            req.params.id.toString(),
+  static approve = asyncHandler(
+    async (req: Request, res: Response) => {
+      const leave =
+        await LeaveService.approve(
+          req.params.id.toString(),
+          req.user!.id,
         );
 
-        return success(
-            res,
-            leave,
-            "Leave approved successfully",
-        );
-    });
+      return success(
+        res,
+        leave,
+        "Leave approved successfully",
+      );
+    },
+  );
 
-    static reject = asyncHandler(async (req: Request, res: Response) => {
-        const leave = await LeaveService.reject(
-            req.params.id.toString(),
+  static reject = asyncHandler(
+    async (req: Request, res: Response) => {
+      const leave =
+        await LeaveService.reject(
+          req.params.id.toString(),
+          req.user!.id,
         );
 
-        return success(
-            res,
-            leave,
-            "Leave rejected successfully",
-        );
-    });
+      return success(
+        res,
+        leave,
+        "Leave rejected successfully",
+      );
+    },
+  );
 
   static cancel = asyncHandler(
     async (req: Request, res: Response) => {

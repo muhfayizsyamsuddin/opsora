@@ -75,6 +75,7 @@ model User {
   sales              Sale[]
   inventoryMovements InventoryMovement[]
   refreshTokens RefreshToken[]
+  leaveReviews Leave[] @relation("LeaveReviewer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -188,12 +189,17 @@ model Leave {
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
+  reviewerId String?
+  reviewer   User? @relation("LeaveReviewer", fields: [reviewerId], references: [id])
+
   startDate DateTime
   endDate   DateTime
 
   reason String
 
   status LeaveStatus @default(PENDING)
+
+  reviewedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

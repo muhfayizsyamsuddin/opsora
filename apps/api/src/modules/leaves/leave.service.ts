@@ -109,7 +109,6 @@ export class LeaveService {
       startDate?: Date;
       endDate?: Date;
       reason?: string;
-      status?: LeaveStatus;
     },
   ) {
     const leave = await LeaveRepository.findById(id);
@@ -169,39 +168,59 @@ export class LeaveService {
     await LeaveRepository.delete(id);
   }
 
-    static async approve(id: string) {
-        const leave = await LeaveRepository.findById(id);
+  static async approve(
+    id: string,
+    reviewerId: string,
+  ) {
+    const leave =
+      await LeaveRepository.findById(id);
 
-        if (!leave) {
-            throw new AppError("Leave not found", 404);
-        }
-
-        if (leave.status !== LeaveStatus.PENDING) {
-            throw new AppError(
-            "Only pending leave can be approved",
-            400,
-            );
-        }
-
-        return LeaveRepository.approve(id);
+    if (!leave) {
+      throw new AppError(
+        "Leave not found",
+        404,
+      );
     }
 
-    static async reject(id: string) {
-        const leave = await LeaveRepository.findById(id);
-
-        if (!leave) {
-            throw new AppError("Leave not found", 404);
-        }
-
-        if (leave.status !== LeaveStatus.PENDING) {
-            throw new AppError(
-            "Only pending leave can be rejected",
-            400,
-            );
-        }
-
-        return LeaveRepository.reject(id);
+    if (leave.status !== LeaveStatus.PENDING) {
+      throw new AppError(
+        "Only pending leave can be approved",
+        400,
+      );
     }
+
+    return LeaveRepository.approve(
+      id,
+      reviewerId,
+    );
+  }
+
+  static async reject(
+    id: string,
+    reviewerId: string,
+  ) {
+    const leave =
+      await LeaveRepository.findById(id);
+
+    if (!leave) {
+      throw new AppError(
+        "Leave not found",
+        404,
+      );
+    }
+
+    if (leave.status !== LeaveStatus.PENDING) {
+      throw new AppError(
+        "Only pending leave can be rejected",
+        400,
+      );
+    }
+
+    return LeaveRepository.reject(
+      id,
+      reviewerId,
+    );
+  }
 
   static async cancel(id: string) {
     const leave = await LeaveRepository.findById(id);
@@ -217,8 +236,6 @@ export class LeaveService {
       );
     }
 
-    return LeaveRepository.update(id, {
-      status: LeaveStatus.CANCELLED,
-    });
+    return LeaveRepository.cancel(id);
   }
 }

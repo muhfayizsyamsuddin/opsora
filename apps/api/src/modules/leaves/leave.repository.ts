@@ -77,6 +77,13 @@ export class LeaveRepository {
             department: true,
           },
         },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
 
       orderBy: {
@@ -142,6 +149,13 @@ export class LeaveRepository {
             department: true,
           },
         },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -152,7 +166,6 @@ export class LeaveRepository {
       startDate?: Date;
       endDate?: Date;
       reason?: string;
-      status?: LeaveStatus;
     },
   ) {
     return prisma.leave.update({
@@ -164,6 +177,13 @@ export class LeaveRepository {
         employee: {
           include: {
             department: true,
+          },
+        },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
       },
@@ -178,41 +198,65 @@ export class LeaveRepository {
     });
   }
 
-    static async approve(id: string) {
-        return prisma.leave.update({
-            where: {
-            id,
-            },
-            data: {
-            status: LeaveStatus.APPROVED,
-            },
-            include: {
-            employee: {
-                include: {
-                department: true,
-                },
-            },
-            },
-        });
-    }
+  static async approve(
+    id: string,
+    reviewerId: string,
+  ) {
+    return prisma.leave.update({
+      where: {
+        id,
+      },
+      data: {
+        status: LeaveStatus.APPROVED,
+        reviewerId,
+        reviewedAt: new Date(),
+      },
+      include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 
-    static async reject(id: string) {
-        return prisma.leave.update({
-            where: {
-            id,
-            },
-            data: {
-            status: LeaveStatus.REJECTED,
-            },
-            include: {
-            employee: {
-                include: {
-                department: true,
-                },
-            },
-            },
-        });
-    }
+  static async reject(
+    id: string,
+    reviewerId: string,
+  ) {
+    return prisma.leave.update({
+      where: {
+        id,
+      },
+      data: {
+        status: LeaveStatus.REJECTED,
+        reviewerId,
+        reviewedAt: new Date(),
+      },
+      include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 
     static async findOverlappingLeave(
         employeeId: string,
@@ -269,4 +313,29 @@ export class LeaveRepository {
         },
       });
     }
+
+  static async cancel(id: string) {
+    return prisma.leave.update({
+      where: {
+        id,
+      },
+      data: {
+        status: LeaveStatus.CANCELLED,
+      },
+      include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }
