@@ -175,6 +175,11 @@ const rolePermissions: RolePermissionMap = {
 
   ADMIN: [
     ...operationalAdminPermissions,
+
+    "users.read",
+    "users.create",
+    "users.update",
+    "users.delete",
   ],
 
   MANAGER: [

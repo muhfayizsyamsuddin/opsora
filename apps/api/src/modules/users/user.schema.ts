@@ -39,3 +39,29 @@ export const getUsersSchema = z.object({
       .default("desc"),
   }),
 });
+
+export const assignUserRoleSchema = z.object({
+  body: z.object({
+    roleId: z.uuid(),
+  }),
+  params: z.object({
+    id: z.uuid(),
+  }),
+  query: z.object({}),
+});
+
+export const deleteUserSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    id: z.uuid(),
+  }),
+  query: z.object({}),
+});
+
+export const getUserPermissionsSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    id: z.uuid(),
+  }),
+  query: z.object({}),
+});

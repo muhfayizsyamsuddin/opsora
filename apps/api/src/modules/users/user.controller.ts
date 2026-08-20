@@ -53,4 +53,62 @@ export class UserController {
 
     return success(res, user, "User updated successfully");
   });
+
+  static assignRole = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user =
+        await UserService.assignRole(
+          String(req.params.id),
+          req.body.roleId,
+        );
+
+      return success(
+        res,
+        user,
+        "User role updated successfully",
+      );
+    },
+  );
+
+  static create = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user = await UserService.create(req.body);
+
+      return success(
+        res,
+        user,
+        "User created successfully",
+      );
+    },
+  );
+
+  static getPermissions = asyncHandler(
+    async (req: Request, res: Response) => {
+      const permissions =
+        await UserService.getEffectivePermissions(
+          String(req.params.id),
+        );
+
+      return success(
+        res,
+        permissions,
+      );
+    },
+  );
+
+  static delete = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user =
+        await UserService.delete(
+          String(req.params.id),
+          req.user!.id,
+        );
+
+      return success(
+        res,
+        user,
+        "User deactivated successfully",
+      );
+    },
+  );
 }

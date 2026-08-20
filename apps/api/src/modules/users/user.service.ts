@@ -1,17 +1,18 @@
 import bcrypt from "bcrypt";
 import { AppError } from "../../errors/AppError.js";
 import { UserRepository } from "./user.repository.js";
+import { prisma } from "../../lib/prisma.js";
 
 function sanitizeUser(user: {
   id: string;
   name: string;
   email: string;
   password: string;
-  role?: string;
   roleId: string | null;
   roleRef?: {
     name: string;
   } | null;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }) {
@@ -21,6 +22,7 @@ function sanitizeUser(user: {
     email: user.email,
     role: user.roleRef?.name ?? null,
     roleId: user.roleId,
+    isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -137,5 +139,86 @@ export class UserService {
     const updatedUser = await UserRepository.update(id, data);
 
     return sanitizeUser(updatedUser);
+  }
+
+  static async assignRole(
+    id: string,
+    roleId: string,
+  ) {
+    const user =
+      await UserRepository.findById(id);
+
+    if (!user) {
+      throw new AppError(
+        "User not found",
+        404,
+      );
+    }
+
+    const role =
+      await prisma.role.findUnique({
+        where: { id: roleId },
+      });
+
+    if (!role) {
+      throw new AppError(
+        "Role not found",
+        404,
+      );
+    }
+
+    const updatedUser =
+      await UserRepository.update(id, {
+        roleId,
+      });
+
+    return sanitizeUser(updatedUser);
+  }
+
+  static async getEffectivePermissions(id: string) {
+    const user =
+      await UserRepository.findByIdWithPermissions(id);
+
+    if (!user) {
+      throw new AppError(
+        "User not found",
+        404,
+      );
+    }
+
+    return {
+      userId: user.id,
+      role: user.roleRef?.name ?? null,
+      permissions:
+        user.roleRef?.permissions.map(
+          (item) => item.permission.name,
+        ) ?? [],
+    };
+  }
+
+  static async delete(
+    id: string,
+    actorId: string,
+  ) {
+    const user = await UserRepository.findById(id);
+
+    if (!user) {
+      throw new AppError(
+        "User not found",
+        404,
+      );
+    }
+
+    if (actorId === id) {
+      throw new AppError(
+        "User cannot deactivate themselves",
+        400,
+      );
+    }
+
+    const deactivatedUser =
+      await UserRepository.deactivate(id);
+
+    return sanitizeUser(deactivatedUser);
   }
 }

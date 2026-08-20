@@ -62,6 +62,8 @@ export class UserRepository {
       skip,
       take,
       where: {
+        isActive: true,
+
         ...(search && {
           OR: [
             {
@@ -78,6 +80,7 @@ export class UserRepository {
             },
           ],
         }),
+
         ...(roleId && {
           roleId,
         }),
@@ -120,6 +123,8 @@ export class UserRepository {
   ) {
     return prisma.user.count({
       where: {
+        isActive: true,
+
         ...(search && {
           OR: [
             {
@@ -136,6 +141,7 @@ export class UserRepository {
             },
           ],
         }),
+
         ...(roleId && {
           roleId,
         }),
@@ -144,10 +150,51 @@ export class UserRepository {
   }
 
   static async findRoleByName(name: string) {
-  return prisma.role.findUnique({
-    where: {
-      name,
-    },
-  });
-}
+    return prisma.role.findUnique({
+      where: {
+        name,
+      },
+    });
+  }
+
+  static async delete(id: string) {
+    return prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+      include: {
+        roleRef: true,
+      },
+    });
+  }
+
+  static async findByIdWithPermissions(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+      include: {
+        roleRef: {
+          include: {
+            permissions: {
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  static async deactivate(id: string) {
+    return prisma.user.update({
+      where: { id },
+      data: {
+        isActive: false,
+      },
+      include: {
+        roleRef: true,
+      },
+    });
+  }
 }

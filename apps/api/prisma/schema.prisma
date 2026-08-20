@@ -67,6 +67,8 @@ model User {
   roleId String
   roleRef Role?   @relation(fields: [roleId], references: [id])
 
+  isActive Boolean @default(true)
+
   purchases          Purchase[]
   sales              Sale[]
   inventoryMovements InventoryMovement[]
