@@ -1,0 +1,52 @@
+import { Request, Response } from "express";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { success } from "../../utils/response.js";
+import { InventoryService } from "./inventory.service.js";
+
+export class InventoryController {
+  static getStock = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await InventoryService.getStock(
+          Number(req.query.page ?? 1),
+          Number(req.query.limit ?? 10),
+          req.query.search?.toString(),
+        );
+
+      return success(res, result);
+    },
+  );
+
+  static getStockByProduct = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await InventoryService.getStockByProduct(
+          req.params.product_id.toString(),
+        );
+
+      return success(res, result);
+    },
+  );
+
+  static getMovements = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await InventoryService.getMovements(
+          Number(req.query.page ?? 1),
+          Number(req.query.limit ?? 10),
+          req.query.productId?.toString(),
+          req.query.movementType?.toString() as
+            | "IN"
+            | "OUT"
+            | undefined,
+          req.query.referenceType?.toString() as
+            | "PURCHASE"
+            | "SALE"
+            | "ADJUSTMENT"
+            | undefined,
+        );
+
+      return success(res, result);
+    },
+  );
+}
