@@ -114,4 +114,34 @@ export class AttendanceService {
             },
         };
     }
+
+  static async getEmployeeHistory(
+    employeeId: string,
+    query: {
+      page?: number;
+      limit?: number;
+      status?: AttendanceStatus;
+      sort?: "checkIn" | "createdAt";
+      order?: "asc" | "desc";
+    },
+  ) {
+    const employee =
+      await EmployeeRepository.findById(employeeId);
+
+    if (!employee) {
+      throw new AppError(
+        "Employee not found",
+        404,
+      );
+    }
+
+    return AttendanceService.getAll({
+      page: query.page,
+      limit: query.limit,
+      employeeId,
+      status: query.status,
+      sort: query.sort,
+      order: query.order,
+    });
+  }
 }

@@ -44,3 +44,21 @@ export const getAttendancesSchema = z.object({
     order: z.enum(["asc", "desc"]).optional(),
   }),
 });
+
+export const getEmployeeAttendanceSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    employee_id: z.string().uuid(),
+  }),
+  query: z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(10),
+    status: z.nativeEnum(AttendanceStatus).optional(),
+    sort: z
+      .enum(["checkIn", "createdAt"])
+      .default("checkIn"),
+    order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
+  }),
+});

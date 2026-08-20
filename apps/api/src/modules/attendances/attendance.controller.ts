@@ -71,4 +71,37 @@ export class AttendanceController {
 
         return success(res, attendances);
     });
+
+  static getEmployeeHistory = asyncHandler(
+    async (req: Request, res: Response) => {
+      const attendances =
+        await AttendanceService.getEmployeeHistory(
+          req.params.employee_id.toString(),
+          {
+            page: req.query.page
+              ? Number(req.query.page)
+              : undefined,
+            limit: req.query.limit
+              ? Number(req.query.limit)
+              : undefined,
+            status: req.query.status as
+              | AttendanceStatus
+              | undefined,
+            sort: req.query.sort as
+              | "checkIn"
+              | "createdAt"
+              | undefined,
+            order: req.query.order as
+              | "asc"
+              | "desc"
+              | undefined,
+          },
+        );
+
+      return success(
+        res,
+        attendances,
+      );
+    },
+  );
 }

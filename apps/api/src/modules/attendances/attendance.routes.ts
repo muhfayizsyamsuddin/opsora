@@ -7,6 +7,7 @@ import {
   createAttendanceSchema,
   getAttendanceByIdSchema,
   getAttendancesSchema,
+  getEmployeeAttendanceSchema,
   updateAttendanceSchema,
 } from "./attendance.schema.js";
 
@@ -29,6 +30,13 @@ router.get(
 );
 
 router.get(
+  "/employee/:employee_id",
+  requirePermission("attendances.read"),
+  validate(getEmployeeAttendanceSchema),
+  AttendanceController.getEmployeeHistory,
+);
+
+router.get(
   "/:id",
   requirePermission("attendances.read"),
   validate(getAttendanceByIdSchema),
@@ -41,12 +49,5 @@ router.patch(
   validate(updateAttendanceSchema),
   AttendanceController.update,
 );
-
-// router.delete(
-//   "/:id",
-//   authorize(UserRole.ADMIN),
-//   validate(getAttendanceByIdSchema),
-//   AttendanceController.delete,
-// );
 
 export default router;
