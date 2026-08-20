@@ -43,6 +43,7 @@ enum PaymentMethod {
 }
 
 enum SaleStatus {
+  PENDING
   COMPLETED
   CANCELLED
 }
@@ -327,7 +328,7 @@ model Sale {
   discount      Decimal
   totalAmount   Decimal
   paymentMethod PaymentMethod
-  status        SaleStatus    @default(COMPLETED)
+  status        SaleStatus    @default(PENDING)
 
   customer Customer?  @relation(fields: [customerId], references: [id])
   user     User       @relation(fields: [userId], references: [id])

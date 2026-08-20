@@ -69,7 +69,9 @@ const permissions = [
   // Sales
   ["sales.read", "View sales"],
   ["sales.create", "Create sales"],
+  ["sales.update", "Update pending sales"],
   ["sales.cancel", "Cancel sales"],
+  ["sales.pay", "Complete sale payment"],
 
   // Inventory Movements
   ["inventory-movements.read", "View inventory movements"],
@@ -214,6 +216,7 @@ const rolePermissions: RolePermissionMap = {
 
     "sales.read",
     "sales.create",
+    "sales.pay",
 
     "customers.read",
     "suppliers.read",
@@ -228,6 +231,9 @@ const rolePermissions: RolePermissionMap = {
     "customers.read",
     "sales.read",
     "sales.create",
+    "sales.update",
+    "sales.pay",
+    "sales.cancel",
   ],
 };
 

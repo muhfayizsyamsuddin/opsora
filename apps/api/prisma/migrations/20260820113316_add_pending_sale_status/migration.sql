@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "SaleStatus" ADD VALUE 'PENDING';
+
+-- AlterTable
+ALTER TABLE "Sale" ALTER COLUMN "status" SET DEFAULT 'PENDING';

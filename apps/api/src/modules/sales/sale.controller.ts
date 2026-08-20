@@ -62,4 +62,44 @@ export class SaleController {
       );
     },
   );
+
+  static pay = asyncHandler(
+    async (req: Request, res: Response) => {
+      const sale = await SaleService.pay(
+        req.params.id.toString(),
+      );
+
+      return success(
+        res,
+        sale,
+        "Sale paid successfully",
+      );
+    },
+  );
+
+  static update = asyncHandler(
+    async (req: Request, res: Response) => {
+      const sale = await SaleService.update(
+        req.params.id.toString(),
+        req.body,
+      );
+
+      return success(
+        res,
+        sale,
+        "Sale updated successfully",
+      );
+    },
+  );
+
+  static getInvoice = asyncHandler(
+    async (req: Request, res: Response) => {
+      const invoice =
+        await SaleService.getInvoice(
+          req.params.id.toString(),
+        );
+
+      return success(res, invoice);
+    },
+  );
 }

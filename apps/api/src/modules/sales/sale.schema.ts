@@ -43,3 +43,35 @@ export const cancelSaleSchema = z.object({
     id: z.string().uuid(),
   }),
 });
+
+export const paySaleSchema = z.object({
+  body: z.object({}),
+  query: z.object({}),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+});
+
+export const updateSaleSchema = z.object({
+  body: z.object({
+    customerId: z.string().uuid().optional().nullable(),
+    saleDate: z.coerce.date().optional(),
+    paymentMethod: z
+      .enum(["CASH", "TRANSFER", "QRIS"])
+      .optional(),
+    discount: z.coerce.number().nonnegative().optional(),
+    items: z.array(saleItemSchema).min(1).optional(),
+  }),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  query: z.object({}),
+});
+
+export const getSaleInvoiceSchema = z.object({
+  body: z.object({}),
+  query: z.object({}),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+});

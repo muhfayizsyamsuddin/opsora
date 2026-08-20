@@ -25,7 +25,15 @@ const userSelect = {
   id: true,
   name: true,
   email: true,
-  role: true,
+  roleId: true,
+  isActive: true,
+  roleRef: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+  },
   createdAt: true,
   updatedAt: true,
 };
@@ -162,7 +170,6 @@ export class SaleService {
           discount: saleDiscount,
           totalAmount,
           paymentMethod: data.paymentMethod,
-          status: "COMPLETED",
         },
       });
 
@@ -176,28 +183,6 @@ export class SaleService {
           subtotal: item.subtotal,
         })),
       });
-
-      for (const item of saleItems) {
-        const stockChange =
-          await InventoryStockService.decreaseStock(
-            tx,
-            item.productId,
-            item.quantity,
-          );
-
-        await tx.inventoryMovement.create({
-          data: {
-            productId: item.productId,
-            userId: data.userId,
-            movementType: "OUT",
-            referenceType: "SALE",
-            referenceId: sale.id,
-            quantity: item.quantity,
-            beforeStock: stockChange.beforeStock,
-            afterStock: stockChange.afterStock,
-          },
-        });
-      }
 
       return tx.sale.findUnique({
         where: {
@@ -236,36 +221,11 @@ export class SaleService {
         );
       }
 
-      if (sale.status !== "COMPLETED") {
+      if (sale.status !== "PENDING") {
         throw new AppError(
-          "Only COMPLETED sales can be cancelled",
+          "Only PENDING sales can be cancelled",
           400,
         );
-      }
-
-      for (const item of sale.items) {
-        const quantity = new Prisma.Decimal(item.quantity);
-
-        const stockChange =
-          await InventoryStockService.increaseStock(
-            tx,
-            item.productId,
-            quantity,
-          );
-
-        await tx.inventoryMovement.create({
-          data: {
-            productId: item.productId,
-            userId: sale.userId,
-            movementType: "IN",
-            referenceType: "SALE",
-            referenceId: sale.id,
-            quantity,
-            beforeStock: stockChange.beforeStock,
-            afterStock: stockChange.afterStock,
-            reason: "Sale cancellation",
-          },
-        });
       }
 
       await tx.sale.update({
@@ -336,5 +296,341 @@ export class SaleService {
     }
 
     return sale;
+  }
+
+  static async pay(id: string) {
+    return prisma.$transaction(async (tx) => {
+      const sale = await tx.sale.findUnique({
+        where: { id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!sale) {
+        throw new AppError(
+          "Sale not found",
+          404,
+        );
+      }
+
+      if (sale.status !== "PENDING") {
+        throw new AppError(
+          "Only PENDING sales can be paid",
+          400,
+        );
+      }
+
+      for (const item of sale.items) {
+        const stockChange =
+          await InventoryStockService.decreaseStock(
+            tx,
+            item.productId,
+            item.quantity,
+          );
+
+        await tx.inventoryMovement.create({
+          data: {
+            productId: item.productId,
+            userId: sale.userId,
+            movementType: "OUT",
+            referenceType: "SALE",
+            referenceId: sale.id,
+            quantity: item.quantity,
+            beforeStock: stockChange.beforeStock,
+            afterStock: stockChange.afterStock,
+          },
+        });
+      }
+
+      await tx.sale.update({
+        where: { id: sale.id },
+        data: {
+          status: "COMPLETED",
+        },
+      });
+
+      return tx.sale.findUnique({
+        where: { id: sale.id },
+        include: {
+          customer: true,
+          user: {
+            select: userSelect,
+          },
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+    });
+  }
+
+  static async update(
+    id: string,
+    data: {
+      customerId?: string | null;
+      saleDate?: Date;
+      paymentMethod?: PaymentMethod;
+      discount?: number;
+      items?: SaleItemInput[];
+    },
+  ) {
+    return prisma.$transaction(async (tx) => {
+      const sale = await tx.sale.findUnique({
+        where: { id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!sale) {
+        throw new AppError(
+          "Sale not found",
+          404,
+        );
+      }
+
+      if (sale.status !== "PENDING") {
+        throw new AppError(
+          "Only PENDING sales can be updated",
+          400,
+        );
+      }
+
+      if (data.customerId !== undefined) {
+        if (data.customerId) {
+          const customer =
+            await tx.customer.findFirst({
+              where: {
+                id: data.customerId,
+                deletedAt: null,
+              },
+            });
+
+          if (!customer) {
+            throw new AppError(
+              "Customer not found",
+              404,
+            );
+          }
+        }
+      }
+
+      let subtotal = sale.subtotal;
+      let discount = sale.discount;
+      let totalAmount = sale.totalAmount;
+
+      if (data.items) {
+        const productIds = data.items.map(
+          (item) => item.productId,
+        );
+
+        const products =
+          await tx.product.findMany({
+            where: {
+              id: {
+                in: productIds,
+              },
+              deletedAt: null,
+              status: "ACTIVE",
+            },
+          });
+
+        if (
+          products.length !== productIds.length
+        ) {
+          throw new AppError(
+            "One or more products not found",
+            404,
+          );
+        }
+
+        const productMap = new Map(
+          products.map((product) => [
+            product.id,
+            product,
+          ]),
+        );
+
+        const saleItems = data.items.map(
+          (item) => {
+            const product =
+              productMap.get(item.productId);
+
+            if (!product) {
+              throw new AppError(
+                "Product not found",
+                404,
+              );
+            }
+
+            const quantity =
+              new Prisma.Decimal(item.quantity);
+
+            const unitPrice =
+              product.sellingPrice;
+
+            const itemDiscount =
+              new Prisma.Decimal(item.discount);
+
+            const gross =
+              quantity.mul(unitPrice);
+
+            if (itemDiscount.gt(gross)) {
+              throw new AppError(
+                "Item discount cannot exceed item gross amount",
+                400,
+              );
+            }
+
+            const itemSubtotal =
+              gross.sub(itemDiscount);
+
+            return {
+              productId: product.id,
+              quantity,
+              unitPrice,
+              discount: itemDiscount,
+              subtotal: itemSubtotal,
+            };
+          },
+        );
+
+        subtotal = saleItems.reduce(
+          (sum, item) =>
+            sum.add(item.subtotal),
+          new Prisma.Decimal(0),
+        );
+
+        discount =
+          data.discount !== undefined
+            ? new Prisma.Decimal(data.discount)
+            : sale.discount;
+
+        if (discount.gt(subtotal)) {
+          throw new AppError(
+            "Sale discount cannot exceed subtotal",
+            400,
+          );
+        }
+
+        totalAmount =
+          subtotal.sub(discount);
+
+        await tx.saleItem.deleteMany({
+          where: {
+            saleId: id,
+          },
+        });
+
+        await tx.saleItem.createMany({
+          data: saleItems.map((item) => ({
+            saleId: id,
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            discount: item.discount,
+            subtotal: item.subtotal,
+          })),
+        });
+      } else if (data.discount !== undefined) {
+        discount = new Prisma.Decimal(
+          data.discount,
+        );
+
+        if (discount.gt(subtotal)) {
+          throw new AppError(
+            "Sale discount cannot exceed subtotal",
+            400,
+          );
+        }
+
+        totalAmount =
+          subtotal.sub(discount);
+      }
+
+      await tx.sale.update({
+        where: { id },
+        data: {
+          customerId:
+            data.customerId !== undefined
+              ? data.customerId
+              : sale.customerId,
+          saleDate:
+            data.saleDate ?? sale.saleDate,
+          paymentMethod:
+            data.paymentMethod ??
+            sale.paymentMethod,
+          subtotal,
+          discount,
+          totalAmount,
+        },
+      });
+
+      return tx.sale.findUnique({
+        where: { id },
+        include: {
+          customer: true,
+          user: {
+            select: userSelect,
+          },
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+    });
+  }
+  
+  static async getInvoice(id: string) {
+    const sale = await SaleRepository.findById(id);
+
+    if (!sale) {
+      throw new AppError(
+        "Sale not found",
+        404,
+      );
+    }
+
+    if (sale.status !== "COMPLETED") {
+      throw new AppError(
+        "Invoice is only available for completed sales",
+        400,
+      );
+    }
+
+    return {
+      invoiceNumber: `INV-${sale.id.slice(0, 8).toUpperCase()}`,
+      saleId: sale.id,
+      saleDate: sale.saleDate,
+      paymentMethod: sale.paymentMethod,
+      customer: sale.customer
+        ? {
+            id: sale.customer.id,
+            name: sale.customer.name,
+          }
+        : null,
+      cashier: {
+        id: sale.user.id,
+        name: sale.user.name,
+        email: sale.user.email,
+      },
+      items: sale.items.map((item) => ({
+        productId: item.productId,
+        productName: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discount: item.discount,
+        subtotal: item.subtotal,
+      })),
+      subtotal: sale.subtotal,
+      discount: sale.discount,
+      totalAmount: sale.totalAmount,
+      status: sale.status,
+    };
   }
 }

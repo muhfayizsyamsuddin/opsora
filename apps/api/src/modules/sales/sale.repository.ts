@@ -4,7 +4,15 @@ const userSelect = {
   id: true,
   name: true,
   email: true,
-  role: true,
+  roleId: true,
+  isActive: true,
+  roleRef: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+    },
+  },
   createdAt: true,
   updatedAt: true,
 };

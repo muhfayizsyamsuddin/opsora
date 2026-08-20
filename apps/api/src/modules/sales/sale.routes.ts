@@ -8,7 +8,10 @@ import {
   cancelSaleSchema,
   createSaleSchema,
   getSaleByIdSchema,
+  getSaleInvoiceSchema,
   getSalesSchema,
+  paySaleSchema,
+  updateSaleSchema,
 } from "./sale.schema.js";
 import { requirePermission } from "../../middlewares/permission.middleware.js";
 
@@ -30,12 +33,20 @@ router.get(
   SaleController.getAll,
 );
 
-router.post(
-  "/:id/cancel",
+router.get(
+  "/:id/invoice",
   authenticate,
-  requirePermission("sales.cancel"),
-  validate(cancelSaleSchema),
-  SaleController.cancel,
+  requirePermission("sales.read"),
+  validate(getSaleInvoiceSchema),
+  SaleController.getInvoice,
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("sales.update"),
+  validate(updateSaleSchema),
+  SaleController.update,
 );
 
 router.get(
@@ -45,5 +56,22 @@ router.get(
   validate(getSaleByIdSchema),
   SaleController.getById,
 );
+
+router.post(
+  "/:id/pay",
+  authenticate,
+  requirePermission("sales.pay"),
+  validate(paySaleSchema),
+  SaleController.pay,
+);
+
+router.post(
+  "/:id/cancel",
+  authenticate,
+  requirePermission("sales.cancel"),
+  validate(cancelSaleSchema),
+  SaleController.cancel,
+);
+
 
 export default router;
