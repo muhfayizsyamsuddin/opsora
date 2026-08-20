@@ -33,9 +33,8 @@ export class AuthController {
     async (req: Request, res: Response) => {
       const result =
         await AuthService.refresh(
-          req.body.refreshToken,
+          req.body.refresh_token,
         );
-
       return success(
         res,
         result,
@@ -47,7 +46,7 @@ export class AuthController {
   static logout = asyncHandler(
     async (req: Request, res: Response) => {
       await AuthService.logout(
-        req.body.refreshToken,
+        req.body.refresh_token,
       );
 
       return success(

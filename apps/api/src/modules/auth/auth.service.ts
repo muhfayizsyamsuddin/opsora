@@ -106,9 +106,18 @@ export class AuthService {
     };
 
     return {
-      accessToken,
-      refreshToken,
-      user: safeUser,
+      access_token: accessToken,
+      token_type: "Bearer",
+      refresh_token: refreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        roles: user.roleRef?.name
+          ? [user.roleRef.name]
+          : [],
+        permissions,
+      },
     };
   }
 
@@ -132,8 +141,9 @@ export class AuthService {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.roleRef?.name ?? null,
-      roleId: user.roleId,
+      roles: user.roleRef?.name
+        ? [user.roleRef.name]
+        : [],
       permissions,
       isActive: user.isActive,
       createdAt: user.createdAt,
@@ -188,7 +198,8 @@ export class AuthService {
     });
 
     return {
-      accessToken,
+      access_token: accessToken,
+      token_type: "Bearer",
     };
   }
 

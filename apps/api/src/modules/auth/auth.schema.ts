@@ -19,7 +19,7 @@ export const loginSchema = z.object({
 
 export const refreshTokenSchema = z.object({
   body: z.object({
-    refreshToken: z.string().min(1),
+    refresh_token: z.string().min(1),
   }),
   query: z.object({}),
   params: z.object({}),
@@ -27,7 +27,7 @@ export const refreshTokenSchema = z.object({
 
 export const logoutSchema = z.object({
   body: z.object({
-    refreshToken: z.string().min(1),
+    refresh_token: z.string().min(1),
   }),
   query: z.object({}),
   params: z.object({}),
