@@ -1,9 +1,7 @@
 import { Router } from "express";
 
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-import { UserRole } from "../../generated/prisma/enums.js";
 
 import { SaleController } from "./sale.controller.js";
 import {
@@ -12,13 +10,14 @@ import {
   getSaleByIdSchema,
   getSalesSchema,
 } from "./sale.schema.js";
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 
 const router = Router();
 
 router.post(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF),
+  requirePermission("sales.create"),
   validate(createSaleSchema),
   SaleController.create,
 );
@@ -26,7 +25,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("sales.read"),
   validate(getSalesSchema),
   SaleController.getAll,
 );
@@ -34,7 +33,7 @@ router.get(
 router.post(
   "/:id/cancel",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("sales.cancel"),
   validate(cancelSaleSchema),
   SaleController.cancel,
 );
@@ -42,7 +41,7 @@ router.post(
 router.get(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("sales.read"),
   validate(getSaleByIdSchema),
   SaleController.getById,
 );

@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { PerformanceReviewController } from "./performance-review.controller.js";
-
 import {
   createPerformanceReviewSchema,
   updatePerformanceReviewSchema,
@@ -18,7 +16,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("performance_reviews.create"),
   validate(createPerformanceReviewSchema),
   PerformanceReviewController.create,
 );
@@ -26,7 +24,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("performance_reviews.read"),
   validate(getPerformanceReviewsSchema),
   PerformanceReviewController.getAll,
 );
@@ -34,7 +32,7 @@ router.get(
 router.get(
   "/:id",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("performance_reviews.read"),
   validate(getPerformanceReviewByIdSchema),
   PerformanceReviewController.getById,
 );
@@ -42,7 +40,7 @@ router.get(
 router.put(
   "/:id",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("performance_reviews.update"),
   validate(updatePerformanceReviewSchema),
   PerformanceReviewController.update,
 );
@@ -50,7 +48,7 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
-  authorize("ADMIN"),
+  requirePermission("performance_reviews.delete"),
   validate(deletePerformanceReviewSchema),
   PerformanceReviewController.delete,
 );

@@ -1,11 +1,8 @@
 import { Router } from 'express';
-
 import { authenticate } from '../../middlewares/auth.middleware.js';
-import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../validators/validate.js';
-import { UserRole } from '../../generated/prisma/enums.js';
-
 import { CategoryController } from './category.controller.js';
+import { requirePermission } from '../../middlewares/permission.middleware.js';
 import {
   createCategorySchema,
   deleteCategorySchema,
@@ -19,7 +16,7 @@ const router = Router();
 router.post(
   '/',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("categories.create"),
   validate(createCategorySchema),
   CategoryController.create,
 );
@@ -27,7 +24,7 @@ router.post(
 router.get(
   '/',
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("categories.read"),
   validate(getCategoriesSchema),
   CategoryController.getAll,
 );
@@ -35,7 +32,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("categories.read"),
   validate(getCategoryByIdSchema),
   CategoryController.getById,
 );
@@ -43,7 +40,7 @@ router.get(
 router.put(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("categories.update"),
   validate(updateCategorySchema),
   CategoryController.update,
 );
@@ -51,7 +48,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("categories.delete"),
   validate(deleteCategorySchema),
   CategoryController.delete,
 );

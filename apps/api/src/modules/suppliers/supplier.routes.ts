@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { authenticate } from '../../middlewares/auth.middleware.js';
-import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../validators/validate.js';
-import { UserRole } from '../../generated/prisma/enums.js';
 import { SupplierController } from './supplier.controller.js';
+import { requirePermission } from '../../middlewares/permission.middleware.js';
 import {
   createSupplierSchema,
   deleteSupplierSchema,
@@ -17,7 +16,7 @@ const router = Router();
 router.post(
   '/',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("suppliers.create"),
   validate(createSupplierSchema),
   SupplierController.create,
 );
@@ -25,7 +24,7 @@ router.post(
 router.get(
   '/',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("suppliers.read"),
   validate(getSuppliersSchema),
   SupplierController.getAll,
 );
@@ -33,7 +32,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("suppliers.read"),
   validate(getSupplierByIdSchema),
   SupplierController.getById,
 );
@@ -41,7 +40,7 @@ router.get(
 router.patch(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("suppliers.update"),
   validate(updateSupplierSchema),
   SupplierController.update,
 );
@@ -49,7 +48,7 @@ router.patch(
 router.delete(
   '/:id',
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("suppliers.delete"),
   validate(deleteSupplierSchema),
   SupplierController.delete,
 );

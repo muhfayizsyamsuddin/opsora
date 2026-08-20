@@ -1,15 +1,22 @@
 import { prisma } from "../../lib/prisma.js";
-import { UserRole } from "../../generated/prisma/enums.js";
 
 export class UserRepository {
   static async create(data: {
     name: string;
     email: string;
     password: string;
-    role?: UserRole;
+    roleId: string;
   }) {
     return prisma.user.create({
-      data,
+      data: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        roleId: data.roleId,
+      },
+      include: {
+        roleRef: true,
+      },
     });
   }
 
@@ -17,6 +24,17 @@ export class UserRepository {
     return prisma.user.findUnique({
       where: {
         email,
+      },
+      include: {
+        roleRef: {
+          include: {
+            permissions: {
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -26,6 +44,9 @@ export class UserRepository {
       where: {
         id,
       },
+      include: {
+        roleRef: true,
+      },
     });
   }
 
@@ -33,8 +54,8 @@ export class UserRepository {
     skip: number,
     take: number,
     search?: string,
-    role?: UserRole,
-    sort: "name" | "email" | "role" | "createdAt" = "createdAt",
+    roleId?: string,
+    sort: "name" | "email" | "createdAt" = "createdAt",
     order: "asc" | "desc" = "desc",
   ) {
     return prisma.user.findMany({
@@ -57,9 +78,12 @@ export class UserRepository {
             },
           ],
         }),
-        ...(role && {
-          role,
+        ...(roleId && {
+          roleId,
         }),
+      },
+      include: {
+        roleRef: true,
       },
       orderBy: {
         [sort]: order,
@@ -72,18 +96,28 @@ export class UserRepository {
     data: {
       name?: string;
       email?: string;
-      role?: UserRole;
+      roleId?: string;
     },
   ) {
     return prisma.user.update({
       where: {
         id,
       },
-      data,
+      data: {
+        name: data.name,
+        email: data.email,
+        roleId: data.roleId,
+      },
+      include: {
+        roleRef: true,
+      },
     });
   }
 
-  static async count(search?: string, role?: UserRole) {
+  static async count(
+    search?: string,
+    roleId?: string,
+  ) {
     return prisma.user.count({
       where: {
         ...(search && {
@@ -102,10 +136,18 @@ export class UserRepository {
             },
           ],
         }),
-        ...(role && {
-          role,
+        ...(roleId && {
+          roleId,
         }),
       },
     });
   }
+
+  static async findRoleByName(name: string) {
+  return prisma.role.findUnique({
+    where: {
+      name,
+    },
+  });
+}
 }

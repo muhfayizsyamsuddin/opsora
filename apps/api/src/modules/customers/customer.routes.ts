@@ -1,10 +1,8 @@
 import { Router } from "express";
 
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-import { UserRole } from "../../generated/prisma/enums.js";
-
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { CustomerController } from "./customer.controller.js";
 import {
   createCustomerSchema,
@@ -19,7 +17,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("customers.create"),
   validate(createCustomerSchema),
   CustomerController.create,
 );
@@ -27,7 +25,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("customers.read"),
   validate(getCustomersSchema),
   CustomerController.getAll,
 );
@@ -35,7 +33,7 @@ router.get(
 router.get(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("customers.read"),
   validate(getCustomerByIdSchema),
   CustomerController.getById,
 );
@@ -43,7 +41,7 @@ router.get(
 router.patch(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("customers.update"),
   validate(updateCustomerSchema),
   CustomerController.update,
 );
@@ -51,7 +49,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("customers.delete"),
   validate(deleteCustomerSchema),
   CustomerController.delete,
 );

@@ -1,11 +1,8 @@
 import { Router } from "express";
 
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-
-import { UserRole } from "../../generated/prisma/enums.js";
-
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { EmployeeController } from "./employee.controller.js";
 import {
   createEmployeeSchema,
@@ -19,35 +16,35 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("employees.create"),
   validate(createEmployeeSchema),
   EmployeeController.create,
 );
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("employees.read"),
   validate(getEmployeesSchema),
   EmployeeController.getAll,
 );
 router.get(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("employees.read"),
   validate(getEmployeeByIdSchema),
   EmployeeController.getById,
 );
 router.patch(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("employees.update"),
   validate(updateEmployeeSchema),
   EmployeeController.update,
 );
 router.delete(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("employees.delete"),
   validate(getEmployeeByIdSchema),
   EmployeeController.delete,
 );

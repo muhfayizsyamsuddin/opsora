@@ -1,9 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-import { UserRole } from "../../generated/prisma/enums.js";
-
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { InventoryMovementController } from "./inventory-movement.controller.js";
 import {
   adjustInventorySchema,
@@ -16,7 +14,7 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("inventory-movements.read"),
   validate(getInventoryMovementsSchema),
   InventoryMovementController.getAll,
 );
@@ -24,7 +22,7 @@ router.get(
 router.post(
   "/adjust",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("inventory-movements.adjust"),
   validate(adjustInventorySchema),
   InventoryMovementController.adjust,
 );
@@ -32,7 +30,7 @@ router.post(
 router.get(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("inventory-movements.read"),
   validate(getInventoryMovementByIdSchema),
   InventoryMovementController.getById,
 );

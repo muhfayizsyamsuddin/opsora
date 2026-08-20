@@ -16,16 +16,33 @@ export class AuthService {
       throw new AppError("Email already exists", 409);
     }
 
+    const staffRole = await UserRepository.findRoleByName("STAFF");
+
+    if (!staffRole) {
+      throw new AppError(
+        "Default STAFF role is not configured",
+        500,
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await UserRepository.create({
-      ...data,
+      name: data.name,
+      email: data.email,
       password: hashedPassword,
+      roleId: staffRole.id,
     });
 
-    const { password, ...safeUser } = user;
-
-    return safeUser;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.roleRef?.name ?? null,
+      roleId: user.roleId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   static async login(data: {
@@ -50,10 +67,23 @@ export class AuthService {
     const accessToken = generateAccessToken({
       id: user.id,
       email: user.email,
-      role: user.role,
     });
 
-    const { password, ...safeUser } = user;
+    const permissions =
+      user.roleRef?.permissions.map(
+        (item) => item.permission.name,
+      ) ?? [];
+
+    const safeUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.roleRef?.name ?? null,
+      roleId: user.roleId,
+      permissions,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
 
     return {
       accessToken,

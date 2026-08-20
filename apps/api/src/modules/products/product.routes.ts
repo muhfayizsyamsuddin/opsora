@@ -1,9 +1,7 @@
 import { Router } from 'express';
 
 import { authenticate } from '../../middlewares/auth.middleware.js';
-import { authorize } from '../../middlewares/role.middleware.js';
 import { validate } from '../../validators/validate.js';
-import { UserRole } from '../../generated/prisma/enums.js';
 
 import { ProductController } from './product.controller.js';
 import {
@@ -14,53 +12,54 @@ import {
   updateProductSchema,
 } from './product.schema.js';
 import { upload } from '../../middlewares/upload.middleware.js';
+import { requirePermission } from '../../middlewares/permission.middleware.js';
 
 const router = Router();
 
 router.post(
-  '/',
+  "/",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("products.create"),
   validate(createProductSchema),
   ProductController.create,
 );
 
 router.get(
-  '/',
+  "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("products.read"),
   validate(getProductsSchema),
   ProductController.getAll,
 );
 
 router.post(
-  '/:id/image',
+  "/:id/image",
   authenticate,
-  authorize(UserRole.ADMIN),
-  upload.single('image'),
+  requirePermission("products.update"),
+  upload.single("image"),
   ProductController.uploadImage,
 );
 
 router.get(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("products.read"),
   validate(getProductByIdSchema),
   ProductController.getById,
 );
 
 router.put(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("products.update"),
   validate(updateProductSchema),
   ProductController.update,
 );
 
 router.delete(
-  '/:id',
+  "/:id",
   authenticate,
-  authorize(UserRole.ADMIN),
+  requirePermission("products.delete"),
   validate(deleteProductSchema),
   ProductController.delete,
 );

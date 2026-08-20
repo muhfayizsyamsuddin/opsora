@@ -1,9 +1,7 @@
 import { Router } from "express";
 
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { validate } from "../../validators/validate.js";
-import { UserRole } from "../../generated/prisma/enums.js";
 
 import { PurchaseController } from "./purchase.controller.js";
 import {
@@ -12,13 +10,14 @@ import {
   getPurchasesSchema,
   purchaseActionSchema,
 } from "./purchase.schema.js";
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 
 const router = Router();
 
 router.post(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("purchases.create"),
   validate(createPurchaseSchema),
   PurchaseController.create,
 );
@@ -26,7 +25,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("purchases.read"),
   validate(getPurchasesSchema),
   PurchaseController.getAll,
 );
@@ -34,7 +33,7 @@ router.get(
 router.post(
   "/:id/complete",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("purchases.complete"),
   validate(purchaseActionSchema),
   PurchaseController.complete,
 );
@@ -42,7 +41,7 @@ router.post(
 router.post(
   "/:id/cancel",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("purchases.cancel"),
   validate(purchaseActionSchema),
   PurchaseController.cancel,
 );
@@ -50,7 +49,7 @@ router.post(
 router.get(
   "/:id",
   authenticate,
-  authorize(UserRole.ADMIN, UserRole.MANAGER),
+  requirePermission("purchases.read"),
   validate(getPurchaseByIdSchema),
   PurchaseController.getById,
 );

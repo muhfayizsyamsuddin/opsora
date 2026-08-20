@@ -1,12 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-
 import { AppError } from "../errors/AppError.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 
 export function authenticate(
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const authHeader = req.headers.authorization;
 
@@ -25,7 +24,6 @@ export function authenticate(
   req.user = {
     id: payload.id,
     email: payload.email,
-    role: payload.role,
   };
 
   next();

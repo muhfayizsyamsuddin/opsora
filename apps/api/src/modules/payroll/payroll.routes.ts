@@ -1,7 +1,8 @@
 import { Router } from "express";
+
 import { PayrollController } from "./payroll.controller.js";
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 import { validate } from "../../validators/validate.js";
 
 import {
@@ -16,7 +17,7 @@ const router = Router();
 router.post(
   "/",
   authenticate,
-  authorize("ADMIN"),
+  requirePermission("payroll.create"),
   validate(createPayrollSchema),
   PayrollController.create,
 );
@@ -24,7 +25,7 @@ router.post(
 router.get(
   "/",
   authenticate,
-  authorize("ADMIN"),
+  requirePermission("payroll.read"),
   validate(getPayrollsSchema),
   PayrollController.getAll,
 );
@@ -32,7 +33,7 @@ router.get(
 router.get(
   "/:id",
   authenticate,
-  authorize("ADMIN"),
+  requirePermission("payroll.read"),
   validate(getPayrollByIdSchema),
   PayrollController.getById,
 );
@@ -40,7 +41,7 @@ router.get(
 router.delete(
   "/:id",
   authenticate,
-  authorize("ADMIN"),
+  requirePermission("payroll.delete"),
   validate(deletePayrollSchema),
   PayrollController.delete,
 );

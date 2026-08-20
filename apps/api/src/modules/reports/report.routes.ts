@@ -1,42 +1,42 @@
 import { Router } from "express";
 import { authenticate } from "../../middlewares/auth.middleware.js";
-import { authorize } from "../../middlewares/role.middleware.js";
 import { ReportController } from "./report.controller.js";
+import { requirePermission } from "../../middlewares/permission.middleware.js";
 
 const router = Router();
 
 router.get(
   "/dashboard",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("reports.read"),
   ReportController.getDashboardReport,
 );
 
 router.get(
   "/attendance",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("reports.read"),
   ReportController.getAttendanceReport,
 );
 
 router.get(
   "/leaves",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("reports.read"),
   ReportController.getLeaveReport,
 );
 
 router.get(
   "/payroll",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("reports.read"),
   ReportController.getPayrollReport,
 );
 
 router.get(
   "/performance",
   authenticate,
-  authorize("ADMIN", "MANAGER"),
+  requirePermission("reports.read"),
   ReportController.getPerformanceReport,
 );
 

@@ -1,15 +1,37 @@
 import bcrypt from "bcrypt";
-
-import { UserRole } from "../../generated/prisma/enums.js";
 import { AppError } from "../../errors/AppError.js";
 import { UserRepository } from "./user.repository.js";
+
+function sanitizeUser(user: {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+  roleId: string | null;
+  roleRef?: {
+    name: string;
+  } | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.roleRef?.name ?? null,
+    roleId: user.roleId,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
 
 export class UserService {
   static async create(data: {
     name: string;
     email: string;
     password: string;
-    role?: UserRole;
+    roleId: string;
   }) {
     const existingUser = await UserRepository.findByEmail(data.email);
 
@@ -20,13 +42,11 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await UserRepository.create({
-        ...data,
-        password: hashedPassword,
+      ...data,
+      password: hashedPassword,
     });
 
-    const { password, ...safeUser } = user;
-
-    return safeUser;
+    return sanitizeUser(user);
   }
 
   static async getProfile(userId: string) {
@@ -36,17 +56,15 @@ export class UserService {
       throw new AppError("User not found", 404);
     }
 
-    const { password, ...safeUser } = user;
-
-    return safeUser;
+    return sanitizeUser(user);
   }
 
   static async getAllUsers(
     page: number,
     limit: number,
     search?: string,
-    role?: UserRole,
-    sort: "name" | "email" | "role" | "createdAt" = "createdAt",
+    roleId?: string,
+    sort: "name" | "email" | "createdAt" = "createdAt",
     order: "asc" | "desc" = "desc",
   ) {
     const skip = (page - 1) * limit;
@@ -56,15 +74,25 @@ export class UserService {
         skip,
         limit,
         search,
-        role,
+        roleId,
         sort,
         order,
       ),
-      UserRepository.count(search, role),
+      UserRepository.count(search, roleId),
     ]);
 
+    const safeUsers = users.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.roleRef?.name ?? null,
+      roleId: user.roleId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
+
     return {
-      data: users,
+      data: safeUsers,
       meta: {
         page,
         limit,
@@ -81,9 +109,7 @@ export class UserService {
       throw new AppError("User not found", 404);
     }
 
-    const { password, ...safeUser } = user;
-
-    return safeUser;
+    return sanitizeUser(user);
   }
 
   static async update(
@@ -91,7 +117,7 @@ export class UserService {
     data: {
       name?: string;
       email?: string;
-      role?: UserRole;
+      roleId?: string;
     },
   ) {
     const user = await UserRepository.findById(id);
@@ -110,8 +136,6 @@ export class UserService {
 
     const updatedUser = await UserRepository.update(id, data);
 
-    const { password, ...safeUser } = updatedUser;
-
-    return safeUser;
+    return sanitizeUser(updatedUser);
   }
 }

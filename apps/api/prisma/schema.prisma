@@ -7,12 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  ADMIN
-  MANAGER
-  STAFF
-}
-
 enum EmployeeStatus {
   ACTIVE
   INACTIVE
@@ -65,139 +59,176 @@ enum InventoryReferenceType {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole @default(STAFF)
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
 
-  purchases Purchase[]
-  sales     Sale[]
+  roleId String
+  roleRef Role?   @relation(fields: [roleId], references: [id])
+
+  purchases          Purchase[]
+  sales              Sale[]
   inventoryMovements InventoryMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Role {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  users       User[]
+  permissions RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Permission {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([roleId, permissionId])
+}
+
 model Department {
-  id        String     @id @default(uuid())
-  name      String     @unique
+  id   String @id @default(uuid())
+  name String @unique
 
   employees Employee[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Employee {
-  id           String      @id @default(uuid())
+  id String @id @default(uuid())
 
-  name         String
-  email        String      @unique
-  position     String
-  salary       Float
-  hireDate     DateTime
-  status EmployeeStatus @default(ACTIVE)
+  name     String
+  email    String         @unique
+  position String
+  salary   Float
+  hireDate DateTime
+  status   EmployeeStatus @default(ACTIVE)
 
   departmentId String
-  department   Department  @relation(fields: [departmentId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id])
 
-  attendances Attendance[]
-  leaves      Leave[]
-  payrolls    Payroll[]
+  attendances        Attendance[]
+  leaves             Leave[]
+  payrolls           Payroll[]
   performanceReviews PerformanceReview[]
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Attendance {
-  id         String           @id @default(uuid())
+  id String @id @default(uuid())
 
   employeeId String
-  employee   Employee         @relation(fields: [employeeId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  checkIn    DateTime
-  checkOut   DateTime?
+  checkIn  DateTime
+  checkOut DateTime?
 
-  status     AttendanceStatus @default(PRESENT)
+  status AttendanceStatus @default(PRESENT)
 
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Leave {
-  id         String        @id @default(uuid())
+  id String @id @default(uuid())
 
   employeeId String
-  employee   Employee      @relation(fields: [employeeId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  startDate  DateTime
-  endDate    DateTime
+  startDate DateTime
+  endDate   DateTime
 
-  reason     String
+  reason String
 
-  status     LeaveStatus   @default(PENDING)
+  status LeaveStatus @default(PENDING)
 
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Payroll {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  employeeId    String
-  employee      Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  month         Int
-  year          Int
+  month Int
+  year  Int
 
-  baseSalary    Float
-  bonus         Float @default(0)
-  deduction     Float @default(0)
+  baseSalary Float
+  bonus      Float @default(0)
+  deduction  Float @default(0)
 
-  totalSalary   Float
+  totalSalary Float
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([employeeId, month, year])
 }
 
 model PerformanceReview {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  employeeId  String
-  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  reviewer    String
+  reviewer String
 
-  score       Int
+  score Int
 
-  comments    String?
+  comments String?
 
-  reviewDate  DateTime
+  reviewDate DateTime
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
 
-  products    Product[]
+  products Product[]
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Product {
-  id            String        @id @default(uuid())
-  categoryId    String
-  category      Category      @relation(fields: [categoryId], references: [id])
+  id         String   @id @default(uuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
 
   name          String
   sku           String        @unique
@@ -210,40 +241,40 @@ model Product {
   imageUrl      String?
   status        ProductStatus @default(ACTIVE)
 
-  purchaseItems PurchaseItem[]
-  saleItems     SaleItem[]
+  purchaseItems      PurchaseItem[]
+  saleItems          SaleItem[]
   inventoryMovements InventoryMovement[]
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Supplier {
-  id        String     @id @default(uuid())
-  name      String
-  phone     String?
-  email     String?
-  address   String?
+  id      String  @id @default(uuid())
+  name    String
+  phone   String?
+  email   String?
+  address String?
 
   purchases Purchase[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
 model Customer {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String?
-  email     String?
-  address   String?
+  id      String  @id @default(uuid())
+  name    String
+  phone   String?
+  email   String?
+  address String?
 
-  sales     Sale[]
+  sales Sale[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
@@ -255,26 +286,26 @@ model Purchase {
   totalAmount  Decimal
   status       PurchaseStatus @default(DRAFT)
 
-  supplier     Supplier       @relation(fields: [supplierId], references: [id])
-  user         User            @relation(fields: [userId], references: [id])
-  items        PurchaseItem[]
+  supplier Supplier       @relation(fields: [supplierId], references: [id])
+  user     User           @relation(fields: [userId], references: [id])
+  items    PurchaseItem[]
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PurchaseItem {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   purchaseId String
   productId  String
   quantity   Decimal
   unitPrice  Decimal
   subtotal   Decimal
 
-  purchase   Purchase @relation(fields: [purchaseId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
+  purchase Purchase @relation(fields: [purchaseId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Sale {
@@ -288,16 +319,16 @@ model Sale {
   paymentMethod PaymentMethod
   status        SaleStatus    @default(COMPLETED)
 
-  customer      Customer?     @relation(fields: [customerId], references: [id])
-  user          User          @relation(fields: [userId], references: [id])
-  items         SaleItem[]
+  customer Customer?  @relation(fields: [customerId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  items    SaleItem[]
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SaleItem {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   saleId    String
   productId String
   quantity  Decimal
@@ -305,14 +336,14 @@ model SaleItem {
   discount  Decimal
   subtotal  Decimal
 
-  sale      Sale     @relation(fields: [saleId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+  sale    Sale    @relation(fields: [saleId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
   createdAt DateTime @default(now())
 }
 
 model InventoryMovement {
-  id            String                  @id @default(uuid())
+  id            String                 @id @default(uuid())
   productId     String
   userId        String
   movementType  MovementType
@@ -323,8 +354,8 @@ model InventoryMovement {
   afterStock    Decimal
   reason        String?
 
-  product       Product                 @relation(fields: [productId], references: [id])
-  user          User                    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 
-  createdAt     DateTime                @default(now())
+  createdAt DateTime @default(now())
 }
