@@ -16,4 +16,45 @@ export class AuthController {
 
     return success(res, user, "Login successful");
   });
+
+  static me = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user = await AuthService.me(req.user!.id);
+
+      return success(
+        res,
+        user,
+        "Current user retrieved successfully",
+      );
+    },
+  );
+
+  static refresh = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result =
+        await AuthService.refresh(
+          req.body.refreshToken,
+        );
+
+      return success(
+        res,
+        result,
+        "Token refreshed successfully",
+      );
+    },
+  );
+
+  static logout = asyncHandler(
+    async (req: Request, res: Response) => {
+      await AuthService.logout(
+        req.body.refreshToken,
+      );
+
+      return success(
+        res,
+        null,
+        "Logout successful",
+      );
+    },
+  );
 }
