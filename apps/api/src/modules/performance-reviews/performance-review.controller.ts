@@ -76,4 +76,39 @@ export class PerformanceReviewController {
 
     return noContent(res);
   });
+
+  static getEmployeeHistory = asyncHandler(
+    async (req: Request, res: Response) => {
+      const reviews =
+        await PerformanceReviewService.getEmployeeHistory(
+          req.params.employee_id.toString(),
+          {
+            page: req.query.page
+              ? Number(req.query.page)
+              : undefined,
+            limit: req.query.limit
+              ? Number(req.query.limit)
+              : undefined,
+            reviewer:
+              req.query.reviewer?.toString(),
+            scoreMin: req.query.scoreMin
+              ? Number(req.query.scoreMin)
+              : undefined,
+            scoreMax: req.query.scoreMax
+              ? Number(req.query.scoreMax)
+              : undefined,
+            sort:
+              (req.query.sort as
+                | keyof Prisma.PerformanceReviewOrderByWithRelationInput
+                | undefined),
+            order:
+              (req.query.order as
+                | Prisma.SortOrder
+                | undefined),
+          },
+        );
+
+      return success(res, reviews);
+    },
+  );
 }

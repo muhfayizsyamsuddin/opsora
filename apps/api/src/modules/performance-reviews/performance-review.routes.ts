@@ -9,6 +9,7 @@ import {
   getPerformanceReviewByIdSchema,
   getPerformanceReviewsSchema,
   deletePerformanceReviewSchema,
+  getPerformanceReviewEmployeeSchema,
 } from "./performance-review.validator.js";
 
 const router = Router();
@@ -27,6 +28,14 @@ router.get(
   requirePermission("performance_reviews.read"),
   validate(getPerformanceReviewsSchema),
   PerformanceReviewController.getAll,
+);
+
+router.get(
+  "/employee/:employee_id",
+  authenticate,
+  requirePermission("performance_reviews.read"),
+  validate(getPerformanceReviewEmployeeSchema),
+  PerformanceReviewController.getEmployeeHistory,
 );
 
 router.get(

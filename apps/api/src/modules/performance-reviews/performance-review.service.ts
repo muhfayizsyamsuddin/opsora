@@ -71,4 +71,38 @@ export class PerformanceReviewService {
 
     await PerformanceReviewRepository.delete(id);
   }
+
+  static async getEmployeeHistory(
+    employeeId: string,
+    query: {
+      page?: number;
+      limit?: number;
+      reviewer?: string;
+      scoreMin?: number;
+      scoreMax?: number;
+      sort?: keyof Prisma.PerformanceReviewOrderByWithRelationInput;
+      order?: Prisma.SortOrder;
+    },
+  ) {
+    const employee =
+      await EmployeeRepository.findById(employeeId);
+
+    if (!employee) {
+      throw new AppError(
+        "Employee not found",
+        404,
+      );
+    }
+
+    return PerformanceReviewRepository.findMany({
+      page: query.page ?? 1,
+      limit: query.limit ?? 10,
+      employeeId,
+      reviewer: query.reviewer,
+      scoreMin: query.scoreMin,
+      scoreMax: query.scoreMax,
+      sort: query.sort ?? "reviewDate",
+      order: query.order ?? "desc",
+    });
+  }
 }

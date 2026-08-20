@@ -80,3 +80,21 @@ export const deletePerformanceReviewSchema = z.object({
   }),
   query: z.object({}),
 });
+
+export const getPerformanceReviewEmployeeSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    employee_id: z.string().uuid(),
+  }),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    reviewer: z.string().optional(),
+    scoreMin: z.coerce.number().int().min(0).max(100).optional(),
+    scoreMax: z.coerce.number().int().min(0).max(100).optional(),
+    sort: z
+      .enum(["reviewDate", "score", "createdAt"])
+      .default("reviewDate"),
+    order: z.enum(["asc", "desc"]).default("desc"),
+  }),
+});
