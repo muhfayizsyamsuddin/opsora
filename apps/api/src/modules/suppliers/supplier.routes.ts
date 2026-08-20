@@ -37,6 +37,14 @@ router.get(
   SupplierController.getById,
 );
 
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("suppliers.update"),
+  validate(updateSupplierSchema),
+  SupplierController.update,
+);
+
 router.patch(
   '/:id',
   authenticate,

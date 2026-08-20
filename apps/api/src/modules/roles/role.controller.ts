@@ -66,4 +66,21 @@ export class RoleController {
       return success(res, result);
     },
   );
+
+  static updatePermissions = asyncHandler(
+    async (req: Request, res: Response) => {
+      const role = await RoleService.update(
+        String(req.params.id),
+        {
+          permissions: req.body.permissions,
+        },
+      );
+
+      return success(
+        res,
+        role,
+        "Role permissions updated successfully",
+      );
+    },
+  );
 }

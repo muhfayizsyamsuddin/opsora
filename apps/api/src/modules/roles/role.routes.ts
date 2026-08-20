@@ -9,6 +9,7 @@ import {
   deleteRoleSchema,
   getRoleByIdSchema,
   getRolesSchema,
+  updateRolePermissionsSchema,
   updateRoleSchema,
 } from "./role.schema.js";
 import { RoleController } from "./role.controller.js";
@@ -37,6 +38,22 @@ router.post(
   requirePermission("roles.create"),
   validate(createRoleSchema),
   RoleController.create,
+);
+
+router.put(
+  "/:id/permissions",
+  authenticate,
+  requirePermission("roles.update"),
+  validate(updateRolePermissionsSchema),
+  RoleController.updatePermissions,
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("roles.update"),
+  validate(updateRoleSchema),
+  RoleController.update,
 );
 
 router.patch(

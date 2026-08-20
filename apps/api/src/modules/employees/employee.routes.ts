@@ -34,6 +34,13 @@ router.get(
   validate(getEmployeeByIdSchema),
   EmployeeController.getById,
 );
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("employees.update"),
+  validate(updateEmployeeSchema),
+  EmployeeController.update,
+);
 router.patch(
   "/:id",
   authenticate,

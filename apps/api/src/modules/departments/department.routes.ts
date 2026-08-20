@@ -30,6 +30,13 @@ router.get(
   validate(getDepartmentByIdSchema),
   DepartmentController.getById,
 );
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("departments.update"),
+  validate(updateDepartmentSchema),
+  DepartmentController.update,
+);
 router.patch(
   "/:id",
   authenticate,

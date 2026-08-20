@@ -43,6 +43,14 @@ router.get(
   AttendanceController.getById,
 );
 
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("attendances.update"),
+  validate(updateAttendanceSchema),
+  AttendanceController.update,
+);
+
 router.patch(
   "/:id",
   requirePermission("attendances.update"),

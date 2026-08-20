@@ -38,6 +38,14 @@ router.get(
   CustomerController.getById,
 );
 
+router.put(
+  "/:id",
+  authenticate,
+  requirePermission("customers.update"),
+  validate(updateCustomerSchema),
+  CustomerController.update,
+);
+
 router.patch(
   "/:id",
   authenticate,

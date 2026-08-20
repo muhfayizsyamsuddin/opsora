@@ -47,3 +47,15 @@ export const deleteRoleSchema = z.object({
   }),
   query: z.object({}),
 });
+
+export const updateRolePermissionsSchema = z.object({
+  body: z.object({
+    permissions: z.array(
+      z.string().min(1),
+    ),
+  }),
+  params: z.object({
+    id: z.uuid(),
+  }),
+  query: z.object({}),
+});
