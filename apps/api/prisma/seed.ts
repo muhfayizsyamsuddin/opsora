@@ -131,6 +131,19 @@ const permissions = [
   ["settings.update", "Update system configuration"],
 ] as const;
 
+const defaultSettings = [
+  ["company.name", ""],
+  ["company.logo", ""],
+  ["company.phone", ""],
+  ["company.email", ""],
+  ["company.address", ""],
+
+  ["system.theme", "light"],
+  ["system.currency", "IDR"],
+  ["system.dateFormat", "DD/MM/YYYY"],
+  ["system.timeFormat", "24h"],
+] as const;
+
 const operationalAdminPermissions = permissions
   .map(([name]) => name)
   .filter(
@@ -331,6 +344,17 @@ async function seed() {
     "Cashier Test",
     cashierRoleId,
   );
+
+  for (const [key, value] of defaultSettings) {
+    await prisma.setting.upsert({
+      where: { key },
+      update: {},
+      create: {
+        key,
+        value,
+      },
+    });
+  }
 
   for (const [roleName, permissionNames] of Object.entries(
     rolePermissions,
