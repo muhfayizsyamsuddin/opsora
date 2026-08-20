@@ -15,6 +15,7 @@ import inventoryMovementRoutes from "./modules/inventory-movements/inventory-mov
 import saleRoutes from "./modules/sales/sale.routes.js";
 import customerRoutes from "./modules/customers/customer.routes.js";
 import roleRoutes from "./modules/roles/role.routes.js";
+import permissionRoutes from "./modules/permissions/permission.routes.js";
 import employeeRoutes from "./modules/employees/employee.routes.js";
 import attendanceRoutes from "./modules/attendances/attendance.routes.js";
 import leaveRoutes from "./modules/leaves/leave.routes.js";
@@ -48,8 +49,9 @@ app.use('/suppliers', supplierRoutes);
 app.use("/purchases", purchaseRoutes);
 app.use("/inventory-movements", inventoryMovementRoutes);
 app.use("/sales", saleRoutes);
-app.use("/roles", roleRoutes);
 app.use("/customers", customerRoutes);
+app.use("/roles", roleRoutes);
+app.use("/permissions", permissionRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/attendances", attendanceRoutes);
 app.use("/leaves", leaveRoutes);
