@@ -5,6 +5,7 @@ import { validate } from "../../validators/validate.js";
 import { requirePermission } from "../../middlewares/permission.middleware.js";
 import {
     approveLeaveSchema,
+  cancelLeaveSchema,
   createLeaveSchema,
   getLeaveByIdSchema,
   updateLeaveSchema,
@@ -27,39 +28,39 @@ router.get(
   LeaveController.getAll,
 );
 
-router.get(
+router.put(
   "/:id",
-  requirePermission("leaves.read"),
-  validate(getLeaveByIdSchema),
-  LeaveController.getById,
+  requirePermission("leaves.update"),
+  validate(updateLeaveSchema),
+  LeaveController.update,
 );
 
-// router.patch(
-//   "/:id",
-//   authorize(UserRole.ADMIN, UserRole.MANAGER),
-//   validate(updateLeaveSchema),
-//   LeaveController.update,
-// );
-
-router.patch(
+router.post(
   "/:id/approve",
   requirePermission("leaves.approve"),
   validate(approveLeaveSchema),
   LeaveController.approve,
 );
 
-router.patch(
+router.post(
   "/:id/reject",
   requirePermission("leaves.reject"),
   validate(approveLeaveSchema),
   LeaveController.reject,
 );
-    
-// router.delete(
-//   "/:id",
-//   authorize(UserRole.ADMIN),
-//   validate(getLeaveByIdSchema),
-//   LeaveController.delete,
-// );
+
+router.post(
+  "/:id/cancel",
+  requirePermission("leaves.cancel"),
+  validate(cancelLeaveSchema),
+  LeaveController.cancel,
+);
+
+router.get(
+  "/:id",
+  requirePermission("leaves.read"),
+  validate(getLeaveByIdSchema),
+  LeaveController.getById,
+);
 
 export default router;

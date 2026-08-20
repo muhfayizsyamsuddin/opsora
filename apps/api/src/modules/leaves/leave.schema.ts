@@ -17,7 +17,6 @@ export const updateLeaveSchema = z.object({
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
     reason: z.string().min(5).max(500).optional(),
-    status: z.nativeEnum(LeaveStatus).optional(),
   }),
   params: z.object({
     id: z.string().uuid(),
@@ -34,6 +33,14 @@ export const getLeaveByIdSchema = z.object({
 });
 
 export const approveLeaveSchema = z.object({
+  body: z.object({}),
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  query: z.object({}),
+});
+
+export const cancelLeaveSchema = z.object({
   body: z.object({}),
   params: z.object({
     id: z.string().uuid(),

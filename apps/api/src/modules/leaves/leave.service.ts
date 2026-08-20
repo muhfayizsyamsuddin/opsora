@@ -105,9 +105,15 @@ export class LeaveService {
     },
   ) {
     const leave = await LeaveRepository.findById(id);
-
+    
     if (!leave) {
       throw new AppError("Leave not found", 404);
+    }
+    if (leave.status !== LeaveStatus.PENDING) {
+      throw new AppError(
+        "Only pending leave can be updated",
+        400,
+      );
     }
 
     const startDate =
@@ -188,4 +194,23 @@ export class LeaveService {
 
         return LeaveRepository.reject(id);
     }
+
+  static async cancel(id: string) {
+    const leave = await LeaveRepository.findById(id);
+
+    if (!leave) {
+      throw new AppError("Leave not found", 404);
+    }
+
+    if (leave.status !== LeaveStatus.PENDING) {
+      throw new AppError(
+        "Only pending leave can be cancelled",
+        400,
+      );
+    }
+
+    return LeaveRepository.update(id, {
+      status: LeaveStatus.CANCELLED,
+    });
+  }
 }

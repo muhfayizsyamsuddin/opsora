@@ -103,6 +103,8 @@ const permissions = [
   ["leaves.create", "Create leave requests"],
   ["leaves.approve", "Approve leave requests"],
   ["leaves.reject", "Reject leave requests"],
+  ["leaves.update", "Update leave requests"],
+  ["leaves.cancel", "Cancel leave requests"],
 
   // Performance Reviews
   ["performance_reviews.read", "View performance reviews"],
@@ -203,6 +205,8 @@ const rolePermissions: RolePermissionMap = {
     "leaves.read",
     "leaves.approve",
     "leaves.reject",
+    "leaves.update",
+    "leaves.cancel",
     "performance_reviews.read",
   ],
 

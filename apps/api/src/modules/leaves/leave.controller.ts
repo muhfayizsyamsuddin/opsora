@@ -98,4 +98,18 @@ export class LeaveController {
             "Leave rejected successfully",
         );
     });
+
+  static cancel = asyncHandler(
+    async (req: Request, res: Response) => {
+      const leave = await LeaveService.cancel(
+        req.params.id.toString(),
+      );
+
+      return success(
+        res,
+        leave,
+        "Leave cancelled successfully",
+      );
+    },
+  );
 }
