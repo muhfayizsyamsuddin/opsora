@@ -54,6 +54,12 @@ export class AuthService {
     if (!user) {
       throw new AppError("Invalid email or password", 401);
     }
+    if (!user.isActive) {
+      throw new AppError(
+        "Account is inactive",
+        401,
+      );
+    }
 
     const isPasswordValid = await bcrypt.compare(
       data.password,
