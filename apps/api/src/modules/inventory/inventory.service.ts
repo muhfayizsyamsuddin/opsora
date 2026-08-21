@@ -39,17 +39,24 @@ export class InventoryService {
 
   static async getMovements(
     page = 1,
-    limit = 10,
+    perPage = 20,
     productId?: string,
     movementType?: "IN" | "OUT",
-    referenceType?: "PURCHASE" | "SALE" | "ADJUSTMENT",
+    referenceType?:
+      | "PURCHASE"
+      | "SALE"
+      | "ADJUSTMENT",
+    sortBy: "createdAt" = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
   ) {
     return InventoryRepository.findMovements(
       page,
-      limit,
+      perPage,
       productId,
       movementType,
       referenceType,
+      sortBy,
+      sortOrder,
     );
   }
 

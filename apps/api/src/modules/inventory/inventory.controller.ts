@@ -41,17 +41,27 @@ export class InventoryController {
       const result =
         await InventoryService.getMovements(
           Number(req.query.page ?? 1),
-          Number(req.query.limit ?? 10),
-          req.query.productId?.toString(),
-          req.query.movementType?.toString() as
+          Number(req.query.per_page ?? 20),
+
+          req.query.product_id?.toString(),
+
+          req.query.movement_type?.toString() as
             | "IN"
             | "OUT"
             | undefined,
-          req.query.referenceType?.toString() as
+
+          req.query.reference_type?.toString() as
             | "PURCHASE"
             | "SALE"
             | "ADJUSTMENT"
             | undefined,
+
+          "createdAt",
+
+          (req.query.sort_order?.toString() ??
+            "desc") as
+            | "asc"
+            | "desc",
         );
 
       return success(res, result);
