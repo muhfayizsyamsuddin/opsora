@@ -6,45 +6,45 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from ".
 import { prisma } from "../../lib/prisma.js";
 
 export class AuthService {
-  static async register(data: {
-    name: string;
-    email: string;
-    password: string;
-  }) {
-    const existingUser = await UserRepository.findByEmail(data.email);
+  // static async register(data: {
+  //   name: string;
+  //   email: string;
+  //   password: string;
+  // }) {
+  //   const existingUser = await UserRepository.findByEmail(data.email);
 
-    if (existingUser) {
-      throw new AppError("Email already exists", 409);
-    }
+  //   if (existingUser) {
+  //     throw new AppError("Email already exists", 409);
+  //   }
 
-    const staffRole = await UserRepository.findRoleByName("STAFF");
+  //   const staffRole = await UserRepository.findRoleByName("STAFF");
 
-    if (!staffRole) {
-      throw new AppError(
-        "Default STAFF role is not configured",
-        500,
-      );
-    }
+  //   if (!staffRole) {
+  //     throw new AppError(
+  //       "Default STAFF role is not configured",
+  //       500,
+  //     );
+  //   }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+  //   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = await UserRepository.create({
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      roleId: staffRole.id,
-    });
+  //   const user = await UserRepository.create({
+  //     name: data.name,
+  //     email: data.email,
+  //     password: hashedPassword,
+  //     roleId: staffRole.id,
+  //   });
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.roleRef?.name ?? null,
-      roleId: user.roleId,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
-  }
+  //   return {
+  //     id: user.id,
+  //     name: user.name,
+  //     email: user.email,
+  //     role: user.roleRef?.name ?? null,
+  //     roleId: user.roleId,
+  //     createdAt: user.createdAt,
+  //     updatedAt: user.updatedAt,
+  //   };
+  // }
 
   static async login(data: {
     email: string;

@@ -5,11 +5,11 @@ import { success } from "../../utils/response.js";
 import { AuthService } from "./auth.service.js";
 
 export class AuthController {
-  static register = asyncHandler(async (req: Request, res: Response) => {
-    const user = await AuthService.register(req.body);
+  // static register = asyncHandler(async (req: Request, res: Response) => {
+  //   const user = await AuthService.register(req.body);
 
-    return success(res, user, "Register successful");
-  });
+  //   return success(res, user, "Register successful");
+  // });
 
   static login = asyncHandler(async (req: Request, res: Response) => {
     const user = await AuthService.login(req.body);

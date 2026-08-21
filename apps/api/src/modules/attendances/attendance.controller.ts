@@ -52,6 +52,10 @@ export class AttendanceController {
             req.query.per_page ?? 20,
           ),
 
+          date: req.query.date
+            ? new Date(req.query.date.toString())
+            : undefined,
+
           search:
             req.query.search?.toString(),
 

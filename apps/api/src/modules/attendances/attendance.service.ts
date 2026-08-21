@@ -81,6 +81,7 @@ export class AttendanceService {
         search?: string;
         employeeId?: string;
         status?: AttendanceStatus;
+        date?: Date;
         sort?: "checkIn" | "createdAt";
         order?: "asc" | "desc";
     }) {
@@ -89,19 +90,21 @@ export class AttendanceService {
         const skip = (page - 1) * limit;
 
         const attendances = await AttendanceRepository.findMany(
-            skip,
-            limit,
-            query.search,
-            query.employeeId,
-            query.status,
-            query.sort,
-            query.order,
+          skip,
+          limit,
+          query.search,
+          query.employeeId,
+          query.status,
+          query.date,
+          query.sort,
+          query.order,
         );
 
         const total = await AttendanceRepository.count(
-            query.search,
-            query.employeeId,
-            query.status,
+          query.search,
+          query.employeeId,
+          query.status,
+          query.date,
         );
 
         return {

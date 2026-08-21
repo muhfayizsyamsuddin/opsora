@@ -35,6 +35,11 @@ export class ProductController {
           | "INACTIVE"
           | undefined;
 
+      const stockStatus =
+        req.query.stock_status?.toString() as
+          | "LOW"
+          | undefined;
+
       const sortBy =
         (req.query.sort_by?.toString() ??
           "createdAt") as
@@ -55,6 +60,7 @@ export class ProductController {
           search,
           categoryId,
           status,
+          stockStatus,
           sortBy,
           sortOrder,
         );

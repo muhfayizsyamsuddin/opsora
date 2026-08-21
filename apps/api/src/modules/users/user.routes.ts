@@ -44,14 +44,6 @@ router.get(
   UserController.getById,
 );
 
-router.patch(
-  "/:id",
-  authenticate,
-  requirePermission("users.update"),
-  validate(updateUserSchema),
-  UserController.update,
-);
-
 router.put(
   "/:id",
   authenticate,

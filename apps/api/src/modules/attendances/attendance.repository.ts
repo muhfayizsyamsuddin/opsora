@@ -66,67 +66,105 @@ export class AttendanceRepository {
   }
 
   static async findMany(
-        skip: number,
-        take: number,
-        search?: string,
-        employeeId?: string,
-        status?: AttendanceStatus,
-        sort: "checkIn" | "createdAt" = "createdAt",
-        order: "asc" | "desc" = "desc",
-    ) {
-        return prisma.attendance.findMany({
-            skip,
-            take,
-            where: {
-            ...(employeeId && {
-                employeeId,
-            }),
+    skip: number,
+    take: number,
+    search?: string,
+    employeeId?: string,
+    status?: AttendanceStatus,
+    date?: Date,
+    sort: "checkIn" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
+  ) {
+    const dateFilter = date
+      ? {
+          checkIn: {
+            gte: new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate(),
+            ),
+            lt: new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              date.getDate() + 1,
+            ),
+          },
+        }
+      : {};
 
-            ...(status && {
-                status,
-            }),
+    return prisma.attendance.findMany({
+      skip,
+      take,
+      where: {
+        ...dateFilter,
 
-            ...(search && {
-                employee: {
-                OR: [
-                    {
-                    name: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                    {
-                    email: {
-                        contains: search,
-                        mode: "insensitive",
-                    },
-                    },
-                ],
+        ...(employeeId && {
+          employeeId,
+        }),
+
+        ...(status && {
+          status,
+        }),
+
+        ...(search && {
+          employee: {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive",
                 },
-            }),
-            },
-
-            include: {
-            employee: {
-                include: {
-                department: true,
+              },
+              {
+                email: {
+                  contains: search,
+                  mode: "insensitive",
                 },
-            },
-            },
+              },
+            ],
+          },
+        }),
+      },
 
-            orderBy: {
-            [sort]: order,
-            },
-        });
-    }
+      include: {
+        employee: {
+          include: {
+            department: true,
+          },
+        },
+      },
+
+      orderBy: {
+        [sort]: order,
+      },
+    });
+  }
 
     static async count(
         search?: string,
         employeeId?: string,
         status?: AttendanceStatus,
+        date?: Date,
     ) {
+        const dateFilter = date
+          ? {
+              checkIn: {
+                gte: new Date(
+                  date.getFullYear(),
+                  date.getMonth(),
+                  date.getDate(),
+                ),
+                lt: new Date(
+                  date.getFullYear(),
+                  date.getMonth(),
+                  date.getDate() + 1,
+                ),
+              },
+            }
+          : {};
         return prisma.attendance.count({
             where: {
+              ...dateFilter,
             ...(employeeId && {
                 employeeId,
             }),

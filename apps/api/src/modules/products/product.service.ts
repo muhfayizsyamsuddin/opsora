@@ -46,9 +46,10 @@ export class ProductService {
     limit = 10,
     search?: string,
     categoryId?: string,
-    status?: 'ACTIVE' | 'INACTIVE',
-    sort: 'name' | 'sku' | 'createdAt' = 'createdAt',
-    order: 'asc' | 'desc' = 'desc',
+    status?: "ACTIVE" | "INACTIVE",
+    stockStatus?: "LOW",
+    sort: "name" | "sku" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
   ) {
     const skip = (page - 1) * limit;
 
@@ -59,6 +60,7 @@ export class ProductService {
         search,
         categoryId,
         status,
+        stockStatus,
         sort,
         order,
       ),
@@ -66,6 +68,7 @@ export class ProductService {
         search,
         categoryId,
         status,
+        stockStatus,
       ),
     ]);
 

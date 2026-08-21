@@ -41,13 +41,6 @@ router.put(
   validate(updateEmployeeSchema),
   EmployeeController.update,
 );
-router.patch(
-  "/:id",
-  authenticate,
-  requirePermission("employees.update"),
-  validate(updateEmployeeSchema),
-  EmployeeController.update,
-);
 router.delete(
   "/:id",
   authenticate,

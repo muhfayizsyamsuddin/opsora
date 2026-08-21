@@ -40,6 +40,9 @@ export class PerformanceReviewController {
           reviewerId:
             req.query.reviewer_id?.toString(),
 
+          reviewPeriod:
+            req.query.review_period?.toString(),
+
           scoreMin: req.query.score_min
             ? Number(req.query.score_min)
             : undefined,

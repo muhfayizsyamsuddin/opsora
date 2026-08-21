@@ -63,7 +63,6 @@ app.use(`${API_PREFIX}/settings`, settingRoutes);
 app.use(`${API_PREFIX}/employees`, employeeRoutes);
 app.use(`${API_PREFIX}/attendances`, attendanceRoutes);
 app.use(`${API_PREFIX}/attendance`, attendanceRoutes);
-app.use(`${API_PREFIX}/leaves`, leaveRoutes);
 app.use(`${API_PREFIX}/leave-requests`, leaveRoutes);
 app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
 app.use(`${API_PREFIX}/payrolls`, payrollRoutes);

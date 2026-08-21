@@ -51,6 +51,7 @@ export class PerformanceReviewService {
     limit: number;
     employeeId?: string;
     reviewerId?: string;
+    reviewPeriod?: string;
     scoreMin?: number;
     scoreMax?: number;
     search?: string;

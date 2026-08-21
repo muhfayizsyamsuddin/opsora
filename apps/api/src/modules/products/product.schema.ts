@@ -38,7 +38,9 @@ export const getProductsSchema = z.object({
     status: z
       .enum(["ACTIVE", "INACTIVE"])
       .optional(),
-
+    stock_status: z
+      .enum(["LOW"])
+      .optional(),
     sort_by: z
       .enum(["name", "sku", "createdAt"])
       .default("createdAt"),

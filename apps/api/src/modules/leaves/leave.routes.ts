@@ -26,12 +26,6 @@ router.post(
 router.get(
   "/",
   requirePermission("leaves.read"),
-  LeaveController.getAll,
-);
-
-router.get(
-  "/",
-  requirePermission("leaves.read"),
   validate(getLeavesSchema),
   LeaveController.getAll,
 );

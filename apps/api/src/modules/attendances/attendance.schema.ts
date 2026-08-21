@@ -43,6 +43,8 @@ export const getAttendancesSchema = z.object({
       .min(1)
       .max(100)
       .default(20),
+      
+    date: z.coerce.date().optional(),
 
     search: z.string().optional(),
 

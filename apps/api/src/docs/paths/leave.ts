@@ -1,6 +1,6 @@
 /**
  * @openapi
- * /leaves:
+ * /leaves-requests:
  *   get:
  *     tags:
  *       - Leave
@@ -102,7 +102,7 @@
 
 /**
  * @openapi
- * /leaves:
+ * /leaves-requests:
  *   post:
  *     tags:
  *       - Leave
@@ -144,7 +144,7 @@
 
 /**
  * @openapi
- * /leaves/{id}:
+ * /leaves-requests/{id}:
  *   get:
  *     tags:
  *       - Leave
@@ -186,7 +186,7 @@
 
 /**
  * @openapi
- * /leaves/{id}:
+ * /leaves-requests/{id}:
  *   put:
  *     tags:
  *       - Leave
@@ -237,7 +237,7 @@
 
 /**
  * @openapi
- * /leaves/{id}/approve:
+ * /leaves-requests/{id}/approve:
  *   post:
  *     tags:
  *       - Leave
@@ -282,7 +282,7 @@
 
 /**
  * @openapi
- * /leaves/{id}/reject:
+ * /leaves-requests/{id}/reject:
  *   post:
  *     tags:
  *       - Leave
@@ -327,7 +327,7 @@
 
 /**
  * @openapi
- * /leaves/{id}/cancel:
+ * /leaves-requests/{id}/cancel:
  *   post:
  *     tags:
  *       - Leave
