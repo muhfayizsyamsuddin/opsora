@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import jwt, {
   type JwtPayload,
   type SignOptions,
@@ -32,9 +33,16 @@ export function verifyAccessToken(token: string) {
 export function generateRefreshToken(payload: {
   id: string;
 }) {
-  return jwt.sign(payload, JWT_REFRESH_SECRET, {
-    expiresIn: JWT_REFRESH_EXPIRES_IN,
-  });
+  return jwt.sign(
+    {
+      ...payload,
+      jti: randomUUID(),
+    },
+    JWT_REFRESH_SECRET,
+    {
+      expiresIn: JWT_REFRESH_EXPIRES_IN,
+    },
+  );
 }
 
 export function verifyRefreshToken(token: string) {
