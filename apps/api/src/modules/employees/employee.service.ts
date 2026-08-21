@@ -1,31 +1,48 @@
 import { AppError } from "../../errors/AppError.js";
 import { EmployeeStatus } from "../../generated/prisma/browser.js";
+import { prisma } from "../../lib/prisma.js";
 import { DepartmentRepository } from "../departments/department.repository.js";
 import { EmployeeRepository } from "./employee.repository.js";
 
 export class EmployeeService {
-    static async create(data: {
-        name: string;
-        email: string;
-        position: string;
-        salary: number;
-        hireDate: Date;
-        departmentId: string;
-    }) {
-        const existingEmployee = await EmployeeRepository.findByEmail(data.email);
+  static async create(data: {
+    name: string;
+    email: string;
+    position: string;
+    salary: number;
+    hireDate: Date;
+    departmentId: string;
+  }) {
+    const existingEmployee =
+        await EmployeeRepository.findByEmail(data.email);
 
-        if (existingEmployee) {
-            throw new AppError("Employee email already exists", 409);
-        }
-
-        const department = await DepartmentRepository.findById(data.departmentId);
-
-        if (!department) {
-            throw new AppError("Department not found", 404);
-        }
-
-        return EmployeeRepository.create(data);
+    if (existingEmployee) {
+        throw new AppError(
+        "Employee email already exists",
+        409,
+        );
     }
+
+    const department =
+        await DepartmentRepository.findById(
+        data.departmentId,
+        );
+
+    if (!department) {
+        throw new AppError(
+        "Department not found",
+        404,
+        );
+    }
+
+    const employeeCode =
+        await EmployeeService.generateEmployeeCode();
+
+    return EmployeeRepository.create({
+        ...data,
+        employeeCode,
+    });
+  }
 
     static async getAll(query: {
         page?: number;
@@ -127,4 +144,24 @@ export class EmployeeService {
 
         await EmployeeRepository.delete(id);
     }
+
+  static async generateEmployeeCode() {
+    const lastEmployee =
+        await prisma.employee.findFirst({
+        orderBy: {
+            employeeCode: "desc",
+        },
+        select: {
+            employeeCode: true,
+        },
+        });
+
+    const nextNumber = lastEmployee
+        ? Number(
+            lastEmployee.employeeCode.replace("EMP-", ""),
+        ) + 1
+        : 1;
+
+    return `EMP-${String(nextNumber).padStart(4, "0")}`;
+  }
 }

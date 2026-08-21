@@ -2,22 +2,23 @@ import { EmployeeStatus } from "../../generated/prisma/browser.js";
 import { prisma } from "../../lib/prisma.js";
 
 export class EmployeeRepository {
-    static async create(data: {
-        name: string;
-        email: string;
-        position: string;
-        salary: number;
-        hireDate: Date;
-        departmentId: string;
-        status?: EmployeeStatus;
-    }) {
-        return prisma.employee.create({
-            data,
-            include: {
-            department: true,
-            },
-        });
-    }
+  static async create(data: {
+    employeeCode: string;
+    name: string;
+    email: string;
+    position: string;
+    salary: number;
+    hireDate: Date;
+    departmentId: string;
+    status?: EmployeeStatus;
+  }) {
+    return prisma.employee.create({
+        data,
+        include: {
+        department: true,
+        },
+    });
+  }
 
     static async findByEmail(email: string) {
         return prisma.employee.findUnique({

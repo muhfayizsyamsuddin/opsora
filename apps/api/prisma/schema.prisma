@@ -150,6 +150,8 @@ model Department {
 model Employee {
   id String @id @default(uuid())
 
+  employeeCode String @unique
+
   name     String
   email    String         @unique
   position String
