@@ -4,6 +4,7 @@ import { AuthController } from "./auth.controller.js";
 import { loginSchema, logoutSchema, refreshTokenSchema } from "./auth.schema.js";
 import { validate } from "../../validators/validate.js";
 import { authenticate } from "../../middlewares/auth.middleware.js";
+import { authLoginRateLimit, authRefreshRateLimit } from "../../middlewares/rate-limit.middleware.js";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const router = Router();
 
 router.post(
   "/login",
+  authLoginRateLimit,
   validate(loginSchema),
   AuthController.login
 )
@@ -27,6 +29,7 @@ router.get(
 
 router.post(
   "/refresh",
+  authRefreshRateLimit,
   validate(refreshTokenSchema),
   AuthController.refresh,
 );
