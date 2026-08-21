@@ -4,25 +4,28 @@
  *   get:
  *     tags:
  *       - Leave
- *     summary: Get all leave requests
- *     description: Retrieve leave requests with pagination, search, filtering, and sorting.
+ *     summary: Get leave requests
+ *     description: Retrieve leave requests with pagination, search, employee filtering, status filtering, date filtering, and sorting.
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 1
  *       - in: query
- *         name: limit
+ *         name: per_page
  *         schema:
  *           type: integer
- *           default: 10
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
  *       - in: query
- *         name: employeeId
+ *         name: employee_id
  *         schema:
  *           type: string
  *           format: uuid
@@ -35,25 +38,66 @@
  *             - APPROVED
  *             - REJECTED
  *       - in: query
- *         name: sort
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: sort_by
  *         schema:
  *           type: string
  *           enum:
  *             - startDate
  *             - endDate
  *             - createdAt
+ *           default: createdAt
  *       - in: query
- *         name: order
+ *         name: sort_order
  *         schema:
  *           type: string
  *           enum:
  *             - asc
  *             - desc
+ *           default: desc
  *     responses:
  *       200:
  *         description: Leave requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   type: object
+ *                   required:
+ *                     - data
+ *                     - meta
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Leave'
+ *                     meta:
+ *                       $ref: '#/components/schemas/PaginationMeta'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  */
 
 /**
@@ -63,7 +107,7 @@
  *     tags:
  *       - Leave
  *     summary: Create leave request
- *     description: Create a new leave request. Requires ADMIN or MANAGER role.
+ *     description: Create a new leave request.
  *     requestBody:
  *       required: true
  *       content:
@@ -73,6 +117,23 @@
  *     responses:
  *       201:
  *         description: Leave request created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave request created successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -98,18 +159,39 @@
  *     responses:
  *       200:
  *         description: Leave request retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Leave request not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
  * @openapi
  * /leaves/{id}:
- *   patch:
+ *   put:
  *     tags:
  *       - Leave
  *     summary: Update leave request
- *     description: Update a leave request. Requires ADMIN or MANAGER role.
+ *     description: Update a leave request.
  *     parameters:
  *       - in: path
  *         name: id
@@ -125,19 +207,42 @@
  *             $ref: '#/components/schemas/UpdateLeaveRequest'
  *     responses:
  *       200:
- *         description: Leave updated successfully
+ *         description: Leave request updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave updated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Leave request not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
  * @openapi
  * /leaves/{id}/approve:
- *   patch:
+ *   post:
  *     tags:
  *       - Leave
  *     summary: Approve leave request
- *     description: Approve a pending leave request. Requires ADMIN or MANAGER role.
+ *     description: Approve a leave request using the authenticated reviewer.
  *     parameters:
  *       - in: path
  *         name: id
@@ -148,18 +253,41 @@
  *     responses:
  *       200:
  *         description: Leave approved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave approved successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Leave request not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
  * @openapi
  * /leaves/{id}/reject:
- *   patch:
+ *   post:
  *     tags:
  *       - Leave
  *     summary: Reject leave request
- *     description: Reject a pending leave request. Requires ADMIN or MANAGER role.
+ *     description: Reject a leave request using the authenticated reviewer.
  *     parameters:
  *       - in: path
  *         name: id
@@ -170,18 +298,41 @@
  *     responses:
  *       200:
  *         description: Leave rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave rejected successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Leave request not found
+ *         $ref: '#/components/responses/NotFound'
  */
 
 /**
  * @openapi
- * /leaves/{id}:
- *   delete:
+ * /leaves/{id}/cancel:
+ *   post:
  *     tags:
  *       - Leave
- *     summary: Delete leave request
- *     description: Delete a leave request. Requires ADMIN role.
+ *     summary: Cancel leave request
+ *     description: Cancel a leave request.
  *     parameters:
  *       - in: path
  *         name: id
@@ -190,8 +341,31 @@
  *           type: string
  *           format: uuid
  *     responses:
- *       204:
- *         description: Leave deleted successfully
+ *       200:
+ *         description: Leave cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Leave cancelled successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Leave'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
- *         description: Leave request not found
+ *         $ref: '#/components/responses/NotFound'
  */

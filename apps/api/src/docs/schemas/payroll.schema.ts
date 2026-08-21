@@ -1,6 +1,18 @@
 export const payrollSchemas = {
   Payroll: {
     type: "object",
+    required: [
+      "id",
+      "employeeId",
+      "month",
+      "year",
+      "baseSalary",
+      "bonus",
+      "deduction",
+      "totalSalary",
+      "createdAt",
+      "updatedAt",
+    ],
     properties: {
       id: {
         type: "string",

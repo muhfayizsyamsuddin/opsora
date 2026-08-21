@@ -1,37 +1,68 @@
 export const performanceReviewSchemas = {
   PerformanceReview: {
     type: "object",
+    required: [
+      "id",
+      "employeeId",
+      "reviewerId",
+      "reviewPeriod",
+      "score",
+      "reviewDate",
+      "createdAt",
+      "updatedAt",
+    ],
     properties: {
       id: {
         type: "string",
         format: "uuid",
       },
+
       employeeId: {
         type: "string",
         format: "uuid",
       },
-      reviewer: {
+
+      reviewerLegacy: {
         type: "string",
-        example: "John Manager",
+        nullable: true,
+        example: "Owner",
       },
+
+      reviewerId: {
+        type: "string",
+        format: "uuid",
+        nullable: true,
+      },
+
+      reviewPeriod: {
+        type: "string",
+        nullable: true,
+        example: "2026-Q3",
+      },
+
       score: {
         type: "integer",
         minimum: 1,
         maximum: 100,
-        example: 92,
+        example: 85,
       },
+
       comments: {
         type: "string",
-        example: "Excellent teamwork and communication.",
+        nullable: true,
+        example: "Good performance",
       },
+
       reviewDate: {
         type: "string",
         format: "date-time",
       },
+
       createdAt: {
         type: "string",
         format: "date-time",
       },
+
       updatedAt: {
         type: "string",
         format: "date-time",
@@ -42,33 +73,39 @@ export const performanceReviewSchemas = {
   CreatePerformanceReviewRequest: {
     type: "object",
     required: [
-      "employeeId",
-      "reviewer",
+      "employee_id",
+      "reviewer_id",
+      "review_period",
       "score",
-      "reviewDate",
     ],
     properties: {
-      employeeId: {
+      employee_id: {
         type: "string",
         format: "uuid",
       },
-      reviewer: {
+
+      reviewer_id: {
         type: "string",
-        example: "John Manager",
+        format: "uuid",
       },
+
+      review_period: {
+        type: "string",
+        minLength: 1,
+        maxLength: 20,
+        example: "2026-Q3",
+      },
+
       score: {
         type: "integer",
         minimum: 1,
         maximum: 100,
-        example: 90,
+        example: 85,
       },
+
       comments: {
         type: "string",
-        example: "Outstanding performance.",
-      },
-      reviewDate: {
-        type: "string",
-        format: "date-time",
+        example: "Good performance",
       },
     },
   },
@@ -76,20 +113,25 @@ export const performanceReviewSchemas = {
   UpdatePerformanceReviewRequest: {
     type: "object",
     properties: {
-      reviewer: {
+      reviewer_id: {
         type: "string",
+        format: "uuid",
       },
+
+      review_period: {
+        type: "string",
+        minLength: 1,
+        maxLength: 20,
+      },
+
       score: {
         type: "integer",
         minimum: 1,
         maximum: 100,
       },
+
       comments: {
         type: "string",
-      },
-      reviewDate: {
-        type: "string",
-        format: "date-time",
       },
     },
   },

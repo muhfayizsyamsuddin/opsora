@@ -1,9 +1,10 @@
-export const departmentSchemas = {
-  Department: {
+export const permissionSchemas = {
+  Permission: {
     type: "object",
     required: [
       "id",
       "name",
+      "description",
       "createdAt",
       "updatedAt",
     ],
@@ -11,17 +12,24 @@ export const departmentSchemas = {
       id: {
         type: "string",
         format: "uuid",
-        example:
-          "0078e33f-488a-4e0c-90ba-14b3e13456a7",
       },
+
       name: {
         type: "string",
-        example: "IT",
+        example: "products.read",
       },
+
+      description: {
+        type: "string",
+        nullable: true,
+        example: "View products",
+      },
+
       createdAt: {
         type: "string",
         format: "date-time",
       },
+
       updatedAt: {
         type: "string",
         format: "date-time",
@@ -29,23 +37,19 @@ export const departmentSchemas = {
     },
   },
 
-  CreateDepartmentRequest: {
+  PermissionCollection: {
     type: "object",
-    required: ["name"],
+    required: ["data", "meta"],
     properties: {
-      name: {
-        type: "string",
-        example: "Finance",
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Permission",
+        },
       },
-    },
-  },
 
-  UpdateDepartmentRequest: {
-    type: "object",
-    properties: {
-      name: {
-        type: "string",
-        example: "Human Resources",
+      meta: {
+        $ref: "#/components/schemas/PaginationMeta",
       },
     },
   },

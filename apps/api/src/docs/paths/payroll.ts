@@ -4,21 +4,24 @@
  *   get:
  *     tags:
  *       - Payroll
- *     summary: Get all payroll records
- *     description: Retrieve payroll records with pagination, filtering, and sorting.
+ *     summary: Get payroll records
+ *     description: Retrieve payroll records with pagination, employee filtering, month/year filtering, search, and sorting.
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
+ *           minimum: 1
  *           default: 1
  *       - in: query
- *         name: limit
+ *         name: per_page
  *         schema:
  *           type: integer
- *           default: 10
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
  *       - in: query
- *         name: employeeId
+ *         name: employee_id
  *         schema:
  *           type: string
  *           format: uuid
@@ -37,27 +40,48 @@
  *         schema:
  *           type: string
  *       - in: query
- *         name: sort
+ *         name: sort_by
  *         schema:
  *           type: string
- *           enum:
- *             - month
- *             - year
- *             - baseSalary
- *             - bonus
- *             - deduction
- *             - totalSalary
- *             - createdAt
+ *           default: createdAt
  *       - in: query
- *         name: order
+ *         name: sort_order
  *         schema:
  *           type: string
  *           enum:
  *             - asc
  *             - desc
+ *           default: desc
  *     responses:
  *       200:
  *         description: Payroll records retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   type: object
+ *                   required:
+ *                     - data
+ *                     - meta
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Payroll'
+ *                     meta:
+ *                       $ref: '#/components/schemas/PaginationMeta'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -71,7 +95,7 @@
  *     tags:
  *       - Payroll
  *     summary: Generate payroll
- *     description: Generate a payroll record for an employee. Requires ADMIN role.
+ *     description: Generate a payroll record for an employee.
  *     requestBody:
  *       required: true
  *       content:
@@ -84,11 +108,28 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Payroll'
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Payroll generated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Payroll'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
  *       403:
  *         $ref: '#/components/responses/Forbidden'
+ *       409:
+ *         description: Payroll record already exists.
  */
 
 /**
@@ -107,7 +148,28 @@
  *           format: uuid
  *     responses:
  *       200:
- *         description: Payroll retrieved successfully
+ *         description: Payroll record retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               required:
+ *                 - success
+ *                 - message
+ *                 - data
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   $ref: '#/components/schemas/Payroll'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */
@@ -119,7 +181,7 @@
  *     tags:
  *       - Payroll
  *     summary: Delete payroll
- *     description: Delete a payroll record. Requires ADMIN role.
+ *     description: Delete a payroll record.
  *     parameters:
  *       - in: path
  *         name: id
@@ -130,6 +192,12 @@
  *     responses:
  *       204:
  *         description: Payroll deleted successfully
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
  *       404:
  *         $ref: '#/components/responses/NotFound'
  */

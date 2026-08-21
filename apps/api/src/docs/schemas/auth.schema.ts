@@ -5,92 +5,178 @@ export const authSchemas = {
     properties: {
       email: {
         type: "string",
-        example: "admin@example.com",
+        format: "email",
+        example: "admin@opsora.com",
       },
       password: {
         type: "string",
+        format: "password",
         example: "password123",
-      },
-    },
-  },
-
-  RegisterRequest: {
-    type: "object",
-    required: ["name", "email", "password", "role"],
-    properties: {
-      name: {
-        type: "string",
-        example: "Admin",
-      },
-      email: {
-        type: "string",
-        example: "admin@example.com",
-      },
-      password: {
-        type: "string",
-        example: "password123",
-      },
-      role: {
-        type: "string",
-        enum: ["ADMIN", "MANAGER", "STAFF"],
       },
     },
   },
 
   LoginResponse: {
     type: "object",
+    required: ["success", "data"],
     properties: {
       success: {
         type: "boolean",
         example: true,
       },
-      message: {
-        type: "string",
-        example: "Login successful",
-      },
       data: {
         type: "object",
+        required: [
+          "access_token",
+          "token_type",
+          "refresh_token",
+          "user",
+        ],
         properties: {
-          token: {
+          access_token: {
             type: "string",
-            example: "eyJhbGc...",
+            example: "eyJhbGciOiJIUzI1NiIs...",
+          },
+          token_type: {
+            type: "string",
+            example: "Bearer",
+          },
+          refresh_token: {
+            type: "string",
+            example: "eyJhbGciOiJIUzI1NiIs...",
+          },
+          user: {
+            $ref: "#/components/schemas/AuthUser",
           },
         },
       },
     },
   },
 
-  RegisterResponse: {
+  AuthUser: {
     type: "object",
+    required: [
+      "id",
+      "name",
+      "email",
+      "roles",
+      "permissions",
+    ],
+    properties: {
+      id: {
+        type: "string",
+        format: "uuid",
+      },
+      name: {
+        type: "string",
+        example: "Admin",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        example: "admin@opsora.com",
+      },
+      roles: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        example: ["ADMIN"],
+      },
+      permissions: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        example: [
+          "products.read",
+          "products.create",
+        ],
+      },
+    },
+  },
+
+  MeResponse: {
+    type: "object",
+    required: ["success", "data"],
     properties: {
       success: {
         type: "boolean",
         example: true,
       },
-      message: {
+      data: {
+        allOf: [
+          {
+            $ref: "#/components/schemas/AuthUser",
+          },
+          {
+            type: "object",
+            properties: {
+              isActive: {
+                type: "boolean",
+                example: true,
+              },
+              createdAt: {
+                type: "string",
+                format: "date-time",
+              },
+              updatedAt: {
+                type: "string",
+                format: "date-time",
+              },
+            },
+          },
+        ],
+      },
+    },
+  },
+
+  RefreshTokenRequest: {
+    type: "object",
+    required: ["refresh_token"],
+    properties: {
+      refresh_token: {
         type: "string",
-        example: "User registered successfully",
+        example: "eyJhbGciOiJIUzI1NiIs...",
+      },
+    },
+  },
+
+  RefreshTokenResponse: {
+    type: "object",
+    required: ["success", "data"],
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
       },
       data: {
         type: "object",
+        required: [
+          "access_token",
+          "token_type",
+        ],
         properties: {
-          id: {
+          access_token: {
             type: "string",
-            example: "uuid",
+            example: "eyJhbGciOiJIUzI1NiIs...",
           },
-          name: {
+          token_type: {
             type: "string",
-            example: "Admin",
-          },
-          email: {
-            type: "string",
-            example: "admin@example.com",
-          },
-          role: {
-            type: "string",
-            example: "ADMIN",
+            example: "Bearer",
           },
         },
+      },
+    },
+  },
+
+  LogoutRequest: {
+    type: "object",
+    required: ["refresh_token"],
+    properties: {
+      refresh_token: {
+        type: "string",
+        example: "eyJhbGciOiJIUzI1NiIs...",
       },
     },
   },

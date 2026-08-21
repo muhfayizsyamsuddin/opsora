@@ -1,11 +1,11 @@
 /**
  * @openapi
- * /employees:
+ * /products:
  *   get:
  *     tags:
- *       - Employees
- *     summary: Get employees
- *     description: Retrieve employees with pagination, search, department filtering, status filtering, and sorting.
+ *       - Products
+ *     summary: Get products
+ *     description: Retrieve products with pagination, search, category filtering, status filtering, and sorting.
  *     parameters:
  *       - in: query
  *         name: page
@@ -25,7 +25,7 @@
  *         schema:
  *           type: string
  *       - in: query
- *         name: department_id
+ *         name: category_id
  *         schema:
  *           type: string
  *           format: uuid
@@ -33,12 +33,16 @@
  *         name: status
  *         schema:
  *           type: string
+ *           enum:
+ *             - ACTIVE
+ *             - INACTIVE
  *       - in: query
  *         name: sort_by
  *         schema:
  *           type: string
  *           enum:
  *             - name
+ *             - sku
  *             - createdAt
  *           default: createdAt
  *       - in: query
@@ -51,34 +55,11 @@
  *           default: desc
  *     responses:
  *       200:
- *         description: Employees retrieved successfully
+ *         description: Products retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required:
- *                 - success
- *                 - message
- *                 - data
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Success
- *                 data:
- *                   type: object
- *                   required:
- *                     - data
- *                     - meta
- *                   properties:
- *                     data:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/Employee'
- *                     meta:
- *                       $ref: '#/components/schemas/PaginationMeta'
+ *               $ref: '#/components/schemas/ProductCollection'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -87,38 +68,25 @@
 
 /**
  * @openapi
- * /employees:
+ * /products:
  *   post:
  *     tags:
- *       - Employees
- *     summary: Create employee
- *     description: Create a new employee.
+ *       - Products
+ *     summary: Create product
+ *     description: Create a new product.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateEmployeeRequest'
+ *             $ref: '#/components/schemas/CreateProductRequest'
  *     responses:
  *       201:
- *         description: Employee created successfully
+ *         description: Product created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required:
- *                 - success
- *                 - message
- *                 - data
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Employee created successfully
- *                 data:
- *                   $ref: '#/components/schemas/Employee'
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -126,16 +94,18 @@
  *       403:
  *         $ref: '#/components/responses/Forbidden'
  *       409:
- *         description: Employee already exists.
+ *         description: Product SKU or barcode already exists.
+ *       422:
+ *         description: Selling price cannot be lower than purchase price.
  */
 
 /**
  * @openapi
- * /employees/{id}:
+ * /products/{id}:
  *   get:
  *     tags:
- *       - Employees
- *     summary: Get employee by ID
+ *       - Products
+ *     summary: Get product by ID
  *     parameters:
  *       - in: path
  *         name: id
@@ -145,24 +115,11 @@
  *           format: uuid
  *     responses:
  *       200:
- *         description: Employee retrieved successfully
+ *         description: Product retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required:
- *                 - success
- *                 - message
- *                 - data
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Success
- *                 data:
- *                   $ref: '#/components/schemas/Employee'
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -173,12 +130,12 @@
 
 /**
  * @openapi
- * /employees/{id}:
+ * /products/{id}:
  *   put:
  *     tags:
- *       - Employees
- *     summary: Update employee
- *     description: Update employee information.
+ *       - Products
+ *     summary: Update product
+ *     description: Update product information.
  *     parameters:
  *       - in: path
  *         name: id
@@ -191,27 +148,14 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UpdateEmployeeRequest'
+ *             $ref: '#/components/schemas/UpdateProductRequest'
  *     responses:
  *       200:
- *         description: Employee updated successfully
+ *         description: Product updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               required:
- *                 - success
- *                 - message
- *                 - data
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Employee updated successfully
- *                 data:
- *                   $ref: '#/components/schemas/Employee'
+ *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -220,16 +164,20 @@
  *         $ref: '#/components/responses/Forbidden'
  *       404:
  *         $ref: '#/components/responses/NotFound'
+ *       409:
+ *         description: Product SKU or barcode already exists.
+ *       422:
+ *         description: Selling price cannot be lower than purchase price.
  */
 
 /**
  * @openapi
- * /employees/{id}:
+ * /products/{id}:
  *   delete:
  *     tags:
- *       - Employees
- *     summary: Delete employee
- *     description: Delete an employee.
+ *       - Products
+ *     summary: Delete product
+ *     description: Soft delete a product.
  *     parameters:
  *       - in: path
  *         name: id
@@ -239,7 +187,51 @@
  *           format: uuid
  *     responses:
  *       204:
- *         description: Employee deleted successfully
+ *         description: Product deleted successfully
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @openapi
+ * /products/{id}/image:
+ *   post:
+ *     tags:
+ *       - Products
+ *     summary: Upload product image
+ *     description: Upload a product image to Cloudinary and update the product image URL.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Product image uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
