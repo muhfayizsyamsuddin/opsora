@@ -9,8 +9,16 @@ export class InventoryController {
       const result =
         await InventoryService.getStock(
           Number(req.query.page ?? 1),
-          Number(req.query.limit ?? 10),
+          Number(req.query.per_page ?? 20),
           req.query.search?.toString(),
+          (req.query.sort_by?.toString() ??
+            "name") as
+            | "name"
+            | "createdAt",
+          (req.query.sort_order?.toString() ??
+            "asc") as
+            | "asc"
+            | "desc",
         );
 
       return success(res, result);

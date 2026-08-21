@@ -56,7 +56,7 @@ export class PayrollRepository {
 
   static async findMany({
     page,
-    limit,
+    perPage,
     employeeId,
     month,
     year,
@@ -65,7 +65,7 @@ export class PayrollRepository {
     order,
   }: {
     page: number;
-    limit: number;
+    perPage: number;
     employeeId?: string;
     month?: number;
     year?: number;
@@ -73,7 +73,8 @@ export class PayrollRepository {
     sort: keyof Prisma.PayrollOrderByWithRelationInput;
     order: Prisma.SortOrder;
   }) {
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * perPage;
 
     const where: Prisma.PayrollWhereInput = {
       ...(employeeId && { employeeId }),
@@ -93,7 +94,7 @@ export class PayrollRepository {
       prisma.payroll.findMany({
         where,
         skip,
-        take: limit,
+        take: perPage,
         orderBy: {
           [sort]: order,
         },
@@ -115,9 +116,11 @@ export class PayrollRepository {
       data,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

@@ -53,6 +53,8 @@ export class RoleRepository {
     skip: number,
     take: number,
     search?: string,
+    sortBy: "name" | "createdAt" = "name",
+    sortOrder: "asc" | "desc" = "asc",
   ) {
     return prisma.role.findMany({
       skip,
@@ -73,7 +75,7 @@ export class RoleRepository {
         },
       },
       orderBy: {
-        name: "asc",
+        [sortBy]: sortOrder,
       },
     });
   }

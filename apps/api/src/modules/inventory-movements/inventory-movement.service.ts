@@ -18,35 +18,47 @@ export class InventoryMovementService {
 
   static async getAll(
     page = 1,
-    limit = 10,
+    perPage = 20,
     productId?: string,
     movementType?: "IN" | "OUT",
-    referenceType?: "PURCHASE" | "SALE" | "ADJUSTMENT",
+    referenceType?:
+      | "PURCHASE"
+      | "SALE"
+      | "ADJUSTMENT",
+    sortBy: "createdAt" = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
   ) {
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * perPage;
 
-    const [data, total] = await Promise.all([
-      InventoryMovementRepository.findMany(
-        skip,
-        limit,
-        productId,
-        movementType,
-        referenceType,
-      ),
-      InventoryMovementRepository.count(
-        productId,
-        movementType,
-        referenceType,
-      ),
-    ]);
+    const [data, total] =
+      await Promise.all([
+        InventoryMovementRepository.findMany(
+          skip,
+          perPage,
+          productId,
+          movementType,
+          referenceType,
+          sortBy,
+          sortOrder,
+        ),
+
+        InventoryMovementRepository.count(
+          productId,
+          movementType,
+          referenceType,
+        ),
+      ]);
 
     return {
       data,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

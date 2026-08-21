@@ -15,31 +15,37 @@ export class DepartmentService {
 
   static async getAllDepartments(
     page = 1,
-    limit = 10,
+    perPage = 20,
     search?: string,
     sort: "name" | "createdAt" = "createdAt",
     order: "asc" | "desc" = "desc",
   ) {
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * perPage;
 
-    const [departments, total] = await Promise.all([
-      DepartmentRepository.findMany(
-        skip,
-        limit,
-        search,
-        sort,
-        order,
-      ),
-      DepartmentRepository.count(search),
-    ]);
+    const [departments, total] =
+      await Promise.all([
+        DepartmentRepository.findMany(
+          skip,
+          perPage,
+          search,
+          sort,
+          order,
+        ),
+        DepartmentRepository.count(
+          search,
+        ),
+      ]);
 
     return {
       data: departments,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

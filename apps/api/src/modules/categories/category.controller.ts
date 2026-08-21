@@ -14,29 +14,46 @@ export class CategoryController {
     );
   });
 
-  static getAll = asyncHandler(async (req: Request, res: Response) => {
-    const page = Number(req.query.page ?? 1);
-    const limit = Number(req.query.limit ?? 10);
-    const search = req.query.search?.toString();
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const page = Number(
+        req.query.page ?? 1,
+      );
 
-    const sort = (
-      req.query.sort?.toString() ?? 'createdAt'
-    ) as 'name' | 'createdAt';
+      const perPage = Number(
+        req.query.per_page ?? 20,
+      );
 
-    const order = (
-      req.query.order?.toString() ?? 'desc'
-    ) as 'asc' | 'desc';
+      const search =
+        req.query.search?.toString();
 
-    const categories = await CategoryService.getAllCategories(
-      page,
-      limit,
-      search,
-      sort,
-      order,
-    );
+      const sortBy =
+        (req.query.sort_by?.toString() ??
+          "createdAt") as
+          | "name"
+          | "createdAt";
 
-    return success(res, categories);
-  });
+      const sortOrder =
+        (req.query.sort_order?.toString() ??
+          "desc") as
+          | "asc"
+          | "desc";
+
+      const categories =
+        await CategoryService.getAllCategories(
+          page,
+          perPage,
+          search,
+          sortBy,
+          sortOrder,
+        );
+
+      return success(
+        res,
+        categories,
+      );
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const category = await CategoryService.getById(

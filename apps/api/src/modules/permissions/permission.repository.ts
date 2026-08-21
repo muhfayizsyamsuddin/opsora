@@ -5,6 +5,8 @@ export class PermissionRepository {
     skip: number,
     take: number,
     search?: string,
+    sortBy: "name" | "createdAt" = "name",
+    sortOrder: "asc" | "desc" = "asc",
   ) {
     return prisma.permission.findMany({
       skip,
@@ -28,7 +30,7 @@ export class PermissionRepository {
           }
         : undefined,
       orderBy: {
-        name: "asc",
+        [sortBy]: sortOrder,
       },
       select: {
         id: true,

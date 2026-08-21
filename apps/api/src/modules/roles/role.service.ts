@@ -113,27 +113,36 @@ export class RoleService {
 
   static async getAll(
     page: number,
-    limit: number,
+    perPage: number,
     search?: string,
+    sortBy: "name" | "createdAt" = "name",
+    sortOrder: "asc" | "desc" = "asc",
   ) {
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * perPage;
 
-    const [roles, total] = await Promise.all([
-      RoleRepository.findMany(
-        skip,
-        limit,
-        search,
-      ),
-      RoleRepository.count(search),
-    ]);
+    const [roles, total] =
+      await Promise.all([
+        RoleRepository.findMany(
+          skip,
+          perPage,
+          search,
+          sortBy,
+          sortOrder,
+        ),
+
+        RoleRepository.count(search),
+      ]);
 
     return {
       data: roles.map(sanitizeRole),
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

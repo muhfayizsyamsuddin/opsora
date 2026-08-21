@@ -51,7 +51,12 @@ export class InventoryMovementRepository {
     take: number,
     productId?: string,
     movementType?: "IN" | "OUT",
-    referenceType?: "PURCHASE" | "SALE" | "ADJUSTMENT",
+    referenceType?:
+      | "PURCHASE"
+      | "SALE"
+      | "ADJUSTMENT",
+    sortBy: "createdAt" = "createdAt",
+    sortOrder: "asc" | "desc" = "desc",
   ) {
     return prisma.inventoryMovement.findMany({
       skip,
@@ -68,7 +73,7 @@ export class InventoryMovementRepository {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        [sortBy]: sortOrder,
       },
     });
   }

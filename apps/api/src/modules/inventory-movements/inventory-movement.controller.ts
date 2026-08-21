@@ -6,32 +6,55 @@ import { InventoryMovementService } from "./inventory-movement.service.js";
 export class InventoryMovementController {
   static getAll = asyncHandler(
     async (req: Request, res: Response) => {
-      const page = Number(req.query.page ?? 1);
-      const limit = Number(req.query.limit ?? 10);
+      const page = Number(
+        req.query.page ?? 1,
+      );
 
-      const productId = req.query.productId?.toString();
+      const perPage = Number(
+        req.query.per_page ?? 20,
+      );
 
-      const movementType = req.query.movementType?.toString() as
-        | "IN"
-        | "OUT"
-        | undefined;
+      const productId =
+        req.query.product_id?.toString();
 
-      const referenceType = req.query.referenceType?.toString() as
-        | "PURCHASE"
-        | "SALE"
-        | "ADJUSTMENT"
-        | undefined;
+      const movementType =
+        req.query.movement_type?.toString() as
+          | "IN"
+          | "OUT"
+          | undefined;
+
+      const referenceType =
+        req.query.reference_type?.toString() as
+          | "PURCHASE"
+          | "SALE"
+          | "ADJUSTMENT"
+          | undefined;
+
+      const sortBy =
+        (req.query.sort_by?.toString() ??
+          "createdAt") as "createdAt";
+
+      const sortOrder =
+        (req.query.sort_order?.toString() ??
+          "desc") as
+          | "asc"
+          | "desc";
 
       const movements =
         await InventoryMovementService.getAll(
           page,
-          limit,
+          perPage,
           productId,
           movementType,
           referenceType,
+          sortBy,
+          sortOrder,
         );
 
-      return success(res, movements);
+      return success(
+        res,
+        movements,
+      );
     },
   );
 

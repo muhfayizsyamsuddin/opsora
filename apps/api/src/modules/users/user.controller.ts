@@ -11,32 +11,48 @@ export class UserController {
     return success(res, user);
   });
 
-  static getAll = asyncHandler(async (req: Request, res: Response) => {
-    const page = Number(req.query.page ?? 1);
-    const limit = Number(req.query.limit ?? 10);
-    const search = req.query.search?.toString();
-    const roleId = req.query.roleId?.toString();
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const page = Number(
+        req.query.page ?? 1,
+      );
 
-    const sort = (req.query.sort?.toString() ?? "createdAt") as
-      | "name"
-      | "email"
-      | "createdAt";
+      const perPage = Number(
+        req.query.per_page ?? 20,
+      );
 
-    const order = (req.query.order?.toString() ?? "desc") as
-      | "asc"
-      | "desc";
+      const search =
+        req.query.search?.toString();
 
-    const users = await UserService.getAllUsers(
-      page,
-      limit,
-      search,
-      roleId,
-      sort,
-      order,
-    );
+      const roleId =
+        req.query.role_id?.toString();
 
-    return success(res, users);
-  });
+      const sortBy =
+        (req.query.sort_by?.toString() ??
+          "createdAt") as
+          | "name"
+          | "email"
+          | "createdAt";
+
+      const sortOrder =
+        (req.query.sort_order?.toString() ??
+          "desc") as
+          | "asc"
+          | "desc";
+
+      const users =
+        await UserService.getAllUsers(
+          page,
+          perPage,
+          search,
+          roleId,
+          sortBy,
+          sortOrder,
+        );
+
+      return success(res, users);
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const id = String(req.params.id);

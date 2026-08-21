@@ -51,7 +51,7 @@ export class PayrollService {
 
   static async getAll(query: {
     page: number;
-    limit: number;
+    perPage: number;
     employeeId?: string;
     month?: number;
     year?: number;

@@ -97,9 +97,11 @@ export class UserService {
       data: safeUsers,
       meta: {
         page,
-        limit,
+        per_page: limit,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / limit,
+        ),
       },
     };
   }

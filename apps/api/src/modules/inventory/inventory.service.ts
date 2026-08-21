@@ -5,13 +5,17 @@ import { InventoryRepository } from "./inventory.repository.js";
 export class InventoryService {
   static async getStock(
     page = 1,
-    limit = 10,
+    perPage = 20,
     search?: string,
+    sortBy: "name" | "createdAt" = "name",
+    sortOrder: "asc" | "desc" = "asc",
   ) {
     return InventoryRepository.findStock(
       page,
-      limit,
+      perPage,
       search,
+      sortBy,
+      sortOrder,
     );
   }
 

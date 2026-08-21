@@ -3,14 +3,17 @@ import { prisma } from "../../lib/prisma.js";
 export class InventoryRepository {
   static async findStock(
     page: number,
-    limit: number,
+    perPage: number,
     search?: string,
+    sortBy: "name" | "createdAt" = "name",
+    sortOrder: "asc" | "desc" = "asc",
   ) {
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * perPage;
 
     const where = {
       status: "ACTIVE" as const,
       deletedAt: null,
+
       ...(search
         ? {
             OR: [
@@ -35,7 +38,7 @@ export class InventoryRepository {
       prisma.product.findMany({
         where,
         skip,
-        take: limit,
+        take: perPage,
         select: {
           id: true,
           name: true,
@@ -46,7 +49,7 @@ export class InventoryRepository {
           status: true,
         },
         orderBy: {
-          name: "asc",
+          [sortBy]: sortOrder,
         },
       }),
 
@@ -59,9 +62,11 @@ export class InventoryRepository {
       data,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

@@ -17,31 +17,37 @@ export class CategoryService {
 
   static async getAllCategories(
     page = 1,
-    limit = 10,
+    perPage = 20,
     search?: string,
-    sort: 'name' | 'createdAt' = 'createdAt',
-    order: 'asc' | 'desc' = 'desc',
+    sort: "name" | "createdAt" = "createdAt",
+    order: "asc" | "desc" = "desc",
   ) {
-    const skip = (page - 1) * limit;
+    const skip =
+      (page - 1) * perPage;
 
-    const [categories, total] = await Promise.all([
-      CategoryRepository.findMany(
-        skip,
-        limit,
-        search,
-        sort,
-        order,
-      ),
-      CategoryRepository.count(search),
-    ]);
+    const [categories, total] =
+      await Promise.all([
+        CategoryRepository.findMany(
+          skip,
+          perPage,
+          search,
+          sort,
+          order,
+        ),
+        CategoryRepository.count(
+          search,
+        ),
+      ]);
 
     return {
       data: categories,
       meta: {
         page,
-        limit,
+        per_page: perPage,
         total,
-        totalPages: Math.ceil(total / limit),
+        total_pages: Math.ceil(
+          total / perPage,
+        ),
       },
     };
   }

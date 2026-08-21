@@ -15,31 +15,51 @@ export class PayrollController {
     );
   });
 
-  static getAll = asyncHandler(async (req: Request, res: Response) => {
-    const {
-      page,
-      limit,
-      employeeId,
-      month,
-      year,
-      search,
-      sort,
-      order,
-    } = req.query;
+  static getAll = asyncHandler(
+    async (req: Request, res: Response) => {
+      const payrolls =
+        await PayrollService.getAll({
+          page: Number(
+            req.query.page ?? 1,
+          ),
 
-    const payrolls = await PayrollService.getAll({
-      page: page ? Number(page) : 1,
-      limit: limit ? Number(limit) : 10,
-      employeeId: employeeId as string | undefined,
-      month: month ? Number(month) : undefined,
-      year: year ? Number(year) : undefined,
-      search: search as string | undefined,
-      sort: (sort as keyof Prisma.PayrollOrderByWithRelationInput) ?? "createdAt",
-      order: (order as Prisma.SortOrder) ?? "desc",
-    });
+          perPage: Number(
+            req.query.per_page ?? 20,
+          ),
 
-    return success(res, payrolls);
-  });
+          employeeId:
+            req.query.employee_id?.toString(),
+
+          month: req.query.month
+            ? Number(req.query.month)
+            : undefined,
+
+          year: req.query.year
+            ? Number(req.query.year)
+            : undefined,
+
+          search:
+            req.query.search?.toString(),
+
+          sort:
+            (req.query.sort_by as
+              | keyof Prisma.PayrollOrderByWithRelationInput
+              | undefined) ??
+            "createdAt",
+
+          order:
+            (req.query.sort_order as
+              | Prisma.SortOrder
+              | undefined) ??
+            "desc",
+        });
+
+      return success(
+        res,
+        payrolls,
+      );
+    },
+  );
 
   static getById = asyncHandler(async (req: Request, res: Response) => {
     const payroll = await PayrollService.getById(

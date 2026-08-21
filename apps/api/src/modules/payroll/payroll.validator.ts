@@ -24,18 +24,37 @@ export const getPayrollsSchema = z.object({
   body: z.object({}),
   params: z.object({}),
   query: z.object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .default(1),
 
-    employeeId: z.string().uuid().optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20),
 
-    month: z.coerce.number().int().min(1).max(12).optional(),
+    employee_id: z.string().uuid().optional(),
 
-    year: z.coerce.number().int().min(2000).optional(),
+    month: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(12)
+      .optional(),
+
+    year: z.coerce
+      .number()
+      .int()
+      .min(2000)
+      .optional(),
 
     search: z.string().optional(),
 
-    sort: z
+    sort_by: z
       .enum([
         "month",
         "year",
@@ -47,7 +66,9 @@ export const getPayrollsSchema = z.object({
       ])
       .default("createdAt"),
 
-    order: z.enum(["asc", "desc"]).default("desc"),
+    sort_order: z
+      .enum(["asc", "desc"])
+      .default("desc"),
   }),
 });
 
