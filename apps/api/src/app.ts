@@ -25,6 +25,7 @@ import dashboardRoutes from "./modules/dashboard/dashboard.routes.js";
 import payrollRoutes from "./modules/payroll/payroll.routes.js";
 import performanceReviewRoutes from "./modules/performance-reviews/performance-review.routes.js";
 import reportRoutes from "./modules/reports/report.routes.js";
+import { apiRateLimit } from "./middlewares/rate-limit.middleware.js";
 
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./docs/swagger.js";
@@ -44,6 +45,8 @@ app.use(
   swaggerUi.setup(swaggerSpec),
 );
 app.use("/health", healthRoutes);
+
+app.use(`${API_PREFIX}`, apiRateLimit);
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/users`, userRoutes);

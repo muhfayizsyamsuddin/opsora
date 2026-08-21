@@ -160,14 +160,31 @@ export class AuthService {
       },
     });
 
-    if (!stored || stored.revokedAt) {
+    if (!stored) {
       throw new AppError(
         "Invalid refresh token",
         401,
       );
     }
 
-    if (stored.expiresAt < new Date()) {
+    if (stored.revokedAt) {
+      await prisma.refreshToken.updateMany({
+        where: {
+          userId: stored.userId,
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: new Date(),
+        },
+      });
+
+      throw new AppError(
+        "Refresh token reuse detected",
+        401,
+      );
+    }
+
+    if (stored.expiresAt <= new Date()) {
       throw new AppError(
         "Refresh token expired",
         401,
@@ -197,9 +214,36 @@ export class AuthService {
       email: user.email,
     });
 
+    const newRefreshToken =
+      generateRefreshToken({
+        id: user.id,
+      });
+
+    await prisma.$transaction([
+      prisma.refreshToken.update({
+        where: {
+          id: stored.id,
+        },
+        data: {
+          revokedAt: new Date(),
+        },
+      }),
+      prisma.refreshToken.create({
+        data: {
+          token: newRefreshToken,
+          userId: user.id,
+          expiresAt: new Date(
+            Date.now() +
+              30 * 24 * 60 * 60 * 1000,
+          ),
+        },
+      }),
+    ]);
+
     return {
       access_token: accessToken,
       token_type: "Bearer",
+      refresh_token: newRefreshToken,
     };
   }
 
