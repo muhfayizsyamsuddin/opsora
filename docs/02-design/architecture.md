@@ -32,7 +32,7 @@ This document serves as the technical blueprint for implementation.
 
 | Layer            | Technology              |
 | ---------------- | ----------------------- |
-| Frontend         | Next.js 15 (App Router) |
+| Frontend         | Next.js 16 (App Router) |
 | Backend          | Express.js              |
 | Language         | TypeScript              |
 | ORM              | Prisma ORM              |
@@ -281,6 +281,7 @@ src/
 | ---------- | ---------------------------------- |
 | app        | Application routes and pages       |
 | components | Reusable UI components             |
+| features   | Domain-specific frontend logic     |
 | hooks      | Custom React hooks                 |
 | services   | API communication                  |
 | stores     | Zustand state management           |
@@ -410,26 +411,26 @@ Default roles:
 - CASHIER
 Permissions should be defined by module and action.
 Example:
-products.read
+products.view
 products.create
 products.update
 products.delete
 
-sales.read
+sales.view
 sales.create
 sales.update
 sales.void
 
-employees.read
+employees.view
 employees.create
 employees.update
 employees.delete
 
-attendance.read
+attendance.view
 attendance.create
 attendance.update
 
-leave.read
+leave.view
 leave.create
 leave.approve
 leave.reject

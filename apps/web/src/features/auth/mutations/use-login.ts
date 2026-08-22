@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { login } from "@/services/auth.service";
 import { storage } from "@/services/storage";
+import { useAuthStore } from "@/stores/auth.store";
 
 export function useLogin() {
   const router = useRouter();
@@ -16,7 +17,9 @@ export function useLogin() {
     onSuccess(data) {
       console.log("LOGIN SUCCESS", data);
 
-      storage.setAccessToken(data.accessToken);
+      storage.setAccessToken(data.access_token);
+      storage.setRefreshToken(data.refresh_token);
+      useAuthStore.getState().setUser(data.user);
 
       toast.success("Login berhasil");
 

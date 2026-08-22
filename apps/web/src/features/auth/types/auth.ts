@@ -7,10 +7,19 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "MANAGER" | "STAFF";
+  roles: string[];
+  permissions: string[];
 }
 
 export interface LoginResponse {
-  accessToken: string;
+  access_token: string;
+  token_type: "Bearer";
+  refresh_token: string;
   user: User;
+}
+
+export interface RefreshResponse {
+  access_token: string;
+  token_type: "Bearer";
+  refresh_token: string;
 }

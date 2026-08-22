@@ -123,15 +123,43 @@ Base URL:
   "data": {
     "access_token": "<jwt>",
     "token_type": "Bearer",
+    "refresh_token": "<refresh-jwt>",
     "user": {
       "id": "uuid",
       "name": "Admin",
       "email": "admin@opsora.com",
-      "roles": ["ADMIN"]
+      "roles": ["ADMIN"],
+      "permissions": ["products.view", "products.create"]
     }
   }
 }
 ```
+
+### Refresh Request
+
+```json
+{
+  "refresh_token": "<refresh-jwt>"
+}
+```
+
+### Refresh Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "access_token": "<new-jwt>",
+    "token_type": "Bearer",
+    "refresh_token": "<new-refresh-jwt>"
+  }
+}
+```
+
+Refresh token rotation issues a new refresh token each time the endpoint succeeds.
+The client must replace its stored refresh token with the newly returned token.
+If a previously revoked refresh token is reused, the server rejects the request
+and may revoke the user's active refresh-token session.
 
 ---
 

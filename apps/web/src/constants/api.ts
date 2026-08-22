@@ -1,22 +1,24 @@
 export const API = {
   AUTH: {
     LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
+    LOGOUT: "/auth/logout",
+    ME: "/auth/me",
+    REFRESH: "/auth/refresh",
   },
 
   DASHBOARD: "/dashboard",
-
-  DEPARTMENTS: "/departments",
+  CATEGORIES: "/categories",
+  PRODUCTS: "/products",
+  SUPPLIERS: "/suppliers",
+  CUSTOMERS: "/customers",
+  PURCHASES: "/purchases",
+  SALES: "/sales",
+  INVENTORY: "/inventory",
+  REPORTS: "/reports",
 
   EMPLOYEES: "/employees",
-
+  DEPARTMENTS: "/departments",
   ATTENDANCE: "/attendance",
-
-  LEAVES: "/leaves",
-
-  PAYROLL: "/payroll",
-
+  LEAVE_REQUESTS: "/leave-requests",
   PERFORMANCE_REVIEWS: "/performance-reviews",
-
-  REPORTS: "/reports",
 } as const;

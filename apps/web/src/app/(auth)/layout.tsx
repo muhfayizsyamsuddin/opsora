@@ -11,13 +11,25 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+
+  const {
+    isAuthenticated,
+    isLoading,
+  } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, router]);
+  }, [
+    isAuthenticated,
+    isLoading,
+    router,
+  ]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background">
