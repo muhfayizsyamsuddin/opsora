@@ -1,14 +1,20 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import {
+  Moon,
+  Sun,
+} from "lucide-react";
+import {
+  usePathname,
+  useRouter,
+} from "next/navigation";
+import { useTheme } from "next-themes";
 
 import {
   Avatar,
   AvatarFallback,
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/auth.store";
 
 const titles: Record<string, string> = {
@@ -30,13 +36,19 @@ const titles: Record<string, string> = {
   "/settings": "Settings",
   "/attendances": "Attendances",
   "/leave-requests": "Leaves",
-  "/performance-reviews": "Performance Reviews",
+  "/performance-reviews":
+    "Performance Reviews",
   "/payrolls": "Payroll",
 };
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+
+  const {
+    resolvedTheme,
+    setTheme,
+  } = useTheme();
 
   const user = useAuthStore(
     (state) => state.user,
@@ -46,7 +58,9 @@ export function Navbar() {
     Object.entries(titles).find(
       ([path]) =>
         pathname === path ||
-        pathname.startsWith(`${path}/`),
+        pathname.startsWith(
+          `${path}/`,
+        ),
     )?.[1] ?? "Opsora";
 
   const initials =
@@ -59,6 +73,15 @@ export function Navbar() {
 
   const role =
     user?.roles?.[0] ?? "USER";
+
+  const isDark =
+    resolvedTheme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(
+      isDark ? "light" : "dark",
+    );
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
@@ -73,24 +96,23 @@ export function Navbar() {
           </h1>
         </div>
 
-        <div className="hidden w-full max-w-sm md:block">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-            <Input
-              placeholder="Search anything..."
-              className="h-10 rounded-xl border bg-muted/40 pl-9 transition-all focus-visible:bg-background"
-            />
-          </div>
-        </div>
-
         <Button
+          type="button"
           variant="ghost"
           size="icon"
           className="rounded-xl"
-          aria-label="Notifications"
+          aria-label={
+            isDark
+              ? "Switch to light mode"
+              : "Switch to dark mode"
+          }
+          onClick={toggleTheme}
         >
-          <Bell className="h-4 w-4" />
+          {isDark ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
         </Button>
 
         <div className="hidden h-8 w-px bg-border sm:block" />
@@ -99,7 +121,9 @@ export function Navbar() {
           <button
             type="button"
             className="flex items-center gap-3 rounded-xl outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={() => router.push("/profile")}
+            onClick={() =>
+              router.push("/profile")
+            }
             aria-label="Open profile"
           >
             <Avatar className="h-9 w-9 ring-2 ring-background">
