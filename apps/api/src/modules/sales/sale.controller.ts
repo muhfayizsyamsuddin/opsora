@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { created, success } from "../../utils/response.js";
 import { SaleService } from "./sale.service.js";
+import { createSaleInvoicePdf } from "./sale-invoice.pdf.js";
 
 export class SaleController {
   static create = asyncHandler(
@@ -129,6 +130,34 @@ export class SaleController {
         );
 
       return success(res, invoice);
+    },
+  );
+
+  static getInvoicePdf = asyncHandler(
+    async (req: Request, res: Response) => {
+      const invoice =
+        await SaleService.getInvoice(
+          req.params.id.toString(),
+        );
+
+      const pdf =
+        createSaleInvoicePdf(invoice);
+
+      const filename =
+        `${invoice.invoiceNumber}.pdf`;
+
+      res.setHeader(
+        "Content-Type",
+        "application/pdf",
+      );
+
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`,
+      );
+
+      pdf.pipe(res);
+      pdf.end();
     },
   );
 }

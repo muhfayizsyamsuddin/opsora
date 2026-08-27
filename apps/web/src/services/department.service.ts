@@ -1,100 +1,70 @@
 import { api } from "@/lib/api";
+import { API } from "@/constants/api";
 
-export type Department = {
-  id: string;
-  name: string;
-};
+import type { ApiResponse } from "@/types/api";
 
-export type GetDepartmentsParams = {
-  page?: number;
-  limit?: number;
-  search?: string;
-  sort?: "name" | "createdAt";
-  order?: "asc" | "desc";
-};
-
-type DepartmentsResponse = {
-  data: {
-    data: Department[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  };
-};
-
-type DepartmentResponse = {
-  data: Department;
-};
+import type {
+  CreateDepartmentInput,
+  Department,
+  DepartmentListResponse,
+  DepartmentQueryParams,
+  UpdateDepartmentInput,
+} from "@/features/departments/types/department";
 
 export async function getDepartments(
-  params: GetDepartmentsParams = {},
-) {
-  const response = await api.get<DepartmentsResponse>(
-    "/departments",
-    {
-      params: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 10,
-        search: params.search || undefined,
-        sort: params.sort ?? "createdAt",
-        order: params.order ?? "desc",
-      },
-    },
-  );
+  params?: DepartmentQueryParams,
+): Promise<DepartmentListResponse> {
+  const response =
+    await api.get<
+      ApiResponse<DepartmentListResponse>
+    >(
+      API.DEPARTMENTS,
+      { params },
+    );
 
   return response.data.data;
 }
 
 export async function getDepartmentById(
   id: string,
-) {
-  const response = await api.get<DepartmentResponse>(
-    `/departments/${id}`,
-  );
+): Promise<Department> {
+  const response =
+    await api.get<ApiResponse<Department>>(
+      `${API.DEPARTMENTS}/${id}`,
+    );
 
   return response.data.data;
 }
 
-export type CreateDepartmentPayload = {
-  name: string;
-};
-
 export async function createDepartment(
-  data: CreateDepartmentPayload,
-) {
-  const response = await api.post(
-    "/departments",
-    data,
-  );
+  data: CreateDepartmentInput,
+): Promise<Department> {
+  const response =
+    await api.post<ApiResponse<Department>>(
+      API.DEPARTMENTS,
+      data,
+    );
 
-  return response.data;
+  return response.data.data;
 }
-
-export type UpdateDepartmentPayload = {
-  name?: string;
-};
 
 export async function updateDepartment(
   id: string,
-  data: UpdateDepartmentPayload,
-) {
-  const response = await api.patch(
-    `/departments/${id}`,
-    data,
-  );
+  data: UpdateDepartmentInput,
+): Promise<Department> {
+  const response =
+    await api.put<ApiResponse<Department>>(
+      `${API.DEPARTMENTS}/${id}`,
+      data,
+    );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function deleteDepartment(
   id: string,
 ) {
-  const response = await api.delete(
-    `/departments/${id}`,
+  await api.delete(
+    `${API.DEPARTMENTS}/${id}`,
   );
-
-  return response.data;
 }

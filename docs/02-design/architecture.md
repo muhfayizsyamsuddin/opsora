@@ -411,26 +411,26 @@ Default roles:
 - CASHIER
 Permissions should be defined by module and action.
 Example:
-products.view
+products.read
 products.create
 products.update
 products.delete
 
-sales.view
+sales.read
 sales.create
 sales.update
 sales.void
 
-employees.view
+employees.read
 employees.create
 employees.update
 employees.delete
 
-attendance.view
+attendance.read
 attendance.create
 attendance.update
 
-leave.view
+leave.read
 leave.create
 leave.approve
 leave.reject

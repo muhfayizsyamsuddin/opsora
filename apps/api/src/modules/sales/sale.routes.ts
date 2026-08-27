@@ -41,6 +41,14 @@ router.get(
   SaleController.getInvoice,
 );
 
+router.get(
+  "/:id/invoice/pdf",
+  authenticate,
+  requirePermission("sales.read"),
+  validate(getSaleInvoiceSchema),
+  SaleController.getInvoicePdf,
+);
+
 router.put(
   "/:id",
   authenticate,

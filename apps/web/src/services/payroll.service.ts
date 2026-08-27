@@ -1,112 +1,55 @@
 import { api } from "@/lib/api";
+import { API } from "@/constants/api";
 
-export type Payroll = {
-  id: string;
-  employeeId: string;
-  month: number;
-  year: number;
-  baseSalary: number;
-  bonus: number;
-  deduction: number;
-  totalSalary: number;
-  createdAt: string;
-  employee: {
-    id: string;
-    name: string;
-    email: string;
-    department: {
-      id: string;
-      name: string;
-    };
-  };
-};
+import type { ApiResponse } from "@/types/api";
 
-export type GetPayrollsParams = {
-  page?: number;
-  limit?: number;
-  employeeId?: string;
-  month?: number;
-  year?: number;
-  search?: string;
-  sort?:
-    | "month"
-    | "year"
-    | "baseSalary"
-    | "bonus"
-    | "deduction"
-    | "totalSalary"
-    | "createdAt";
-  order?: "asc" | "desc";
-};
-
-type PayrollsResponse = {
-  data: Payroll[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
+import type {
+  Payroll,
+  PayrollListResponse,
+  PayrollQueryParams,
+  CreatePayrollInput,
+} from "@/features/payrolls/types/payroll";
 
 export async function getPayrolls(
-  params: GetPayrollsParams = {},
-) {
-  const response = await api.get("/payrolls", {
-    params: {
-      page: params.page ?? 1,
-      limit: params.limit ?? 10,
-      employeeId:
-        params.employeeId || undefined,
-      month: params.month ?? undefined,
-      year: params.year ?? undefined,
-      search:
-        params.search || undefined,
-      sort:
-        params.sort ?? "createdAt",
-      order:
-        params.order ?? "desc",
-    },
-  });
+  params?: PayrollQueryParams,
+): Promise<PayrollListResponse> {
+  const response =
+    await api.get<
+      ApiResponse<PayrollListResponse>
+    >(API.PAYROLLS, {
+      params,
+    });
 
-  return response.data.data as PayrollsResponse;
+  return response.data.data;
 }
 
 export async function getPayrollById(
   id: string,
-) {
-  const response = await api.get(
-    `/payrolls/${id}`,
-  );
+): Promise<Payroll> {
+  const response =
+    await api.get<ApiResponse<Payroll>>(
+      `${API.PAYROLLS}/${id}`,
+    );
 
-  return response.data.data as Payroll;
+  return response.data.data;
 }
 
-export type CreatePayrollPayload = {
-  employeeId: string;
-  month: number;
-  year: number;
-  bonus: number;
-  deduction: number;
-};
-
 export async function createPayroll(
-  data: CreatePayrollPayload,
-) {
-  const response = await api.post(
-    "/payrolls",
-    data,
-  );
+  data: CreatePayrollInput,
+): Promise<Payroll> {
+  const response =
+    await api.post<ApiResponse<Payroll>>(
+      API.PAYROLLS,
+      data,
+    );
 
-  return response.data.data as Payroll;
+  return response.data.data;
 }
 
 export async function deletePayroll(
   id: string,
-) {
-  const response = await api.delete(
-    `/payrolls/${id}`,
+): Promise<void> {
+  await api.delete(
+    `${API.PAYROLLS}/${id}`,
   );
-
-  return response.data;
 }

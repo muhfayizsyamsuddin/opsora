@@ -1,106 +1,120 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { DashboardHeader } from "@/features/dashboard/components/DashboardHeader";
+import { DashboardKpiGrid } from "@/features/dashboard/components/DashboardKpiGrid";
+import { LowStockProducts } from "@/features/dashboard/components/LowStockProducts";
+import { PeopleSummary } from "@/features/dashboard/components/PeopleSummary";
+import { RecentTransactions } from "@/features/dashboard/components/RecentTransactions";
+import { useDashboardSummary } from "@/features/dashboard/queries/use-dashboard-summary";
+import { useLowStock } from "@/features/dashboard/queries/use-low-stock";
+import { usePeopleSummary } from "@/features/dashboard/queries/use-people-summary";
+import { useRecentTransactions } from "@/features/dashboard/queries/use-recent-transactions";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useAuthStore } from "@/stores/auth.store";
 
-import { getDashboardReport } from "@/services/report.service";
-
-import { AttendanceChart } from "@/features/dashboard/components/AttendanceChart";
-import { EmployeeDistribution } from "@/features/dashboard/components/employee-distribution-card";
-import { QuickActions } from "@/features/dashboard/components/QuickActions";
-import { RecentActivities } from "@/features/dashboard/components/RecentActivities";
-import { StatsCards } from "@/features/dashboard/components/StatsCards";
-import { UpcomingLeave } from "@/features/dashboard/components/UpcomingLeave";
+function SectionSkeleton() {
+  return (
+    <div className="h-64 animate-pulse rounded-2xl border bg-muted/40" />
+  );
+}
 
 export default function DashboardPage() {
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["dashboard-report"],
-    queryFn: getDashboardReport,
-  });
+  const user = useAuthStore((state) => state.user);
 
-  if (isLoading) {
+  const { hasPermission } = usePermissions();
+  const canReadDashboard = hasPermission("dashboard.read");
+
+  const summary = useDashboardSummary();
+  const recentTransactions =
+    useRecentTransactions();
+  const lowStock = useLowStock();
+  const peopleSummary = usePeopleSummary();
+
+  const isInitialLoading =
+    summary.isLoading ||
+    recentTransactions.isLoading ||
+    lowStock.isLoading ||
+    peopleSummary.isLoading;
+
+  if (isInitialLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Dashboard
-          </h1>
+      <div className="space-y-8">
+        <DashboardHeader userName={user?.name} />
 
-          <p className="text-sm text-muted-foreground">
-            Overview of your organization.
-          </p>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map(
+            (_, index) => (
+              <SectionSkeleton key={index} />
+            ),
+          )}
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Loading dashboard...
-        </p>
+        <SectionSkeleton />
+        <SectionSkeleton />
       </div>
     );
   }
 
-  if (isError || !data) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Dashboard
-          </h1>
+  const firstError =
+    summary.error ??
+    recentTransactions.error ??
+    lowStock.error ??
+    peopleSummary.error;
 
-          <p className="text-sm text-muted-foreground">
-            Overview of your organization.
+  if (firstError) {
+    return (
+      <div className="space-y-8">
+        <DashboardHeader userName={user?.name} />
+
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
+          <p className="font-medium">
+            Unable to load dashboard.
+          </p>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Please try again later.
           </p>
         </div>
+      </div>
+    );
+  }
 
-        <p className="text-sm text-destructive">
-          Failed to load dashboard data.
+  if (
+    !summary.data ||
+    !recentTransactions.data ||
+    !lowStock.data ||
+    !peopleSummary.data
+  ) {
+    return null;
+  }
+
+  if (!canReadDashboard) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view the dashboard.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Dashboard
-        </h1>
+    <div className="space-y-8">
+      <DashboardHeader userName={user?.name} />
 
-        <p className="text-sm text-muted-foreground">
-          Overview of your organization.
-        </p>
-      </div>
+      <DashboardKpiGrid data={summary.data} />
 
-      <StatsCards
-        totalEmployees={data.totalEmployees}
-        totalDepartments={data.totalDepartments}
-        presentToday={data.presentToday}
-        pendingLeaves={data.pendingLeaves}
-      />
+      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+        <RecentTransactions
+          data={recentTransactions.data}
+        />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <AttendanceChart data={data.attendanceWeekly} />
-        </div>
-
-        <EmployeeDistribution
-          departments={data.employeesByDepartment}
+        <LowStockProducts
+          data={lowStock.data}
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <RecentActivities
-          activities={data.recentActivities}
-        />
-
-        <UpcomingLeave
-          leaves={data.upcomingLeaves}
-        />
-      </div>
-
-      <QuickActions />
+      <PeopleSummary data={peopleSummary.data} />
     </div>
   );
 }

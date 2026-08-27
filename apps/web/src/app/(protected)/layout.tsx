@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/hooks/use-auth";
 import { AppShell } from "@/components/layouts/AppShell";
+import { storage } from "@/services/storage";
 
 export default function ProtectedLayout({
   children,
@@ -12,19 +12,26 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    setMounted(true);
+  }, []);
+
+  const isAuthenticated =
+    mounted && !!storage.getAccessToken();
+
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [
+    mounted,
+    isAuthenticated,
+    router,
+  ]);
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (!isAuthenticated) {
+  if (!mounted || !isAuthenticated) {
     return null;
   }
 

@@ -129,7 +129,7 @@ Base URL:
       "name": "Admin",
       "email": "admin@opsora.com",
       "roles": ["ADMIN"],
-      "permissions": ["products.view", "products.create"]
+      "permissions": ["products.read", "products.create"]
     }
   }
 }

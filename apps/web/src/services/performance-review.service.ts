@@ -1,128 +1,89 @@
 import { api } from "@/lib/api";
+import { API } from "@/constants/api";
 
-export type PerformanceReview = {
-  id: string;
-  employeeId: string;
-  reviewer: string;
-  score: number;
-  comments?: string;
-  reviewDate: string;
-  createdAt: string;
-  employee: {
-    id: string;
-    name: string;
-    email: string;
-    department: {
-      id: string;
-      name: string;
-    };
-  };
-};
+import type { ApiResponse } from "@/types/api";
 
-export type GetPerformanceReviewsParams = {
-  page?: number;
-  limit?: number;
-  employeeId?: string;
-  reviewer?: string;
-  scoreMin?: number;
-  scoreMax?: number;
-  search?: string;
-  sort?: "reviewDate" | "score" | "createdAt";
-  order?: "asc" | "desc";
-};
-
-type PerformanceReviewsResponse = {
-  data: PerformanceReview[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
+import type {
+  PerformanceReview,
+  PerformanceReviewListResponse,
+  PerformanceReviewQueryParams,
+  CreatePerformanceReviewInput,
+  UpdatePerformanceReviewInput,
+} from "@/features/performance-reviews/types/performance-review";
 
 export async function getPerformanceReviews(
-  params: GetPerformanceReviewsParams = {},
-) {
-  const response = await api.get(
-    "/performance-reviews",
-    {
-      params: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 10,
-        employeeId:
-          params.employeeId || undefined,
-        reviewer:
-          params.reviewer || undefined,
-        scoreMin: params.scoreMin ?? undefined,
-        scoreMax: params.scoreMax ?? undefined,
-        search:
-          params.search || undefined,
-        sort:
-          params.sort ?? "reviewDate",
-        order:
-          params.order ?? "desc",
-      },
-    },
-  );
+  params?: PerformanceReviewQueryParams,
+): Promise<PerformanceReviewListResponse> {
+  const response =
+    await api.get<
+      ApiResponse<PerformanceReviewListResponse>
+    >(API.PERFORMANCE_REVIEWS, {
+      params,
+    });
 
-  return response.data.data as PerformanceReviewsResponse;
+  return response.data.data;
 }
 
 export async function getPerformanceReviewById(
   id: string,
-) {
-  const response = await api.get(
-    `/performance-reviews/${id}`,
-  );
+): Promise<PerformanceReview> {
+  const response =
+    await api.get<ApiResponse<PerformanceReview>>(
+      `${API.PERFORMANCE_REVIEWS}/${id}`,
+    );
 
-  return response.data.data as PerformanceReview;
+  return response.data.data;
 }
-
-export type CreatePerformanceReviewPayload = {
-  employeeId: string;
-  reviewer: string;
-  score: number;
-  comments?: string;
-  reviewDate: string;
-};
 
 export async function createPerformanceReview(
-  data: CreatePerformanceReviewPayload,
-) {
-  const response = await api.post(
-    "/performance-reviews",
-    data,
-  );
+  data: CreatePerformanceReviewInput,
+): Promise<PerformanceReview> {
+  const response =
+    await api.post<ApiResponse<PerformanceReview>>(
+      API.PERFORMANCE_REVIEWS,
+      data,
+    );
 
-  return response.data.data as PerformanceReview;
+  return response.data.data;
 }
-
-export type UpdatePerformanceReviewPayload = {
-  reviewer?: string;
-  score?: number;
-  comments?: string;
-  reviewDate?: string;
-};
 
 export async function updatePerformanceReview(
   id: string,
-  data: UpdatePerformanceReviewPayload,
-) {
-  const response = await api.put(
-    `/performance-reviews/${id}`,
-    data,
-  );
+  data: UpdatePerformanceReviewInput,
+): Promise<PerformanceReview> {
+  const response =
+    await api.put<ApiResponse<PerformanceReview>>(
+      `${API.PERFORMANCE_REVIEWS}/${id}`,
+      data,
+    );
 
-  return response.data.data as PerformanceReview;
+  return response.data.data;
 }
 
 export async function deletePerformanceReview(
   id: string,
-) {
-  const response = await api.delete(
-    `/performance-reviews/${id}`,
+): Promise<void> {
+  await api.delete(
+    `${API.PERFORMANCE_REVIEWS}/${id}`,
   );
+}
 
-  return response.data;
+export async function getEmployeePerformanceHistory(
+  employeeId: string,
+  params?: Omit<
+    PerformanceReviewQueryParams,
+    "employee_id"
+  >,
+): Promise<PerformanceReviewListResponse> {
+  const response =
+    await api.get<
+      ApiResponse<PerformanceReviewListResponse>
+    >(
+      `${API.PERFORMANCE_REVIEWS}/employee/${employeeId}`,
+      {
+        params,
+      },
+    );
+
+  return response.data.data;
 }

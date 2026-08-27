@@ -1,136 +1,39 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import { toast } from "sonner";
-
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-
-import { createDepartment } from "@/services/department.service";
-import { useQueryClient } from "@tanstack/react-query";
+import { DepartmentForm } from "@/features/departments/components/DepartmentForm";
+import { usePermissions } from "@/hooks/use-permissions";
 
 export default function NewDepartmentPage() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const { hasPermission } = usePermissions();
+  const canCreateDepartment = hasPermission("departments.create");
 
-  const [name, setName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  async function handleSubmit(
-    event: React.FormEvent,
-  ) {
-    event.preventDefault();
-
-    if (!name.trim()) {
-      toast.error("Department name is required");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      await createDepartment({
-        name: name.trim(),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["departments"],
-      });
-
-      toast.success(
-        "Department created successfully",
-      );
-
-      router.push("/departments");
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message ??
-          "Failed to create department";
-
-        toast.error(message);
-      } else {
-        toast.error(
-          "Failed to create department",
-        );
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+  if (!canCreateDepartment) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to create departments.
+        </p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <Link
-          href="/departments"
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          ← Back to Departments
-        </Link>
+        <p className="text-sm font-medium text-muted-foreground">
+          Departments
+        </p>
 
-        <h1 className="mt-4 text-2xl font-semibold">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           Add Department
         </h1>
 
-        <p className="text-sm text-muted-foreground">
-          Create a new department.
+        <p className="mt-2 text-sm text-muted-foreground">
+          Create a new department for your organization.
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-            <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="text-sm font-medium"
-              >
-                Department Name
-              </label>
-
-              <Input
-                id="name"
-                value={name}
-                onChange={(event) =>
-                  setName(event.target.value)
-                }
-                placeholder="Human Resources"
-                required
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 border-t pt-6">
-              <Link href="/departments">
-                <Button
-                  type="button"
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </Link>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting
-                  ? "Creating..."
-                  : "Create Department"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <DepartmentForm />
     </div>
   );
 }

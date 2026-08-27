@@ -6,6 +6,11 @@ export const API = {
     REFRESH: "/auth/refresh",
   },
 
+  USERS: "/users",
+  PERMISSIONS: "/permissions",
+  ROLES: "/roles",
+  SETTINGS: "/settings",
+
   DASHBOARD: "/dashboard",
   CATEGORIES: "/categories",
   PRODUCTS: "/products",
@@ -18,7 +23,8 @@ export const API = {
 
   EMPLOYEES: "/employees",
   DEPARTMENTS: "/departments",
-  ATTENDANCE: "/attendance",
+  ATTENDANCES: "/attendances",
   LEAVE_REQUESTS: "/leave-requests",
   PERFORMANCE_REVIEWS: "/performance-reviews",
+  PAYROLLS: "/payrolls",
 } as const;

@@ -162,24 +162,24 @@ resource.action
 Examples:
 
 ```text
-products.view
+products.read
 products.create
 products.update
 products.delete
-sales.view
+sales.read
 sales.create
-purchases.view
+purchases.read
 purchases.create
-inventory.view
+inventory.read
 inventory.adjust
-employees.view
+employees.read
 employees.create
-attendance.view
+attendance.read
 attendance.create
-leave.view
+leave.read
 leave.create
 leave.approve
-performance.view
+performance.read
 performance.create
 ```
 

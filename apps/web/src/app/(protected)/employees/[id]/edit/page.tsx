@@ -1,173 +1,84 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
-import axios from "axios";
-import { toast } from "sonner";
+import { use } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
-import {
-  getEmployeeById,
-  updateEmployee,
-} from "@/services/employee.service";
+import { EmployeeForm } from "@/features/employees/components/EmployeeForm";
+import { useDepartments } from "@/features/departments/queries/use-departments";
 
-import { getDepartments } from "@/services/department.service";
+import { getEmployeeById } from "@/services/employee.service";
+import { usePermissions } from "@/hooks/use-permissions";
 
-export default function EditEmployeePage() {
+export default function EditEmployeePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const router = useRouter();
-  const params = useParams();
-  const queryClient = useQueryClient();
 
-  const id = params.id as string;
+  const { hasPermission } = usePermissions();
+  const canUpdateEmployee = hasPermission("employees.update");
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [departmentId, setDepartmentId] = useState("");
-  const [position, setPosition] = useState("");
-  const [salary, setSalary] = useState("");
-  const [hireDate, setHireDate] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<
-    "ACTIVE" | "INACTIVE"
-  >("ACTIVE");
-
-  const {
-    data: employee,
-    isLoading: isLoadingEmployee,
-    isError: isEmployeeError,
-  } = useQuery({
-    queryKey: ["employee", id],
+  const employee = useQuery({
+    queryKey: ["employees", id],
     queryFn: () => getEmployeeById(id),
-    enabled: Boolean(id),
   });
 
-  const {
-    data,
-    isLoading: isLoadingDepartments,
-  } = useQuery({
-    queryKey: ["departments"],
-    queryFn: () =>
-      getDepartments({
-        page: 1,
-        limit: 100,
-        sort: "name",
-        order: "asc",
-      }),
-  });
+  const departments =
+    useDepartments({
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    });
 
-  const departments = data?.data ?? [];
-
-  useEffect(() => {
-    if (!employee) {
-      return;
-    }
-
-    setName(employee.name);
-    setEmail(employee.email);
-    setDepartmentId(employee.department.id);
-    setStatus(employee.status);
-    setPosition(employee.position);
-    setSalary(String(employee.salary));
-
-    setHireDate(
-      new Date(employee.hireDate)
-        .toISOString()
-        .split("T")[0],
-    );
-  }, [employee]);
-
-  async function handleSubmit(
-    event: React.FormEvent,
+  if (
+    employee.isLoading ||
+    departments.isLoading
   ) {
-    event.preventDefault();
-
-    if (!departmentId) {
-      toast.error("Please select a department");
-      return;
-    }
-
-    if (!salary || Number(salary) <= 0) {
-      toast.error("Salary must be greater than 0");
-      return;
-    }
-
-    if (!hireDate) {
-      toast.error("Please select a hire date");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      await updateEmployee(id, {
-        name,
-        email,
-        position,
-        salary: Number(salary),
-        hireDate,
-        departmentId,
-        status,
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["employee", id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["employees"],
-      });
-
-      toast.success("Employee updated successfully");
-
-      router.push(`/employees/${id}`);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message ??
-          "Failed to update employee";
-
-        toast.error(message);
-      } else {
-        toast.error("Failed to update employee");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  if (isLoadingEmployee) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          Loading employee...
-        </p>
+      <div className="space-y-6">
+        <div className="h-24 animate-pulse rounded-2xl border bg-muted/30" />
+        <div className="h-80 animate-pulse rounded-2xl border bg-muted/30" />
       </div>
     );
   }
 
-  if (isEmployeeError || !employee) {
+  if (
+    employee.error ||
+    departments.error ||
+    !employee.data
+  ) {
     return (
-      <div className="space-y-6">
-        <Link href="/employees">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employees
-          </Button>
-        </Link>
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
+        <p className="font-medium">
+          Unable to load employee editor.
+        </p>
 
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Employee not found.
-            </p>
-          </CardContent>
-        </Card>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 rounded-xl"
+          onClick={() =>
+            router.push(`/employees/${id}`)
+          }
+        >
+          Back to Employee
+        </Button>
+      </div>
+    );
+  }
+
+  if (!canUpdateEmployee) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit employees.
+        </p>
       </div>
     );
   }
@@ -175,207 +86,25 @@ export default function EditEmployeePage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href={`/employees/${id}`}>
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employee
-          </Button>
-        </Link>
-      </div>
+        <p className="text-sm font-medium text-muted-foreground">
+          Employees
+        </p>
 
-      <div>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
           Edit Employee
         </h1>
 
-        <p className="text-sm text-muted-foreground">
-          Update employee information.
+        <p className="mt-2 text-sm text-muted-foreground">
+          Update employee information and status.
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6"
-          >
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <label
-                  htmlFor="name"
-                  className="text-sm font-medium"
-                >
-                  Name
-                </label>
-
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(event) =>
-                    setName(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium"
-                >
-                  Email
-                </label>
-
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="department"
-                  className="text-sm font-medium"
-                >
-                  Department
-                </label>
-
-                <select
-                  id="department"
-                  value={departmentId}
-                  onChange={(event) =>
-                    setDepartmentId(event.target.value)
-                  }
-                  disabled={isLoadingDepartments}
-                  required
-                  className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
-                >
-                  <option value="">
-                    {isLoadingDepartments
-                      ? "Loading departments..."
-                      : "Select department"}
-                  </option>
-
-                  {departments.map((department) => (
-                    <option
-                      key={department.id}
-                      value={department.id}
-                    >
-                      {department.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="status"
-                  className="text-sm font-medium"
-                >
-                  Status
-                </label>
-
-                <select
-                  id="status"
-                  value={status}
-                  onChange={(event) =>
-                    setStatus(
-                      event.target.value as "ACTIVE" | "INACTIVE",
-                    )
-                  }
-                  required
-                  className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
-                >
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="position"
-                  className="text-sm font-medium"
-                >
-                  Position
-                </label>
-
-                <Input
-                  id="position"
-                  value={position}
-                  onChange={(event) =>
-                    setPosition(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="salary"
-                  className="text-sm font-medium"
-                >
-                  Salary
-                </label>
-
-                <Input
-                  id="salary"
-                  type="number"
-                  min="1"
-                  value={salary}
-                  onChange={(event) =>
-                    setSalary(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="hireDate"
-                  className="text-sm font-medium"
-                >
-                  Hire Date
-                </label>
-
-                <Input
-                  id="hireDate"
-                  type="date"
-                  value={hireDate}
-                  onChange={(event) =>
-                    setHireDate(event.target.value)
-                  }
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 border-t pt-6">
-              <Link href={`/employees/${id}`}>
-                <Button
-                  type="button"
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </Link>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting
-                  ? "Saving..."
-                  : "Save Changes"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      <EmployeeForm
+        employee={employee.data}
+        departments={
+          departments.data?.data ?? []
+        }
+      />
     </div>
   );
 }

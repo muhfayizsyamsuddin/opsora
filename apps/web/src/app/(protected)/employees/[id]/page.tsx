@@ -1,308 +1,452 @@
 "use client";
 
-import Link from "next/link";
-import { useParams, useRouter  } from "next/navigation";
-import { useQuery, useQueryClient  } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Building2,
-  Briefcase,
-  CalendarDays,
-  CircleUser,
-  Mail,
-  Wallet,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { use } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
-import { getEmployeeById, deleteEmployee, } from "@/services/employee.service";
-import { toast } from "sonner";
-import axios from "axios";
-import { useState } from "react";
-
-export default  function EmployeeDetailPage() {
-    const params = useParams<{ id: string }>();
-    const id = params.id;
-    const [isDeleting, setIsDeleting] = useState(false);
-    const router = useRouter();
-    const queryClient = useQueryClient();
-
-  const {
-    data: employee,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["employee", id],
-    queryFn: () => getEmployeeById(id),
-    enabled: Boolean(id),
-  });
-
-  async function handleDelete() {
-    try {
-        setIsDeleting(true);
-
-        await deleteEmployee(id);
-
-        toast.success("Employee deleted successfully");
-
-        await queryClient.invalidateQueries({
-        queryKey: ["employees"],
-        });
-
-        router.push("/employees");
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-        const message =
-            error.response?.data?.message ??
-            "Failed to delete employee";
-
-        toast.error(message);
-        } else {
-        toast.error("Failed to delete employee");
-        }
-    } finally {
-        setIsDeleting(false);
-    }
+import { getEmployeeById } from "@/services/employee.service";
+import { useEmployeeAttendance } from "@/features/attendances/queries/use-employee-attendance";
+import { usePerformanceReviewHistory } from "@/features/performance-reviews/queries/use-performance-review-history";
+import { usePermissions } from "@/hooks/use-permissions";
+function formatCurrency(
+  value: string | number,
+) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+}
+function formatDateTime(
+  value: string | null,
+) {
+  if (!value) {
+    return "-";
   }
 
-  if (isLoading) {
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  ).format(new Date(value));
+}
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+  }).format(new Date(value));
+}
+
+function getStatusStyle(
+  status: string,
+) {
+  if (status === "ACTIVE") {
+    return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+  }
+
+  return "border-muted bg-muted text-muted-foreground";
+}
+
+export default function EmployeeDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  const { hasPermission } = usePermissions();
+  const canReadEmployee = hasPermission("employees.read");
+
+  const employee = useQuery({
+    queryKey: ["employees", id],
+    queryFn: () => getEmployeeById(id),
+  });
+
+  const attendance = useEmployeeAttendance(id, {
+    page: 1,
+    per_page: 10,
+    sort_by: "checkIn",
+    sort_order: "desc",
+  });
+  const performanceHistory = usePerformanceReviewHistory(id, {
+    page: 1,
+    per_page: 10,
+    sort_by: "reviewDate",
+    sort_order: "desc",
+  });
+
+  if (employee.isLoading) {
     return (
       <div className="space-y-6">
-        <Link href="/employees">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employees
-          </Button>
-        </Link>
-
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Loading employee...
-            </p>
-          </CardContent>
-        </Card>
+        <div className="h-24 animate-pulse rounded-2xl border bg-muted/30" />
+        <div className="h-72 animate-pulse rounded-2xl border bg-muted/30" />
       </div>
     );
   }
 
-  if (isError || !employee) {
+  if (
+    employee.error ||
+    !employee.data
+  ) {
     return (
-      <div className="space-y-6">
-        <Link href="/employees">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Employees
-          </Button>
-        </Link>
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
+        <p className="font-medium">
+          Unable to load employee.
+        </p>
 
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Employee not found.
-            </p>
-          </CardContent>
-        </Card>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 rounded-xl"
+          onClick={() =>
+            router.push("/employees")
+          }
+        >
+          Back to Employees
+        </Button>
+      </div>
+    );
+  }
+
+  const data = employee.data;
+
+  if (!canReadEmployee) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this employee.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link href="/employees">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Employees
+          </p>
+
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Employee Detail
+          </h1>
+
+          <p className="mt-2 text-sm text-muted-foreground">
+            Review employee information and organizational assignment.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() =>
+              router.push("/employees")
+            }
+          >
             Back to Employees
           </Button>
-        </Link>
+
+          {/* <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() =>
+              document
+                .getElementById("attendance-history")
+                ?.scrollIntoView({
+                  behavior: "smooth",
+                })
+            }
+          >
+            View Attendance
+          </Button> */}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() =>
+              router.push(
+                `/employees/${data.id}/edit`,
+              )
+            }
+          >
+            Edit
+          </Button>
+        </div>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Employee Detail
-        </h1>
+      <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Employee Code
+            </p>
 
-        <p className="text-sm text-muted-foreground">
-          View employee information.
-        </p>
-      </div>
+            <p className="mt-1 font-semibold">
+              {data.employeeCode}
+            </p>
+          </div>
 
-      <div className="flex gap-2">
-        <Link href={`/employees/${id}/edit`}>
-            <Button>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Employee
-            </Button>
-        </Link>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Name
+            </p>
 
-        <AlertDialog>
-            <AlertDialogTrigger
-                className="inline-flex h-10 items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-xs transition-colors hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
-                disabled={isDeleting}
-            >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Employee
-            </AlertDialogTrigger>
+            <p className="mt-1 font-semibold">
+              {data.name}
+            </p>
+          </div>
 
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                <AlertDialogTitle>
-                    Delete Employee?
-                </AlertDialogTitle>
-
-                <AlertDialogDescription>
-                    Are you sure you want to delete{" "}
-                    <span className="font-medium">
-                    {employee.name}
-                    </span>
-                    ? This action cannot be undone.
-                </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                <AlertDialogCancel>
-                    Cancel
-                </AlertDialogCancel>
-
-                <AlertDialogAction
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                    {isDeleting ? "Deleting..." : "Delete Employee"}
-                </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <CircleUser className="h-10 w-10 text-muted-foreground" />
-            </div>
-
-            <h2 className="text-xl font-semibold">
-              {employee.name}
-            </h2>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              {employee.position}
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Status
             </p>
 
             <span
-              className={
-                employee.status === "ACTIVE"
-                  ? "mt-4 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-                  : "mt-4 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground"
-              }
+              className={`mt-1 inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusStyle(
+                data.status,
+              )}`}
             >
-              {employee.status}
+              {data.status}
             </span>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Employee Information</CardTitle>
-          </CardHeader>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Email
+            </p>
 
-          <CardContent className="grid gap-6 sm:grid-cols-2">
-            <div className="flex items-start gap-3">
-              <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
+            <p className="mt-1 font-semibold break-all">
+              {data.email}
+            </p>
+          </div>
 
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Email
-                </p>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Position
+            </p>
 
-                <p className="text-sm font-medium">
-                  {employee.email}
-                </p>
-              </div>
+            <p className="mt-1 font-semibold">
+              {data.position}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Department
+            </p>
+
+            <p className="mt-1 font-semibold">
+              {data.department.name}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Salary
+            </p>
+
+            <p className="mt-1 font-semibold">
+              {formatCurrency(data.salary)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Hire Date
+            </p>
+
+            <p className="mt-1 font-semibold">
+              {formatDate(data.hireDate)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Last Updated
+            </p>
+
+            <p className="mt-1 font-semibold">
+              {formatDate(data.updatedAt)}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="attendance-history"
+        className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6"
+      >
+        <div className="mb-5">
+          <h2 className="text-base font-semibold">
+            Attendance History
+         </h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            Recent attendance records for this employee.
+          </p>
+        </div>
+
+        {attendance.isLoading ? (
+          <div className="h-32 animate-pulse rounded-xl bg-muted/30" />
+        ) : attendance.error ? (
+          <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+            <p className="text-sm font-medium">
+              Unable to load attendance history.
+            </p>
+          </div>
+        ) : attendance.data?.data.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              No attendance records found.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {attendance.data?.data.map(
+              (item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {item.status}
+                    </p>
+
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Check in:{" "}
+                      {formatDateTime(item.checkIn)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      Check out:{" "}
+                      {item.checkOut
+                        ? formatDateTime(item.checkOut)
+                        : "Not checked out"}
+                    </p>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="rounded-xl"
+                      onClick={() =>
+                        router.push(
+                          `/attendances/${item.id}`,
+                        )
+                      }
+                    >
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        )}
+        </section>
+        <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-base font-semibold">
+                Performance History
+              </h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Recent performance reviews for this employee.
+              </p>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Building2 className="mt-0.5 h-5 w-5 text-muted-foreground" />
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Department
+            {performanceHistory.data &&
+              performanceHistory.data.meta.total > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {performanceHistory.data.meta.total} review
+                  {performanceHistory.data.meta.total !== 1
+                    ? "s"
+                    : ""}
                 </p>
+              )}
+          </div>
 
-                <p className="text-sm font-medium">
-                  {employee.department.name}
-                </p>
-              </div>
+          {performanceHistory.isLoading ? (
+            <div className="h-32 animate-pulse rounded-xl bg-muted/30" />
+          ) : performanceHistory.error ? (
+            <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+              <p className="text-sm font-medium">
+                Unable to load performance history.
+              </p>
             </div>
-
-            <div className="flex items-start gap-3">
-              <Briefcase className="mt-0.5 h-5 w-5 text-muted-foreground" />
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Position
-                </p>
-
-                <p className="text-sm font-medium">
-                  {employee.position}
-                </p>
-              </div>
+          ) : performanceHistory.data?.data.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                No performance reviews found.
+              </p>
             </div>
+          ) : (
+            <div className="divide-y">
+              {performanceHistory.data?.data.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">
+                        {item.reviewPeriod ?? "Performance Review"}
+                      </p>
 
-            <div className="flex items-start gap-3">
-              <Wallet className="mt-0.5 h-5 w-5 text-muted-foreground" />
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                          item.score >= 80
+                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : item.score >= 60
+                              ? "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400"
+                        }`}
+                      >
+                        {item.score} / 100
+                      </span>
+                    </div>
 
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Salary
-                </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Reviewer:{" "}
+                      {item.reviewer?.name ??
+                        item.reviewerLegacy ??
+                        "—"}
+                    </p>
 
-                <p className="text-sm font-medium">
-                  Rp {employee.salary.toLocaleString("id-ID")}
-                </p>
-              </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatDate(item.reviewDate)}
+                    </p>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="rounded-xl"
+                    onClick={() =>
+                      router.push(
+                        `/performance-reviews/${item.id}`,
+                      )
+                    }
+                  >
+                    View
+                  </Button>
+                </div>
+              ))}
             </div>
-
-            <div className="flex items-start gap-3">
-              <CalendarDays className="mt-0.5 h-5 w-5 text-muted-foreground" />
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Hire Date
-                </p>
-
-                <p className="text-sm font-medium">
-                  {new Date(
-                    employee.hireDate,
-                  ).toLocaleDateString("id-ID")}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </section>
     </div>
   );
 }

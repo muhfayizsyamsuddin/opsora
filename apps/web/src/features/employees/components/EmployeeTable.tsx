@@ -1,213 +1,213 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+  Eye,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 
-import { getEmployees } from "@/services/employee.service";
+import { Button } from "@/components/ui/button";
+
+import type {
+  Employee,
+} from "@/features/employees/types/employee";
 
 type EmployeeTableProps = {
-  search?: string;
-  department?: string;
-  status?: "ACTIVE" | "INACTIVE" | "";
+  employees: Employee[];
+  canUpdate: boolean;
+  canDelete: boolean;
+  onView: (employee: Employee) => void;
+  onEdit: (employee: Employee) => void;
+  onDelete: (employee: Employee) => void;
 };
 
+function formatCurrency(
+  value: string | number,
+) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+  }).format(new Date(value));
+}
+
+function getStatusStyle(
+  status: Employee["status"],
+) {
+  if (status === "ACTIVE") {
+    return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+  }
+
+  return "border-muted bg-muted text-muted-foreground";
+}
+
 export function EmployeeTable({
-  search = "",
-  department = "",
-  status = "",
+  employees,
+  canUpdate,
+  canDelete,
+  onView,
+  onEdit,
+  onDelete,
 }: EmployeeTableProps) {
-  const [page, setPage] = useState(1);
-
-  const pageSize = 5;
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, department, status]);
-
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: [
-      "employees",
-      {
-        page,
-        search,
-        department,
-        status,
-      },
-    ],
-    queryFn: () =>
-      getEmployees({
-        page,
-        limit: pageSize,
-        search: search || undefined,
-        departmentId: department || undefined,
-        status: status || undefined,
-        sort: "createdAt",
-        order: "desc",
-      }),
-  });
-
-  const employees = data?.data ?? [];
-  const meta = data?.meta;
-
-  if (isLoading) {
+  if (employees.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center text-sm text-muted-foreground">
-          Loading employees...
-        </CardContent>
-      </Card>
+      <section className="rounded-2xl border bg-card shadow-sm">
+        <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
+          <h3 className="text-sm font-semibold">
+            No employees found
+          </h3>
+
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            Try changing your filters or create a new employee.
+          </p>
+        </div>
+      </section>
     );
   }
-
-  if (isError) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center text-sm text-destructive">
-          Failed to load employees.
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const totalPages = meta?.totalPages ?? 1;
-  const total = meta?.total ?? 0;
-
-  const startIndex =
-    total === 0 ? 0 : (page - 1) * pageSize + 1;
-
-  const endIndex =
-    Math.min(page * pageSize, total);
 
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b text-left text-sm">
-                <th className="px-6 py-4 font-medium">
-                  Name
-                </th>
+    <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[1180px] text-sm">
+          <thead>
+            <tr className="border-b bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <th className="px-5 py-4">
+                Employee
+              </th>
 
-                <th className="px-6 py-4 font-medium">
-                  Email
-                </th>
+              <th className="px-5 py-4">
+                Position
+              </th>
 
-                <th className="px-6 py-4 font-medium">
-                  Department
-                </th>
+              <th className="px-5 py-4">
+                Department
+              </th>
 
-                <th className="px-6 py-4 font-medium">
-                  Position
-                </th>
+              <th className="px-5 py-4">
+                Salary
+              </th>
 
-                <th className="px-6 py-4 font-medium">
-                  Status
-                </th>
-              </tr>
-            </thead>
+              <th className="px-5 py-4">
+                Hire Date
+              </th>
 
-            <tbody>
-              {employees.map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="border-b last:border-0"
-                >
-                  <td className="px-6 py-4 text-sm font-medium">
-                    <Link
-                      href={`/employees/${employee.id}`}
-                      className="hover:underline"
-                    >
-                      {employee.name}
-                    </Link>
-                  </td>
+              <th className="px-5 py-4">
+                Status
+              </th>
 
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+              <th className="px-5 py-4 text-right">
+                Actions
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {employees.map((employee) => (
+              <tr
+                key={employee.id}
+                className="border-b last:border-0 hover:bg-muted/30"
+              >
+                <td className="px-5 py-4">
+                  <p className="font-medium">
+                    {employee.name}
+                  </p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {employee.employeeCode}
+                  </p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {employee.email}
-                  </td>
+                  </p>
+                </td>
 
-                  <td className="px-6 py-4 text-sm">
-                    {employee.department.name}
-                  </td>
+                <td className="px-5 py-4">
+                  {employee.position}
+                </td>
 
-                  <td className="px-6 py-4 text-sm">
-                    {employee.position}
-                  </td>
+                <td className="px-5 py-4">
+                  {employee.department.name}
+                </td>
 
-                  <td className="px-6 py-4">
-                    <span
-                        className={
-                            employee.status === "ACTIVE"
-                            ? "rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
-                            : "rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                        }
-                        >
-                        {employee.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                <td className="px-5 py-4 font-medium">
+                  {formatCurrency(
+                    employee.salary,
+                  )}
+                </td>
 
-              {employees.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-12 text-center text-sm text-muted-foreground"
+                <td className="px-5 py-4 text-muted-foreground">
+                  {formatDate(
+                    employee.hireDate,
+                  )}
+                </td>
+
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium ${getStatusStyle(
+                      employee.status,
+                    )}`}
                   >
-                    No employees found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    {employee.status}
+                  </span>
+                </td>
 
-        {total > 0 && (
-          <div className="flex items-center justify-between border-t px-6 py-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {startIndex}–{endIndex} of {total}
-            </p>
+                <td className="px-5 py-4">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-lg"
+                      aria-label={`View ${employee.name}`}
+                      onClick={() =>
+                        onView(employee)
+                      }
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={page === 1}
-                onClick={() =>
-                  setPage((current) => current - 1)
-                }
-                className="rounded-md border px-3 py-2 text-sm disabled:pointer-events-none disabled:opacity-50"
-              >
-                Previous
-              </button>
+                    {canUpdate && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-lg"
+                        aria-label={`Edit ${employee.name}`}
+                        onClick={() =>
+                          onEdit(employee)
+                        }
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
 
-              <span className="px-2 text-sm">
-                {page} / {totalPages}
-              </span>
-
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() =>
-                  setPage((current) => current + 1)
-                }
-                className="rounded-md border px-3 py-2 text-sm disabled:pointer-events-none disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    {canDelete && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-lg text-destructive hover:text-destructive"
+                        aria-label={`Delete ${employee.name}`}
+                        onClick={() =>
+                          onDelete(employee)
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

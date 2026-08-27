@@ -1,237 +1,155 @@
 "use client";
 
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, CalendarDays, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
-import axios from "axios";
-import { toast } from "sonner";
+import { use } from "react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useQuery } from "@tanstack/react-query";
 
-import {
-  getDepartmentById,
-  deleteDepartment,
-} from "@/services/department.service";
+import { getDepartmentById } from "@/services/department.service";
+import { usePermissions } from "@/hooks/use-permissions";
 
-export default function DepartmentDetailPage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
 
+export default function DepartmentDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const router = useRouter();
-  const queryClient = useQueryClient();
 
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { hasPermission } = usePermissions();
+  const canReadDepartment = hasPermission("departments.read");
 
-  const {
-    data: department,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["department", id],
+  const department = useQuery({
+    queryKey: ["departments", id],
     queryFn: () => getDepartmentById(id),
-    enabled: Boolean(id),
   });
 
-  async function handleDelete() {
-    try {
-      setIsDeleting(true);
-
-      await deleteDepartment(id);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["departments"],
-      });
-
-      toast.success(
-        "Department deleted successfully",
-      );
-
-      router.push("/departments");
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        const message =
-          error.response?.data?.message ??
-          "Failed to delete department";
-
-        toast.error(message);
-      } else {
-        toast.error(
-          "Failed to delete department",
-        );
-      }
-    } finally {
-      setIsDeleting(false);
-    }
-  }
-
-  if (isLoading) {
+  if (department.isLoading) {
     return (
       <div className="space-y-6">
-        <Link
-          href="/departments"
-          className="inline-flex items-center text-sm text-muted-foreground hover:underline"
-        >
-          ← Back to Departments
-        </Link>
-
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Loading department...
-            </p>
-          </CardContent>
-        </Card>
+        <div className="h-24 animate-pulse rounded-2xl border bg-muted/30" />
+        <div className="h-52 animate-pulse rounded-2xl border bg-muted/30" />
       </div>
     );
   }
 
-  if (isError || !department) {
+  if (
+    department.error ||
+    !department.data
+  ) {
     return (
-      <div className="space-y-6">
-        <Link
-          href="/departments"
-          className="inline-flex items-center text-sm text-muted-foreground hover:underline"
-        >
-          ← Back to Departments
-        </Link>
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
+        <p className="font-medium">
+          Unable to load department.
+        </p>
 
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">
-              Department not found.
-            </p>
-          </CardContent>
-        </Card>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 rounded-xl"
+          onClick={() =>
+            router.push("/departments")
+          }
+        >
+          Back to Departments
+        </Button>
+      </div>
+    );
+  }
+
+  const data = department.data;
+
+  if (!canReadDepartment) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this department.
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/departments"
-        className="inline-flex items-center text-sm text-muted-foreground hover:underline"
-      >
-        ← Back to Departments
-      </Link>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Departments
+          </p>
 
-      <div>
-        <h1 className="text-2xl font-semibold">
-          Department Detail
-        </h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+            Department Detail
+          </h1>
+        </div>
 
-        <p className="text-sm text-muted-foreground">
-          View department information.
-        </p>
-      </div>
-
-      <div className="flex gap-2">
-        <Link href={`/departments/${id}/edit`}>
-          <Button>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit Department
-          </Button>
-        </Link>
-
-        <AlertDialog>
-          <AlertDialogTrigger
-            className="inline-flex h-10 items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-xs transition-colors hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
-            disabled={isDeleting}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() =>
+              router.push("/departments")
+            }
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete Department
-          </AlertDialogTrigger>
+            Back to Departments
+          </Button>
 
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete Department?
-              </AlertDialogTitle>
-
-              <AlertDialogDescription>
-                Are you sure you want to delete{" "}
-                <span className="font-medium">
-                  {department.name}
-                </span>
-                ? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>
-                Cancel
-              </AlertDialogCancel>
-
-              <AlertDialogAction
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeleting
-                  ? "Deleting..."
-                  : "Delete Department"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl"
+            onClick={() =>
+              router.push(
+                `/departments/${data.id}/edit`,
+              )
+            }
+          >
+            Edit
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <Building2 className="h-10 w-10 text-muted-foreground" />
-            </div>
+      <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+        <div className="grid gap-6 md:grid-cols-3">
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Department Name
+            </p>
 
-            <h2 className="text-xl font-semibold">
-              {department.name}
-            </h2>
-          </CardContent>
-        </Card>
+            <p className="mt-1 font-semibold">
+              {data.name}
+            </p>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Department Information
-            </CardTitle>
-          </CardHeader>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Created
+            </p>
 
-          <CardContent className="space-y-6">
-            <div className="flex items-start gap-3">
-              <Building2 className="mt-0.5 h-5 w-5 text-muted-foreground" />
+            <p className="mt-1 font-semibold">
+              {formatDate(data.createdAt)}
+            </p>
+          </div>
 
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Name
-                </p>
+          <div>
+            <p className="text-xs text-muted-foreground">
+              Updated
+            </p>
 
-                <p className="text-sm font-medium">
-                  {department.name}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="mt-1 font-semibold">
+              {formatDate(data.updatedAt)}
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

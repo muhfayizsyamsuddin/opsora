@@ -1,109 +1,149 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Search, UserPlus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { getDepartments, type Department, } from "@/services/department.service";
-import { EmployeeStatus } from "../types";
+import type { Department } from "@/features/departments/types/department";
+
+import type {
+  EmployeeQueryParams,
+  EmployeeStatus,
+} from "@/features/employees/types/employee";
 
 type EmployeeToolbarProps = {
-  search: string;
-  department: string;
-  status: EmployeeStatus;
-  onSearchChange: (value: string) => void;
-  onDepartmentChange: (value: string) => void;
-  onStatusChange: (value: EmployeeStatus) => void;
+  params: EmployeeQueryParams;
+  departments: Department[];
+  onChange: (
+    params: EmployeeQueryParams,
+  ) => void;
 };
 
 export function EmployeeToolbar({
-  search,
-  department,
-  status,
-  onSearchChange,
-  onDepartmentChange,
-  onStatusChange,
+  params,
+  departments,
+  onChange,
 }: EmployeeToolbarProps) {
-  const router = useRouter();
-
-  const {
-    data,
-    isLoading,
-  } = useQuery({
-    queryKey: ["departments"],
-    queryFn: () =>
-      getDepartments({
-        page: 1,
-        limit: 100,
-        sort: "name",
-        order: "asc",
-      }),
-  });
-
-  const departments: Department[] = data?.data ?? [];
-
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_auto] lg:items-end">
+        <div className="space-y-2">
+          <label
+            htmlFor="employee-search"
+            className="text-sm font-medium"
+          >
+            Search employee
+          </label>
 
           <Input
-            value={search}
+            id="employee-search"
+            value={params.search ?? ""}
             onChange={(event) =>
-              onSearchChange(event.target.value)
+              onChange({
+                ...params,
+                page: 1,
+                search:
+                  event.target.value ||
+                  undefined,
+              })
             }
-            placeholder="Search employees..."
-            className="pl-9"
+            placeholder="Search name, email, or position..."
+            className="h-10 rounded-xl"
           />
         </div>
 
-        <select
-          value={department}
-          onChange={(event) =>
-            onDepartmentChange(event.target.value)
-          }
-          disabled={isLoading}
-          className="h-10 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="">
-            {isLoading
-              ? "Loading Departments..."
-              : "All Departments"}
-          </option>
+        <div className="space-y-2">
+          <label
+            htmlFor="employee-department"
+            className="text-sm font-medium"
+          >
+            Department
+          </label>
 
-          {departments.map((item) => (
-            <option
-              key={item.id}
-              value={item.id}
-            >
-              {item.name}
+          <select
+            id="employee-department"
+            value={params.department_id ?? ""}
+            onChange={(event) =>
+              onChange({
+                ...params,
+                page: 1,
+                department_id:
+                  event.target.value ||
+                  undefined,
+              })
+            }
+            className="h-10 w-full rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">
+              All departments
             </option>
-          ))}
-        </select>
 
-        <select
-          value={status}
-          onChange={(event) =>
-            onStatusChange(event.target.value as EmployeeStatus)
+            {departments.map(
+              (department) => (
+                <option
+                  key={department.id}
+                  value={department.id}
+                >
+                  {department.name}
+                </option>
+              ),
+            )}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="employee-status"
+            className="text-sm font-medium"
+          >
+            Status
+          </label>
+
+          <select
+            id="employee-status"
+            value={params.status ?? ""}
+            onChange={(event) =>
+              onChange({
+                ...params,
+                page: 1,
+                status:
+                  (event.target.value ||
+                    undefined) as
+                    | EmployeeStatus
+                    | undefined,
+              })
+            }
+            className="h-10 w-full rounded-xl border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">
+              All statuses
+            </option>
+
+            <option value="ACTIVE">
+              Active
+            </option>
+
+            <option value="INACTIVE">
+              Inactive
+            </option>
+          </select>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="h-10 rounded-xl"
+          onClick={() =>
+            onChange({
+              page: 1,
+              per_page: 20,
+              sort_by: "createdAt",
+              sort_order: "desc",
+            })
           }
-          className="h-10 rounded-md border bg-background px-3 text-sm"
         >
-          <option value="">All Status</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-        </select>
+          Reset
+        </Button>
       </div>
-
-      <Button
-        onClick={() => router.push("/employees/new")}
-      >
-        <UserPlus className="mr-2 h-4 w-4" />
-        Add Employee
-      </Button>
     </div>
   );
 }

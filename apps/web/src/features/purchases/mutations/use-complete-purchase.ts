@@ -1,0 +1,47 @@
+"use client";
+
+import {
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { completePurchase } from "@/services/purchase.service";
+
+export function useCompletePurchase() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      completePurchase(id),
+
+    onSuccess: (purchase) => {
+      queryClient.setQueryData(
+        ["purchases", purchase.id],
+        purchase,
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ["purchases"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["inventory", "stock"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["inventory", "movements"],
+      });
+
+      toast.success(
+        "Purchase completed successfully",
+      );
+    },
+
+    onError: () => {
+      toast.error(
+        "Failed to complete purchase.",
+      );
+    },
+  });
+}

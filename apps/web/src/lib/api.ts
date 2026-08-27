@@ -2,8 +2,9 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
-
+import { API } from "@/constants/api";
 import { storage } from "@/services/storage";
+import { useAuthStore } from "@/stores/auth.store";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -47,6 +48,7 @@ function processQueue(
 
 function redirectToLogin() {
   storage.clearTokens();
+  useAuthStore.getState().clearAuth();
 
   if (
     typeof window !== "undefined" &&
@@ -114,7 +116,7 @@ api.interceptors.response.use(
     try {
       const response =
         await refreshClient.post(
-          "/auth/refresh",
+          API.AUTH.REFRESH,
           {
             refresh_token: refreshToken,
           },

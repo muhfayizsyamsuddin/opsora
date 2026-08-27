@@ -1,149 +1,94 @@
 import { api } from "@/lib/api";
+import { API } from "@/constants/api";
 
-export type LeaveStatus =
-  | "PENDING"
-  | "APPROVED"
-  | "REJECTED";
+import type { ApiResponse } from "@/types/api";
 
-export type Leave = {
-  id: string;
-  employeeId: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  status: LeaveStatus;
-  employee: {
-    id: string;
-    name: string;
-    email: string;
-    department: {
-      id: string;
-      name: string;
-    };
-  };
-};
-
-export type GetLeavesParams = {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: LeaveStatus;
-  employeeId?: string;
-  sort?: "startDate" | "endDate" | "createdAt";
-  order?: "asc" | "desc";
-};
-
-export type CreateLeavePayload = {
-  employeeId: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-};
-
-export type UpdateLeavePayload = {
-  startDate?: string;
-  endDate?: string;
-  reason?: string;
-  status?: LeaveStatus;
-};
-
-type LeavesResponse = {
-  data: {
-    data: Leave[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  };
-};
-
-type LeaveResponse = {
-  data: Leave;
-};
+import type {
+  Leave,
+  LeaveListResponse,
+  LeaveQueryParams,
+  CreateLeaveInput,
+  UpdateLeaveInput,
+} from "@/features/leaves/types/leave";
 
 export async function getLeaves(
-  params: GetLeavesParams = {},
-) {
-  const response = await api.get<LeavesResponse>(
-    "/leaves",
-    {
-      params: {
-        page: params.page ?? 1,
-        limit: params.limit ?? 10,
-        search: params.search || undefined,
-        status: params.status || undefined,
-        employeeId:
-          params.employeeId || undefined,
-        sort: params.sort ?? "createdAt",
-        order: params.order ?? "desc",
-      },
-    },
-  );
+  params?: LeaveQueryParams,
+): Promise<LeaveListResponse> {
+  const response =
+    await api.get<
+      ApiResponse<LeaveListResponse>
+    >(API.LEAVE_REQUESTS, {
+      params,
+    });
 
   return response.data.data;
 }
 
 export async function getLeaveById(
   id: string,
-) {
-  const response = await api.get<LeaveResponse>(
-    `/leaves/${id}`,
-  );
+): Promise<Leave> {
+  const response =
+    await api.get<ApiResponse<Leave>>(
+      `${API.LEAVE_REQUESTS}/${id}`,
+    );
 
   return response.data.data;
 }
 
 export async function createLeave(
-  data: CreateLeavePayload,
-) {
-  const response = await api.post(
-    "/leaves",
-    data,
-  );
+  data: CreateLeaveInput,
+): Promise<Leave> {
+  const response =
+    await api.post<ApiResponse<Leave>>(
+      API.LEAVE_REQUESTS,
+      data,
+    );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function updateLeave(
   id: string,
-  data: UpdateLeavePayload,
-) {
-  const response = await api.patch(
-    `/leaves/${id}`,
-    data,
-  );
+  data: UpdateLeaveInput,
+): Promise<Leave> {
+  const response =
+    await api.put<ApiResponse<Leave>>(
+      `${API.LEAVE_REQUESTS}/${id}`,
+      data,
+    );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function approveLeave(
   id: string,
-) {
-  const response = await api.patch(
-    `/leaves/${id}/approve`,
-  );
+): Promise<Leave> {
+  const response =
+    await api.post<ApiResponse<Leave>>(
+      `${API.LEAVE_REQUESTS}/${id}/approve`,
+    );
 
-  return response.data;
+  return response.data.data;
 }
 
 export async function rejectLeave(
   id: string,
-) {
-  const response = await api.patch(
-    `/leaves/${id}/reject`,
-  );
+): Promise<Leave> {
+  const response =
+    await api.post<ApiResponse<Leave>>(
+      `${API.LEAVE_REQUESTS}/${id}/reject`,
+    );
 
-  return response.data;
+  return response.data.data;
 }
 
-export async function deleteLeave(
+export async function cancelLeave(
   id: string,
-) {
-  const response = await api.delete(
-    `/leaves/${id}`,
-  );
+): Promise<Leave> {
+  const response =
+    await api.post<ApiResponse<Leave>>(
+      `${API.LEAVE_REQUESTS}/${id}/cancel`,
+    );
 
-  return response.data;
+  return response.data.data;
 }

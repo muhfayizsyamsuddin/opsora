@@ -1,119 +1,114 @@
 import { api } from "@/lib/api";
+import { API } from "@/constants/api";
 
-export type DashboardReport = {
-  totalEmployees: number;
-  totalDepartments: number;
-  presentToday: number;
-  lateToday: number;
-  absentToday: number;
-  pendingLeaves: number;
-  approvedLeaves: number;
-  rejectedLeaves: number;
-  totalSalary: number;
-  averageSalary: number;
+import type {
+  AttendanceReport,
+  DashboardReport,
+  InventoryReport,
+  LeaveReport,
+  PayrollReport,
+  PerformanceReport,
+  ProfitReport,
+  PurchasesReport,
+  SalesReport,
+} from "@/features/reports/types/report";
 
-  employeesByDepartment: {
-    id: string;
-    name: string;
-    totalEmployees: number;
-  }[];
+import type { ApiResponse } from "@/types/api";
 
-  attendanceWeekly: {
-    day: string;
-    date: string;
-    attendance: number;
-  }[];
-  recentActivities: DashboardActivity[];
-  upcomingLeaves: {
-    id: string;
-    name: string;
-    type: string;
-    startDate: string;
-    endDate: string;
-  }[];
-};
+export async function getDashboardReport(): Promise<DashboardReport> {
+  const response =
+    await api.get<ApiResponse<DashboardReport>>(
+      `${API.REPORTS}/dashboard`,
+    );
 
-export type AttendanceReport = {
-  totalAttendances: number;
-  present: number;
-  late: number;
-  absent: number;
-  leave: number;
-};
-
-export type LeaveReport = {
-  totalLeaves: number;
-  pendingLeaves: number;
-  approvedLeaves: number;
-  rejectedLeaves: number;
-};
-
-export type PayrollReport = {
-  totalPayroll: number;
-  averagePayroll: number;
-  totalPayrollRecords: number;
-  highestPayroll: {
-    employee: string;
-    totalSalary: number;
-  } | null;
-  lowestPayroll: {
-    employee: string;
-    totalSalary: number;
-  } | null;
-};
-
-export type PerformanceReport = {
-  averageScore: number;
-  totalReviews: number;
-  highestScore: {
-    employee: string;
-    score: number;
-  } | null;
-  lowestScore: {
-    employee: string;
-    score: number;
-  } | null;
-};
-
-export type DashboardActivity = {
-  id: string;
-  type:
-    | "EMPLOYEE"
-    | "ATTENDANCE"
-    | "LEAVE"
-    | "PAYROLL"
-    | "PERFORMANCE";
-  title: string;
-  description: string;
-  createdAt: string;
-};
-
-export async function getDashboardReport() {
-  const response = await api.get("/reports/dashboard");
-
-  return response.data.data as DashboardReport;
+  return response.data.data;
 }
 
-export async function getAttendanceReport() {
-  const response = await api.get("/reports/attendance");
+export type ReportDateParams = {
+  date_from?: string;
+  date_to?: string;
+};
 
-  return response.data.data as AttendanceReport;
+export async function getSalesReport(
+  params?: ReportDateParams,
+): Promise<SalesReport> {
+  const response =
+    await api.get<ApiResponse<SalesReport>>(
+      `${API.REPORTS}/sales`,
+      { params },
+    );
+
+  return response.data.data;
 }
 
-export async function getLeaveReport() {
-  const response = await api.get("/reports/leaves");
+export async function getPurchasesReport(
+  params?: ReportDateParams,
+): Promise<PurchasesReport> {
+  const response =
+    await api.get<ApiResponse<PurchasesReport>>(
+      `${API.REPORTS}/purchases`,
+      { params },
+    );
 
-  return response.data.data as LeaveReport;
+  return response.data.data;
 }
 
-export async function getPayrollReport() {
-  const response = await api.get("/reports/payroll");
+export async function getInventoryReport(
+  params?: ReportDateParams,
+): Promise<InventoryReport> {
+  const response =
+    await api.get<ApiResponse<InventoryReport>>(
+      `${API.REPORTS}/inventory`,
+      { params },
+    );
 
-  return response.data.data as PayrollReport;
+  return response.data.data;
 }
 
-export async function getPerformanceReport() {
-  const response = await api.get("/reports/performance");
+export async function getProfitReport(
+  params?: ReportDateParams,
+): Promise<ProfitReport> {
+  const response =
+    await api.get<ApiResponse<ProfitReport>>(
+      `${API.REPORTS}/profit`,
+      { params },
+    );
 
-  return response.data.data as PerformanceReport;
+  return response.data.data;
+}
+
+export async function getPerformanceReport(): Promise<PerformanceReport> {
+  const response =
+    await api.get<ApiResponse<PerformanceReport>>(
+      `${API.REPORTS}/performance`,
+    );
+
+  return response.data.data;
+}
+
+export async function getAttendanceReport(): Promise<AttendanceReport> {
+  const response =
+    await api.get<ApiResponse<AttendanceReport>>(
+      `${API.REPORTS}/attendance`,
+    );
+
+  return response.data.data;
+}
+
+export async function getLeaveReport(): Promise<LeaveReport> {
+  const response =
+    await api.get<ApiResponse<LeaveReport>>(
+      `${API.REPORTS}/leaves`,
+    );
+
+  return response.data.data;
+}
+
+export async function getPayrollReport(): Promise<PayrollReport> {
+  const response =
+    await api.get<ApiResponse<PayrollReport>>(
+      `${API.REPORTS}/payroll`,
+    );
+
+  return response.data.data;
 }

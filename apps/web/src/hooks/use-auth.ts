@@ -32,25 +32,38 @@ export function useAuth() {
   });
 
   useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
+    if (!hasAccessToken) {
+      clearAuth();
+      return;
+    }
+
     if (query.isSuccess && query.data) {
       setUser(query.data);
     }
   }, [
+    mounted,
+    hasAccessToken,
     query.isSuccess,
     query.data,
     setUser,
+    clearAuth,
   ]);
 
   useEffect(() => {
     if (
       mounted &&
-      query.isError &&
-      !storage.getAccessToken()
+      hasAccessToken &&
+      query.isError
     ) {
       clearAuth();
     }
   }, [
     mounted,
+    hasAccessToken,
     query.isError,
     clearAuth,
   ]);
@@ -59,11 +72,14 @@ export function useAuth() {
     user,
     isAuthenticated:
       mounted &&
+      hasAccessToken &&
       isAuthenticated &&
       !!user,
+
     isLoading:
       !mounted ||
-      query.isLoading ||
-      query.isFetching,
+      (hasAccessToken &&
+        (query.isLoading ||
+          query.isFetching)),
   };
 }
