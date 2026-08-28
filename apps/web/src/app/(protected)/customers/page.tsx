@@ -51,7 +51,10 @@ export default function CustomersPage() {
       DEFAULT_PARAMS,
     );
 
-  const customers = useCustomers(params);
+  const customers = useCustomers(
+    params,
+    canReadCustomer,
+  );
 
   const customerData =
     customers.data?.data ?? [];

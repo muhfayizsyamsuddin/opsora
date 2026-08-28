@@ -20,11 +20,26 @@ export default function EditCustomerPage({
 }: EditCustomerPageProps) {
   const { id } = use(params);
   const router = useRouter();
+
   const { hasPermission } = usePermissions();
+  const canReadCustomer = hasPermission("customers.read");
   const canUpdateCustomer = hasPermission("customers.update");
 
-  const customer = useCustomer(id);
+  const customer = useCustomer(
+    id,
+    canReadCustomer && canUpdateCustomer,
+  );
   const updateCustomer = useUpdateCustomer();
+
+  if (!canReadCustomer || !canUpdateCustomer) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit customers.
+        </p>
+      </div>
+    );
+  }
 
   if (customer.isLoading) {
     return (
@@ -56,16 +71,6 @@ export default function EditCustomerPage({
         >
           Back to Customers
         </Button>
-      </div>
-    );
-  }
-
-  if (!canUpdateCustomer) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit customers.
-        </p>
       </div>
     );
   }
@@ -103,9 +108,9 @@ export default function EditCustomerPage({
               id,
               data: {
                 name: values.name,
-                phone: values.phone || undefined,
-                email: values.email || undefined,
-                address: values.address || undefined,
+                phone: values.phone || null,
+                email: values.email || null,
+                address: values.address || null,
               },
             },
             {

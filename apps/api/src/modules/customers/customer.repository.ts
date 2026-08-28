@@ -109,9 +109,9 @@ export class CustomerRepository {
     id: string,
     data: {
       name?: string;
-      phone?: string;
-      email?: string;
-      address?: string;
+      phone?: string | null;
+      email?: string | null;
+      address?: string | null;
     },
   ) {
     return prisma.customer.update({

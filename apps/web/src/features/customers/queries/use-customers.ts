@@ -7,9 +7,11 @@ import type { CustomerQueryParams } from "@/features/customers/types/customer";
 
 export function useCustomers(
   params: CustomerQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["customers", params],
     queryFn: () => getCustomers(params),
+    enabled,
   });
 }

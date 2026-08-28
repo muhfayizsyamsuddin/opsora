@@ -51,14 +51,17 @@ export default function CustomerDetailPage({
   const [showDeleteDialog, setShowDeleteDialog] =
     useState(false);
 
-  const customer = useCustomer(id);
-  const deleteCustomer = useDeleteCustomer();
-
   const { hasPermission } = usePermissions();
   const canReadCustomer = hasPermission("customers.read");
   const canUpdate = hasPermission("customers.update");
   const canDelete = hasPermission("customers.delete");
-
+    
+  const customer = useCustomer(
+    id,
+    canReadCustomer,
+  );
+  const deleteCustomer = useDeleteCustomer();
+  
   if (!canReadCustomer) {
     return (
       <div className="rounded-2xl border bg-card p-6">
@@ -334,11 +337,11 @@ export default function CustomerDetailPage({
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              This will permanently delete{" "}
+              This will remove{" "}
               <span className="font-medium text-foreground">
                 {data.name}
-              </span>
-              . This action cannot be undone.
+              </span>{" "}
+              from the active customer list.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
