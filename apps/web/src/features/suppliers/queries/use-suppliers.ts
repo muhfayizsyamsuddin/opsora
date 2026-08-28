@@ -7,9 +7,11 @@ import type { SupplierQueryParams } from "@/features/suppliers/types/supplier";
 
 export function useSuppliers(
   params: SupplierQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["suppliers", params],
     queryFn: () => getSuppliers(params),
+    enabled,
   });
 }

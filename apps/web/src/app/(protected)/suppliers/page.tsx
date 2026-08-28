@@ -51,7 +51,10 @@ export default function SuppliersPage() {
       DEFAULT_PARAMS,
     );
 
-  const suppliers = useSuppliers(params);
+  const suppliers = useSuppliers(
+    params,
+    canReadSuppliers,
+  );
 
   const supplierData =
     suppliers.data?.data ?? [];

@@ -47,9 +47,22 @@ export const getSupplierByIdSchema = z.object({
 export const updateSupplierSchema = z.object({
   body: z.object({
     name: z.string().min(2).max(150).optional(),
-    phone: z.string().max(30).optional(),
-    email: z.string().email().max(150).optional(),
-    address: z.string().max(500).optional(),
+    phone: z
+      .string()
+      .max(30)
+      .nullable()
+      .optional(),
+    email: z
+      .string()
+      .email()
+      .max(150)
+      .nullable()
+      .optional(),
+    address: z
+      .string()
+      .max(500)
+      .nullable()
+      .optional(),
   }),
   params: z.object({
     id: z.string().uuid(),

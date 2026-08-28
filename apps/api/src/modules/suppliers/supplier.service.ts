@@ -62,9 +62,9 @@ export class SupplierService {
     id: string,
     data: {
       name?: string;
-      phone?: string;
-      email?: string;
-      address?: string;
+      phone?: string | null;
+      email?: string | null;
+      address?: string | null;
     },
   ) {
     const supplier = await SupplierRepository.findById(id);

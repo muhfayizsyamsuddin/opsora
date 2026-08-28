@@ -46,17 +46,19 @@ export default function SupplierDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-
-  const [showDeleteDialog, setShowDeleteDialog] =
-    useState(false);
-
-  const supplier = useSupplier(id);
-  const deleteSupplier = useDeleteSupplier();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { hasPermission } = usePermissions();
   const canReadSupplier = hasPermission("suppliers.read");
   const canUpdate = hasPermission("suppliers.update");
   const canDelete = hasPermission("suppliers.delete");
+  
+  const supplier = useSupplier(
+    id,
+    canReadSupplier,
+  );
+  const deleteSupplier = useDeleteSupplier();
+
 
   if (!canReadSupplier) {
     return (

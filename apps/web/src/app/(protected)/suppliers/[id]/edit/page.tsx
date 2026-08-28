@@ -22,10 +22,24 @@ export default function EditSupplierPage({
   const router = useRouter();
   
   const { hasPermission } = usePermissions();
+  const canReadSupplier = hasPermission("suppliers.read");
   const canUpdateSupplier = hasPermission("suppliers.update");
 
-  const supplier = useSupplier(id);
+  const supplier = useSupplier(
+    id,
+    canReadSupplier && canUpdateSupplier,
+  );
   const updateSupplier = useUpdateSupplier();
+
+  if (!canReadSupplier || !canUpdateSupplier) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit suppliers.
+        </p>
+      </div>
+    );
+  }
 
   if (supplier.isLoading) {
     return (
@@ -57,16 +71,6 @@ export default function EditSupplierPage({
         >
           Back to Suppliers
         </Button>
-      </div>
-    );
-  }
-
-  if (!canUpdateSupplier) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit suppliers.
-        </p>
       </div>
     );
   }
@@ -104,9 +108,9 @@ export default function EditSupplierPage({
               id,
               data: {
                 name: values.name,
-                phone: values.phone || undefined,
-                email: values.email || undefined,
-                address: values.address || undefined,
+                phone: values.phone || null,
+                email: values.email || null,
+                address: values.address || null,
               },
             },
             {
