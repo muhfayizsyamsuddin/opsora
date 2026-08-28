@@ -19,10 +19,7 @@ export default function EditPerformanceReviewPage({
   const { hasPermission } =
     usePermissions();
 
-  const canUpdatePerformanceReview =
-    hasPermission(
-      "performance_reviews.update",
-    );
+  const canUpdatePerformanceReview = hasPermission("performance_reviews.update");
 
   if (!canUpdatePerformanceReview) {
     return (

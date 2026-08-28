@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 import { AttendancePagination } from "@/features/attendances/components/AttendancePagination";
 import { useEmployeeAttendance } from "@/features/attendances/queries/use-employee-attendance";
-
+import { usePermissions } from "@/hooks/use-permissions";
 import { useEmployee } from "@/features/employees/queries/use-employee";
 
 const DEFAULT_PARAMS = {
@@ -64,6 +64,9 @@ export default function EmployeeAttendancePage({
   const { employee_id } = use(params);
 
   const router = useRouter();
+  const { hasPermission } = usePermissions();
+  const canReadAttendances = hasPermission("attendances.read");
+  const canReadEmployees = hasPermission("employees.read");
 
   const [queryParams, setQueryParams] =
     useState(DEFAULT_PARAMS);
@@ -76,6 +79,19 @@ export default function EmployeeAttendancePage({
       employee_id,
       queryParams,
     );
+
+  if (
+    !canReadAttendances ||
+    !canReadEmployees
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view employee attendance history.
+        </p>
+      </div>
+    );
+  }
 
   if (
     employee.isLoading ||

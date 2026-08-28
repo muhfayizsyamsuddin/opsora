@@ -74,7 +74,7 @@ export default function LeaveDetailPage({
   const cancelLeaveMutation = useCancelLeave();
 
   const { hasPermission } = usePermissions();
-
+  const canRead = hasPermission("leaves.read");
   const canUpdate = hasPermission("leaves.update");
   const canApprove = hasPermission("leaves.approve");
   const canReject = hasPermission("leaves.reject");
@@ -84,6 +84,16 @@ export default function LeaveDetailPage({
     queryKey: ["leaves", id],
     queryFn: () => getLeaveById(id),
   });
+
+  if (!canRead) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view leave requests.
+        </p>
+      </div>
+    );
+  }
 
   if (leave.isLoading) {
     return (

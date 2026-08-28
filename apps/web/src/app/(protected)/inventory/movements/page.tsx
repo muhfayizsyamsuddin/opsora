@@ -13,6 +13,7 @@ import { useInventoryMovements } from "@/features/inventory/queries/use-inventor
 import { useProducts } from "@/features/products/queries/use-products";
 
 import type { InventoryMovementQueryParams } from "@/features/inventory/types/inventory";
+import { usePermissions } from "@/hooks/use-permissions";
 
 const DEFAULT_PARAMS: InventoryMovementQueryParams = {
   page: 1,
@@ -23,20 +24,36 @@ const DEFAULT_PARAMS: InventoryMovementQueryParams = {
 export default function InventoryMovementsPage() {
   const router = useRouter();
 
+  const { hasPermission } = usePermissions();
+  const canReadMovements = hasPermission("inventory-movements.read");
+  const canReadProducts = hasPermission("products.read");
+
   const [params, setParams] =
     useState<InventoryMovementQueryParams>(
       DEFAULT_PARAMS,
     );
 
-  const movements =
-    useInventoryMovements(params);
+  const movements = useInventoryMovements(params);
 
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadProducts,
+  );
+
+  if (!canReadMovements) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view inventory movements.
+        </p>
+      </div>
+    );
+  }
 
   const movementData =
     movements.data?.data ?? [];
@@ -76,16 +93,20 @@ export default function InventoryMovementsPage() {
       <InventoryMovementToolbar
         params={params}
         products={
-          products.data?.data ?? []
+          canReadProducts
+            ? products.data?.data ?? []
+            : []
         }
         onChange={setParams}
       />
 
       {movements.isLoading ||
-      products.isLoading ? (
+      (canReadProducts &&
+        products.isLoading) ? (
         <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
       ) : movements.error ||
-        products.error ? (
+      (canReadProducts &&
+        products.error) ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
           <p className="font-medium">
             Unable to load inventory movements.

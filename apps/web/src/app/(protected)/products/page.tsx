@@ -31,6 +31,12 @@ const DEFAULT_PARAMS: ProductQueryParams = {
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { hasPermission } = usePermissions();
+  const canReadProducts = hasPermission("products.read");
+  const canCreateProduct = hasPermission("products.create");
+  const canUpdateProduct = hasPermission("products.update");
+  const canDeleteProduct = hasPermission("products.delete");
+  const canReadCategories = hasPermission("categories.read");
   const [params, setParams] =
     useState<ProductQueryParams>(
       DEFAULT_PARAMS,
@@ -40,12 +46,15 @@ export default function ProductsPage() {
 
   const deleteProduct = useDeleteProduct();
 
-  const categories = useCategories({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const categories = useCategories(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadCategories,
+  );
 
   const products = useProducts(params);
 
@@ -58,17 +67,15 @@ export default function ProductsPage() {
   const meta = products.data?.meta;
 
   const hasError =
-    products.error || categories.error;
+    Boolean(products.error) ||
+    (canReadCategories &&
+      Boolean(categories.error));
 
   const isLoading =
     products.isLoading ||
-    categories.isLoading;
+    (canReadCategories &&
+      categories.isLoading);
 
-  const { hasPermission } = usePermissions();
-  const canReadProducts = hasPermission("products.read");
-  const canCreateProduct = hasPermission("products.create");
-  const canUpdateProduct = hasPermission("products.update");
-  const canDeleteProduct = hasPermission("products.delete");
   
   const handleDelete = () => {
     if (!deleteTarget) {
@@ -139,7 +146,11 @@ export default function ProductsPage() {
 
       <ProductToolbar
         params={params}
-        categories={categoryData}
+        categories={
+          canReadCategories
+            ? categories.data?.data ?? []
+            : []
+        }
         onChange={setParams}
       />
 

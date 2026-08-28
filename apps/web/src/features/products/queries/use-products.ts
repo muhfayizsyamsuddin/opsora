@@ -7,9 +7,11 @@ import type { ProductQueryParams } from "@/features/products/types/product";
 
 export function useProducts(
   params: ProductQueryParams,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["products", params],
     queryFn: () => getProducts(params),
+    enabled,
   });
 }

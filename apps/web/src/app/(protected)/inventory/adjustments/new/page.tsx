@@ -13,10 +13,7 @@ export default function NewInventoryAdjustmentPage() {
     status: "ACTIVE",
   });
   const { hasPermission } = usePermissions();
-  const canAdjustInventory =
-    hasPermission(
-      "inventory-movements.adjust",
-    );
+  const canAdjustInventory = hasPermission("inventory-movements.adjust");
 
   if (!canAdjustInventory) {
     return (
