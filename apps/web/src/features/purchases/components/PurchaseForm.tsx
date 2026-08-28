@@ -348,8 +348,8 @@ export function PurchaseForm({
                         },
                       )}
                       type="number"
-                      min="1"
-                      step="1"
+                      min="0.01"
+                      step="0.01"
                       disabled={isPending}
                       className="rounded-xl"
                     />

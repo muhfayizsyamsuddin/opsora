@@ -53,12 +53,21 @@ export class PurchaseService {
 
       const productIds = data.items.map((item) => item.productId);
 
+      const uniqueProductIds = new Set(productIds);
+      if (uniqueProductIds.size !== productIds.length) {
+        throw new AppError(
+          "Purchase cannot contain duplicate products",
+          400,
+        );
+      }
+
       const products = await tx.product.findMany({
         where: {
           id: {
             in: productIds,
           },
           deletedAt: null,
+          status: "ACTIVE",
         },
       });
 
@@ -89,19 +98,28 @@ export class PurchaseService {
           throw new AppError("Product not found", 404);
         }
 
-        const subtotal = item.quantity * item.unitPrice;
+        const quantity = new Prisma.Decimal(
+          item.quantity,
+        );
+
+        const unitPrice = new Prisma.Decimal(
+          item.unitPrice,
+        );
+
+        const subtotal = quantity.mul(unitPrice);
 
         return {
           productId: item.productId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
+          quantity,
+          unitPrice,
           subtotal,
         };
       });
 
       const totalAmount = purchaseItems.reduce(
-        (total, item) => total + item.subtotal,
-        0,
+        (total, item) =>
+          total.add(item.subtotal),
+        new Prisma.Decimal(0),
       );
 
       const purchase = await tx.purchase.create({
@@ -230,21 +248,23 @@ export class PurchaseService {
         throw new AppError("Purchase not found", 404);
       }
 
-      if (purchase.status !== "DRAFT") {
+      const cancelResult =
+        await tx.purchase.updateMany({
+          where: {
+            id: purchase.id,
+            status: "DRAFT",
+          },
+          data: {
+            status: "CANCELLED",
+          },
+        });
+
+      if (cancelResult.count !== 1) {
         throw new AppError(
           "Only DRAFT purchases can be cancelled",
           400,
         );
       }
-
-      await tx.purchase.update({
-        where: {
-          id: purchase.id,
-        },
-        data: {
-          status: "CANCELLED",
-        },
-      });
 
       return tx.purchase.findUnique({
         where: {
@@ -395,7 +415,18 @@ export class PurchaseService {
         );
       }
 
-      if (purchase.status !== "DRAFT") {
+      const draftClaim =
+        await tx.purchase.updateMany({
+          where: {
+            id: purchase.id,
+            status: "DRAFT",
+          },
+          data: {
+            updatedAt: new Date(),
+          },
+        });
+
+      if (draftClaim.count !== 1) {
         throw new AppError(
           "Only DRAFT purchases can be updated",
           400,
@@ -425,12 +456,26 @@ export class PurchaseService {
           (item) => item.productId,
         );
 
+        const uniqueProductIds =
+          new Set(productIds);
+
+        if (
+          uniqueProductIds.size !==
+          productIds.length
+        ) {
+          throw new AppError(
+            "Purchase cannot contain duplicate products",
+            400,
+          );
+        }
+
         const products = await tx.product.findMany({
           where: {
             id: {
               in: productIds,
             },
             deletedAt: null,
+            status: "ACTIVE",
           },
         });
 
@@ -457,23 +502,29 @@ export class PurchaseService {
               );
             }
 
-            const subtotal =
-              item.quantity * item.unitPrice;
+            const quantity = new Prisma.Decimal(
+              item.quantity,
+            );
+
+            const unitPrice = new Prisma.Decimal(
+              item.unitPrice,
+            );
+
+            const subtotal = quantity.mul(unitPrice);
 
             return {
               productId: item.productId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
+              quantity,
+              unitPrice,
               subtotal,
             };
           },
         );
 
-        totalAmount = new Prisma.Decimal(
-          purchaseItems.reduce(
-            (total, item) => total + item.subtotal,
-            0,
-          ),
+        totalAmount = purchaseItems.reduce(
+          (total, item) =>
+            total.add(item.subtotal),
+          new Prisma.Decimal(0),
         );
 
         await tx.purchaseItem.deleteMany({

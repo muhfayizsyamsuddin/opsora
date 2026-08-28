@@ -8,27 +8,45 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function NewPurchasePage() {
   const { hasPermission } = usePermissions();
   const canCreatePurchase = hasPermission("purchases.create");
+  const canReadSuppliers = hasPermission("suppliers.read");
+  const canReadProducts = hasPermission("products.read");
 
-  const suppliers = useSuppliers({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const suppliers = useSuppliers(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canCreatePurchase && canReadSuppliers,
+  );
 
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-    status: "ACTIVE",
-  });
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    canCreatePurchase && canReadProducts,
+  );
 
   if (!canCreatePurchase) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">
           You do not have permission to create purchases.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadSuppliers || !canReadProducts) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view suppliers or products required to create purchases.
         </p>
       </div>
     );

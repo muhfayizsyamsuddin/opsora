@@ -65,12 +65,25 @@ export default function PurchaseDetailPage({
   const canComplete = hasPermission("purchases.complete");
   const canCancel = hasPermission("purchases.cancel");
 
-  const purchase = usePurchase(id);
+  const purchase = usePurchase(
+    id,
+    canRead,
+  );
   const complete = useCompletePurchase();
   const cancel = useCancelPurchase();
   const [action, setAction] = useState<
     "complete" | "cancel" | null
   >(null);
+  
+  if (!canRead) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this purchase.
+        </p>
+      </div>
+    );
+  }
 
   if (purchase.isLoading) {
     return (
@@ -107,16 +120,6 @@ export default function PurchaseDetailPage({
   const isPending =
     complete.isPending ||
     cancel.isPending;
-
-  if (!canRead) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this purchase.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

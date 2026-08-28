@@ -24,24 +24,63 @@ export default function EditPurchasePage({
   const router = useRouter();
   
   const { hasPermission } = usePermissions();
+  const canReadPurchase = hasPermission("purchases.read");
   const canUpdatePurchase = hasPermission("purchases.update");
+  const canReadSuppliers = hasPermission("suppliers.read");
+  const canReadProducts = hasPermission("products.read");
 
-  const purchase = usePurchase(id);
+  const purchase = usePurchase(
+    id,
+    canReadPurchase && canUpdatePurchase,
+  );
 
-  const suppliers = useSuppliers({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const suppliers = useSuppliers(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadPurchase &&
+      canUpdatePurchase &&
+      canReadSuppliers,
+  );
 
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-    status: "ACTIVE",
-  });
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    canReadPurchase &&
+      canUpdatePurchase &&
+      canReadProducts,
+  );
+
+  if (
+    !canReadPurchase ||
+    !canUpdatePurchase
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit purchases.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadSuppliers || !canReadProducts) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view suppliers or products required to edit purchases.
+        </p>
+      </div>
+    );
+  }
 
   if (
     purchase.isLoading ||
@@ -96,18 +135,7 @@ export default function EditPurchasePage({
     router.replace(
       `/purchases/${purchase.data.id}`,
     );
-
     return null;
-  }
-
-  if (!canUpdatePurchase) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit this purchase.
-        </p>
-      </div>
-    );
   }
 
   return (

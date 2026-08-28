@@ -33,8 +33,10 @@ export default function PurchasesPage() {
       DEFAULT_PARAMS,
     );
 
-  const purchases =
-    usePurchases(params);
+  const purchases = usePurchases(
+    params,
+    canReadPurchases,
+  );
 
   const suppliers = useSuppliers({
     page: 1,

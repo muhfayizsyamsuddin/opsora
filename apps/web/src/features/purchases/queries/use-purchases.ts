@@ -7,9 +7,11 @@ import type { PurchaseQueryParams } from "@/features/purchases/types/purchase";
 
 export function usePurchases(
   params: PurchaseQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["purchases", params],
     queryFn: () => getPurchases(params),
+    enabled,
   });
 }
