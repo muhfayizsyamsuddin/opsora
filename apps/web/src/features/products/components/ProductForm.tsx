@@ -78,7 +78,6 @@ export function ProductForm({
       barcode: "",
       purchasePrice: 0,
       sellingPrice: 0,
-      stock: 0,
       minimumStock: 0,
       unit: "pcs",
       status: "ACTIVE",
@@ -97,7 +96,6 @@ export function ProductForm({
       barcode: product.barcode ?? "",
       purchasePrice: Number(product.purchasePrice),
       sellingPrice: Number(product.sellingPrice),
-      stock: Number(product.stock),
       minimumStock: Number(product.minimumStock),
       unit: product.unit,
       status: product.status,
@@ -136,10 +134,7 @@ export function ProductForm({
     }
 
     createProduct.mutate(
-      {
-        ...payload,
-        stock: values.stock,
-      },
+      payload,
       {
         onSuccess: () => {
           router.replace("/products");
@@ -346,7 +341,7 @@ export function ProductForm({
           </h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Set pricing, stock levels, unit, and product status.
+            Set pricing, minimum stock, unit, and product status.
           </p>
         </div>
 
@@ -379,28 +374,6 @@ export function ProductForm({
               step="0.01"
               className="rounded-xl"
             />
-          </Field>
-
-          <Field
-            label="Stock"
-            error={errors.stock?.message}
-          >
-            <Input
-              {...register("stock", {
-                valueAsNumber: true,
-              })}
-              type="number"
-              min="0"
-              step="1"
-              disabled={isEditMode}
-              className="rounded-xl disabled:cursor-not-allowed disabled:opacity-60"
-            />
-
-            {isEditMode && (
-              <p className="text-xs text-muted-foreground">
-                Stock is managed through inventory movements.
-              </p>
-            )}
           </Field>
 
           <Field

@@ -6,6 +6,7 @@ import { getInventoryMovementById } from "@/services/inventory.service";
 
 export function useInventoryMovement(
   id?: string,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -15,6 +16,6 @@ export function useInventoryMovement(
     ],
     queryFn: () =>
       getInventoryMovementById(id!),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }

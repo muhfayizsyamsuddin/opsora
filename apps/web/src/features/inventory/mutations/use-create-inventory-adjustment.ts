@@ -28,6 +28,10 @@ export function useCreateInventoryAdjustment() {
         queryKey: ["inventory", "movements"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      });
+
       toast.success(
         "Inventory adjustment created successfully",
       );

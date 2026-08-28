@@ -35,11 +35,6 @@ export const productSchema = z
       .finite()
       .min(0, "Selling price cannot be negative"),
 
-    stock: z
-      .number()
-      .finite()
-      .min(0, "Stock cannot be negative"),
-
     minimumStock: z
       .number()
       .finite()

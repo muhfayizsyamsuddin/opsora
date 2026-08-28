@@ -36,8 +36,20 @@ export default function InventoryMovementDetailPage({
   const { hasPermission } = usePermissions();
   const canReadMovement = hasPermission("inventory-movements.read");
   
-  const movement =
-    useInventoryMovement(id);
+  const movement = useInventoryMovement(
+    id,
+    canReadMovement,
+  );
+
+  if (!canReadMovement) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view inventory movements.
+        </p>
+      </div>
+    );
+  }
 
   if (movement.isLoading) {
     return (
@@ -92,16 +104,6 @@ export default function InventoryMovementDetailPage({
 
   const isIn =
     data.movementType === "IN";
-    
-  if (!canReadMovement) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view inventory movements.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

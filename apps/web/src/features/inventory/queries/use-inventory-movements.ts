@@ -7,6 +7,7 @@ import type { InventoryMovementQueryParams } from "@/features/inventory/types/in
 
 export function useInventoryMovements(
   params: InventoryMovementQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -16,5 +17,6 @@ export function useInventoryMovements(
     ],
     queryFn: () =>
       getInventoryMovements(params),
+    enabled,
   });
 }

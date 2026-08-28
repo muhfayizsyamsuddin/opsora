@@ -30,6 +30,7 @@ export class InventoryStockService {
       where: {
         id: productId,
         deletedAt: null,
+        status: "ACTIVE",
       },
     });
 
@@ -37,24 +38,41 @@ export class InventoryStockService {
       throw new AppError("Product not found", 404);
     }
 
-    const beforeStock = product.stock;
-    const afterStock = beforeStock.add(quantity);
-
-    await tx.product.update({
-      where: {
-        id: product.id,
-      },
-      data: {
-        stock: {
-          increment: quantity,
+    const updatedProducts =
+      await tx.product.updateManyAndReturn({
+        where: {
+          id: product.id,
+          deletedAt: null,
+          status: "ACTIVE",
         },
-      },
-    });
+        data: {
+          stock: {
+            increment: quantity,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          stock: true,
+        },
+      });
+
+    const updatedProduct = updatedProducts[0];
+
+    if (!updatedProduct) {
+      throw new AppError(
+        "Product not found",
+        404,
+      );
+    }
+
+    const afterStock = updatedProduct.stock;
+    const beforeStock = afterStock.sub(quantity);
 
     return {
       product: {
-        id: product.id,
-        name: product.name,
+        id: updatedProduct.id,
+        name: updatedProduct.name,
         stock: afterStock,
       },
       beforeStock,
@@ -78,6 +96,7 @@ export class InventoryStockService {
       where: {
         id: productId,
         deletedAt: null,
+        status: "ACTIVE",
       },
     });
 
@@ -85,36 +104,44 @@ export class InventoryStockService {
       throw new AppError("Product not found", 404);
     }
 
-    const beforeStock = product.stock;
-
-    const updateResult = await tx.product.updateMany({
-      where: {
-        id: product.id,
-        deletedAt: null,
-        stock: {
-          gte: quantity,
+    const updatedProducts =
+      await tx.product.updateManyAndReturn({
+        where: {
+          id: product.id,
+          deletedAt: null,
+          status: "ACTIVE",
+          stock: {
+            gte: quantity,
+          },
         },
-      },
-      data: {
-        stock: {
-          decrement: quantity,
+        data: {
+          stock: {
+            decrement: quantity,
+          },
         },
-      },
-    });
+        select: {
+          id: true,
+          name: true,
+          stock: true,
+        },
+      });
 
-    if (updateResult.count !== 1) {
+    const updatedProduct = updatedProducts[0];
+
+    if (!updatedProduct) {
       throw new AppError(
         `Insufficient stock for product: ${product.name}`,
         400,
       );
     }
 
-    const afterStock = beforeStock.sub(quantity);
+    const afterStock = updatedProduct.stock;
+    const beforeStock = afterStock.add(quantity);
 
     return {
       product: {
-        id: product.id,
-        name: product.name,
+        id: updatedProduct.id,
+        name: updatedProduct.name,
         stock: afterStock,
       },
       beforeStock,

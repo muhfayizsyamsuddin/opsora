@@ -8,7 +8,6 @@ export const createProductSchema = z.object({
     barcode: z.string().max(100).optional(),
     purchasePrice: z.coerce.number().min(0),
     sellingPrice: z.coerce.number().min(0),
-    stock: z.coerce.number().min(0).default(0),
     minimumStock: z.coerce.number().min(0).default(0),
     unit: z.string().min(1).max(20),
     imageUrl: z.string().url().optional(),

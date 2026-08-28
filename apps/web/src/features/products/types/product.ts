@@ -72,7 +72,6 @@ export interface CreateProductInput {
   barcode?: string;
   purchasePrice: number;
   sellingPrice: number;
-  stock: number;
   minimumStock: number;
   unit: string;
   imageUrl?: string;

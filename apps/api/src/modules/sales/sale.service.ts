@@ -221,21 +221,23 @@ export class SaleService {
         );
       }
 
-      if (sale.status !== "PENDING") {
+      const cancelResult =
+        await tx.sale.updateMany({
+          where: {
+            id: sale.id,
+            status: "PENDING",
+          },
+          data: {
+            status: "CANCELLED",
+          },
+        });
+
+      if (cancelResult.count !== 1) {
         throw new AppError(
           "Only PENDING sales can be cancelled",
           400,
         );
       }
-
-      await tx.sale.update({
-        where: {
-          id: sale.id,
-        },
-        data: {
-          status: "CANCELLED",
-        },
-      });
 
       return tx.sale.findUnique({
         where: {
@@ -331,7 +333,17 @@ export class SaleService {
         );
       }
 
-      if (sale.status !== "PENDING") {
+      const payResult = await tx.sale.updateMany({
+        where: {
+          id: sale.id,
+          status: "PENDING",
+        },
+        data: {
+          status: "COMPLETED",
+        },
+      });
+
+      if (payResult.count !== 1) {
         throw new AppError(
           "Only PENDING sales can be paid",
           400,
@@ -359,13 +371,6 @@ export class SaleService {
           },
         });
       }
-
-      await tx.sale.update({
-        where: { id: sale.id },
-        data: {
-          status: "COMPLETED",
-        },
-      });
 
       return tx.sale.findUnique({
         where: { id: sale.id },

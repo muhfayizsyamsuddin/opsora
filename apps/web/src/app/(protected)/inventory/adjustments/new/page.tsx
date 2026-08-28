@@ -5,21 +5,36 @@ import { useProducts } from "@/features/products/queries/use-products";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export default function NewInventoryAdjustmentPage() {
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-    status: "ACTIVE",
-  });
   const { hasPermission } = usePermissions();
   const canAdjustInventory = hasPermission("inventory-movements.adjust");
+  const canReadProducts = hasPermission("products.read");
+
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    canAdjustInventory && canReadProducts,
+  );
 
   if (!canAdjustInventory) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">
           You do not have permission to adjust inventory.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadProducts) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view products required for inventory adjustment.
         </p>
       </div>
     );

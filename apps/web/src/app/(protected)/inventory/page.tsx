@@ -30,7 +30,11 @@ export default function InventoryPage() {
   const canReadInventory = hasPermission("inventory-movements.read");
   const canAdjustInventory = hasPermission("inventory-movements.adjust");
 
-  const inventory = useInventoryStock(params);
+  const inventory = useInventoryStock(
+    params,
+    canReadInventory,
+  );
+  
   if (!canReadInventory) {
     return (
       <div className="rounded-2xl border bg-card p-6">

@@ -33,7 +33,10 @@ export default function InventoryMovementsPage() {
       DEFAULT_PARAMS,
     );
 
-  const movements = useInventoryMovements(params);
+  const movements = useInventoryMovements(
+    params,
+    canReadMovements,
+  );
 
   const products = useProducts(
     {

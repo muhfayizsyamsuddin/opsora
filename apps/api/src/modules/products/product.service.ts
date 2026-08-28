@@ -11,7 +11,6 @@ export class ProductService {
     barcode?: string;
     purchasePrice: number;
     sellingPrice: number;
-    stock: number;
     minimumStock: number;
     unit: string;
     imageUrl?: string;
@@ -43,7 +42,10 @@ export class ProductService {
       }
     }
 
-    return ProductRepository.create(data);
+    return ProductRepository.create({
+      ...data,
+      stock: 0,
+    });
   }
 
   static async getAllProducts(

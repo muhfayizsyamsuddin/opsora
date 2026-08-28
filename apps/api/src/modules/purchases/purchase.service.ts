@@ -157,7 +157,18 @@ export class PurchaseService {
         throw new AppError("Purchase not found", 404);
       }
 
-      if (purchase.status !== "DRAFT") {
+      const completeResult =
+        await tx.purchase.updateMany({
+          where: {
+            id: purchase.id,
+            status: "DRAFT",
+          },
+          data: {
+            status: "COMPLETED",
+          },
+        });
+
+      if (completeResult.count !== 1) {
         throw new AppError(
           "Only DRAFT purchases can be completed",
           400,
@@ -187,15 +198,6 @@ export class PurchaseService {
           },
         });
       }
-
-      await tx.purchase.update({
-        where: {
-          id: purchase.id,
-        },
-        data: {
-          status: "COMPLETED",
-        },
-      });
 
       return tx.purchase.findUnique({
         where: {
