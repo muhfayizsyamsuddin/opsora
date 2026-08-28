@@ -62,16 +62,34 @@ export default function ProductDetailPage({
   const canReadProduct = hasPermission("products.read");
   const canUpdate = hasPermission("products.update");
   const canDelete = hasPermission("products.delete");
+  const canReadInventory = hasPermission("inventory-movements.read");
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     
-  const product = useProduct(id);
-  const stock = useInventoryStockByProduct(id);
+  const product = useProduct(
+    id,
+    canReadProduct,
+  );
+  const stock = useInventoryStockByProduct(
+    id,
+    canReadInventory
+  );
   const deleteProduct = useDeleteProduct();
+  
+  if (!canReadProduct) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this product.
+        </p>
+      </div>
+    );
+  }
 
   if (
     product.isLoading ||
-    stock.isLoading
+    (canReadInventory &&
+      stock.isLoading)
   ) {
     return (
       <div className="space-y-6">
@@ -84,7 +102,8 @@ export default function ProductDetailPage({
 
   if (
     product.error ||
-    stock.error ||
+    (canReadInventory &&
+      stock.error) ||
     !product.data
   ) {
     return (
@@ -137,16 +156,6 @@ export default function ProductDetailPage({
       },
     );
   };
-
-  if (!canReadProduct) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this product.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -319,6 +328,7 @@ export default function ProductDetailPage({
         </section>
       )}
 
+      {canReadInventory && (
       <section className="rounded-2xl border bg-card shadow-sm">
         <div className="border-b px-5 py-5 sm:px-6">
           <h2 className="text-sm font-semibold">
@@ -362,15 +372,16 @@ export default function ProductDetailPage({
           </div>
         </div>
       </section>
+      )}
 
       <section className="rounded-2xl border bg-card shadow-sm">
         <div className="border-b px-5 py-5 sm:px-6">
           <h2 className="text-sm font-semibold">
-            Pricing & Stock
+            Pricing
           </h2>
         </div>
 
-        <div className="grid gap-6 p-5 sm:grid-cols-2 lg:grid-cols-4 sm:p-6">
+        <div className="grid gap-6 p-5 sm:grid-cols-2 sm:p-6">
           <div className="flex items-start gap-3">
             <DollarSign className="mt-0.5 h-4 w-4 text-muted-foreground" />
 
@@ -396,27 +407,6 @@ export default function ProductDetailPage({
               {formatCurrency(
                 data.sellingPrice,
               )}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Stock
-            </p>
-
-            <p className="mt-1 font-medium">
-              {data.stock} {data.unit}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Minimum Stock
-            </p>
-
-            <p className="mt-1 font-medium">
-              {data.minimumStock}{" "}
-              {data.unit}
             </p>
           </div>
         </div>
@@ -503,11 +493,11 @@ export default function ProductDetailPage({
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              This will permanently delete{" "}
+              This will remove{" "}
               <span className="font-medium text-foreground">
                 {data.name}
-              </span>
-              . This action cannot be undone.
+              </span>{" "}
+              from the active product list.
             </AlertDialogDescription>
           </AlertDialogHeader>
 

@@ -6,6 +6,7 @@ import { getInventoryStockByProduct } from "@/services/inventory.service";
 
 export function useInventoryStockByProduct(
   productId?: string,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -17,6 +18,7 @@ export function useInventoryStockByProduct(
       getInventoryStockByProduct(
         productId!,
       ),
-    enabled: Boolean(productId),
+    enabled: 
+    Boolean(productId) && enabled,
   });
 }

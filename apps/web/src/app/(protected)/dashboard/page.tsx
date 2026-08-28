@@ -24,12 +24,20 @@ export default function DashboardPage() {
   const { hasPermission } = usePermissions();
   const canReadDashboard = hasPermission("dashboard.read");
 
-  const summary = useDashboardSummary();
-  const recentTransactions =
-    useRecentTransactions();
-  const lowStock = useLowStock();
-  const peopleSummary = usePeopleSummary();
+  const summary = useDashboardSummary(canReadDashboard);
+  const recentTransactions = useRecentTransactions(canReadDashboard);
+  const lowStock = useLowStock(canReadDashboard);
+  const peopleSummary = usePeopleSummary(canReadDashboard);
 
+  if (!canReadDashboard) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view the dashboard.
+        </p>
+      </div>
+    );
+  }
   const isInitialLoading =
     summary.isLoading ||
     recentTransactions.isLoading ||
@@ -86,16 +94,6 @@ export default function DashboardPage() {
     !peopleSummary.data
   ) {
     return null;
-  }
-
-  if (!canReadDashboard) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view the dashboard.
-        </p>
-      </div>
-    );
   }
 
   return (

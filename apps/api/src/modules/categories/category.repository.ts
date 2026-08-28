@@ -11,10 +11,9 @@ export class CategoryRepository {
   }
 
   static async findByName(name: string) {
-    return prisma.category.findFirst({
+    return prisma.category.findUnique({
       where: {
         name,
-        deletedAt: null,
       },
     });
   }

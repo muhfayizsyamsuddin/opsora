@@ -48,7 +48,10 @@ export default function CategoriesPage() {
       DEFAULT_PARAMS,
     );
 
-  const categories = useCategories(params);
+  const categories = useCategories(
+    params,
+    canReadCategory,
+  );
 
   const categoryData = categories.data?.data ?? [];
 

@@ -1,6 +1,7 @@
 import { AppError } from '../../errors/AppError.js';
 import { ProductRepository } from './product.repository.js';
 import { uploadToCloudinary } from '../../utils/uploadToCloudinary.js';
+import { CategoryRepository } from "../categories/category.repository.js";
 
 export class ProductService {
   static async create(data: {
@@ -16,6 +17,10 @@ export class ProductService {
     imageUrl?: string;
     status: 'ACTIVE' | 'INACTIVE';
   }) {
+    await this.ensureActiveCategory(
+      data.categoryId,
+    );
+
     if (data.sellingPrice < data.purchasePrice) {
       throw new AppError(
         'Selling price cannot be lower than purchase price',
@@ -114,6 +119,12 @@ export class ProductService {
       throw new AppError('Product not found', 404);
     }
 
+    if (data.categoryId) {
+      await this.ensureActiveCategory(
+        data.categoryId,
+      );
+    }
+
     const purchasePrice =
       data.purchasePrice ?? Number(product.purchasePrice);
 
@@ -191,5 +202,21 @@ export class ProductService {
     return ProductRepository.update(id, {
         imageUrl: result.secure_url,
     });
+  }
+
+  private static async ensureActiveCategory(
+    categoryId: string,
+  ) {
+    const category =
+      await CategoryRepository.findById(
+        categoryId,
+      );
+
+    if (!category) {
+      throw new AppError(
+        "Category not found",
+        404,
+      );
+    }
   }
 }

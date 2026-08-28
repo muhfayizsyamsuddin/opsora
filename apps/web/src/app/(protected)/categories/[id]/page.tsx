@@ -46,13 +46,16 @@ export default function CategoryDetailPage({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const deleteCategory = useDeleteCategory();
-
-
-  const category = useCategory(id);
   
   const { hasPermission } = usePermissions();
   const canReadCategory = hasPermission("categories.read");
   const canDelete = hasPermission("categories.delete");
+  const canUpdate = hasPermission("categories.update");
+  
+  const category = useCategory(
+    id,
+    canReadCategory,
+  );
 
   const handleDelete = () => {
     deleteCategory.mutate(data.id, {
@@ -62,10 +65,16 @@ export default function CategoryDetailPage({
     });
   };
 
-  const canUpdate =
-    hasPermission(
-      "categories.update",
+    
+  if (!canReadCategory) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this category.
+        </p>
+      </div>
     );
+  }
 
   if (category.isLoading) {
     return (
@@ -123,15 +132,6 @@ export default function CategoryDetailPage({
 
   const data = category.data;
 
-  if (!canReadCategory) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this category.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -305,11 +305,11 @@ export default function CategoryDetailPage({
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              This will permanently delete{" "}
+              This will remove{" "}
               <span className="font-medium text-foreground">
                 {data.name}
-              </span>
-              . This action cannot be undone.
+              </span>{" "}
+              from the active category list.
             </AlertDialogDescription>
           </AlertDialogHeader>
 

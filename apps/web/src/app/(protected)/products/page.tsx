@@ -58,9 +58,6 @@ export default function ProductsPage() {
 
   const products = useProducts(params);
 
-  const categoryData =
-    categories.data?.data ?? [];
-
   const productData =
     products.data?.data ?? [];
 
@@ -227,11 +224,11 @@ export default function ProductsPage() {
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              This will permanently delete{" "}
+              This will remove{" "}
               <span className="font-medium text-foreground">
                 {deleteTarget?.name}
-              </span>
-              . This action cannot be undone.
+              </span>{" "}
+              from the active product list.
             </AlertDialogDescription>
           </AlertDialogHeader>
 

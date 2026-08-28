@@ -21,19 +21,17 @@ export class ProductRepository {
   }
 
   static async findBySku(sku: string) {
-    return prisma.product.findFirst({
+    return prisma.product.findUnique({
       where: {
         sku,
-        deletedAt: null,
       },
     });
   }
 
   static async findByBarcode(barcode: string) {
-    return prisma.product.findFirst({
+    return prisma.product.findUnique({
       where: {
         barcode,
-        deletedAt: null,
       },
     });
   }

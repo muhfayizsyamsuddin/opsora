@@ -4,10 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getCategoryById } from "@/services/category.service";
 
-export function useCategory(id?: string) {
+export function useCategory(
+  id?: string,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["categories", id],
     queryFn: () => getCategoryById(id!),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }
