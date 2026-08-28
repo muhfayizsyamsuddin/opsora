@@ -2,15 +2,12 @@
 
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
-import { useAuth } from "@/hooks/use-auth";
 
 export function AppShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  useAuth();
-
   return (
     <div className="min-h-screen bg-muted/20 text-foreground">
       <Sidebar />

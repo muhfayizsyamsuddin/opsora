@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError.js";
 import { ZodError } from "zod";
 import multer from "multer";
+import jwt from "jsonwebtoken";
 
 export function errorMiddleware(
   err: Error,
@@ -36,6 +37,20 @@ export function errorMiddleware(
       error: {
         code: "UPLOAD_ERROR",
         message: err.message,
+      },
+    });
+  }
+
+  if (
+    err instanceof jwt.JsonWebTokenError ||
+    err instanceof jwt.TokenExpiredError ||
+    err instanceof jwt.NotBeforeError
+  ) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: "UNAUTHORIZED",
+        message: "Unauthorized",
       },
     });
   }

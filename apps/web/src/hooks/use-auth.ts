@@ -8,11 +8,11 @@ import { storage } from "@/services/storage";
 import { useAuthStore } from "@/stores/auth.store";
 
 export function useAuth() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] =
+    useState(false);
 
   const {
     user,
-    isAuthenticated,
     setUser,
     clearAuth,
   } = useAuthStore();
@@ -22,7 +22,8 @@ export function useAuth() {
   }, []);
 
   const hasAccessToken =
-    mounted && !!storage.getAccessToken();
+    mounted &&
+    !!storage.getAccessToken();
 
   const query = useQuery({
     queryKey: ["auth", "me"],
@@ -41,7 +42,10 @@ export function useAuth() {
       return;
     }
 
-    if (query.isSuccess && query.data) {
+    if (
+      query.isSuccess &&
+      query.data
+    ) {
       setUser(query.data);
     }
   }, [
@@ -53,33 +57,28 @@ export function useAuth() {
     clearAuth,
   ]);
 
-  useEffect(() => {
-    if (
-      mounted &&
-      hasAccessToken &&
-      query.isError
-    ) {
-      clearAuth();
-    }
-  }, [
-    mounted,
-    hasAccessToken,
-    query.isError,
-    clearAuth,
-  ]);
+  const currentUser =
+    user ?? query.data ?? null;
 
   return {
-    user,
+    user: currentUser,
+
     isAuthenticated:
       mounted &&
       hasAccessToken &&
-      isAuthenticated &&
-      !!user,
+      !!currentUser,
 
     isLoading:
       !mounted ||
       (hasAccessToken &&
         (query.isLoading ||
           query.isFetching)),
+
+    isError:
+      mounted &&
+      hasAccessToken &&
+      query.isError,
+
+    refetch: query.refetch,
   };
 }

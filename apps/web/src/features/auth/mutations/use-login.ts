@@ -15,20 +15,16 @@ export function useLogin() {
     mutationFn: login,
 
     onSuccess(data) {
-      console.log("LOGIN SUCCESS", data);
-
       storage.setAccessToken(data.access_token);
       storage.setRefreshToken(data.refresh_token);
       useAuthStore.getState().setUser(data.user);
 
       toast.success("Login berhasil");
 
-      router.push("/dashboard");
+      router.replace("/dashboard");
     },
 
-    onError(error) {
-      console.error("LOGIN ERROR", error);
-
+    onError() {
       toast.error("Email atau password salah");
     },
   });
