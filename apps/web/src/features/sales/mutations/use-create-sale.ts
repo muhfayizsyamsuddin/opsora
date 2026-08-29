@@ -21,6 +21,10 @@ export function useCreateSale() {
         queryKey: ["sales"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
       toast.success(
         "Sale created successfully",
       );

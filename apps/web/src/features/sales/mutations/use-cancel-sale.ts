@@ -25,6 +25,10 @@ export function useCancelSale() {
         queryKey: ["sales"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
       toast.success(
         "Sale cancelled successfully",
       );

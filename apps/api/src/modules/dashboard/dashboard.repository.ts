@@ -431,7 +431,11 @@ export class DashboardRepository {
         },
       }),
 
-      prisma.product.count(),
+      prisma.product.count({
+        where: {
+          deletedAt: null,
+        },
+      }),
 
       prisma.product.count({
         where: {
@@ -597,7 +601,11 @@ export class DashboardRepository {
       rejectedLeaves,
       employeesByDepartment,
     ] = await Promise.all([
-      prisma.employee.count(),
+      prisma.employee.count({
+        where: {
+          status: "ACTIVE",
+        },
+      }),
 
       prisma.department.count(),
 
@@ -655,7 +663,11 @@ export class DashboardRepository {
           name: true,
           _count: {
             select: {
-              employees: true,
+              employees: {
+                where: {
+                  status: "ACTIVE",
+                },
+              },
             },
           },
         },

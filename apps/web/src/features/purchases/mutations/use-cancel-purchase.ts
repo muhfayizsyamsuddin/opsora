@@ -25,6 +25,10 @@ export function useCancelPurchase() {
         queryKey: ["purchases"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
       toast.success(
         "Purchase cancelled successfully",
       );

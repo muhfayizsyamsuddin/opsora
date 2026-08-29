@@ -34,6 +34,10 @@ export function useUpdatePurchase() {
         queryKey: ["purchases"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
       toast.success(
         "Purchase updated successfully",
       );

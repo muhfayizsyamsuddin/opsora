@@ -35,6 +35,10 @@ export function useUpdateSale() {
         queryKey: ["sales"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
       toast.success(
         "Sale updated successfully",
       );

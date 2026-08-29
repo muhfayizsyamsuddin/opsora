@@ -30,6 +30,10 @@ export function useCompletePurchase() {
       });
 
       queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
         queryKey: ["inventory", "stock"],
       });
 
