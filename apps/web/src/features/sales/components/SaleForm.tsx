@@ -52,6 +52,7 @@ export function SaleForm({
     register,
     reset,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<SaleFormValues>({
     resolver: zodResolver(
@@ -174,14 +175,81 @@ export function SaleForm({
   const onSubmit = (
     values: SaleFormValues,
   ) => {
+    for (const [index, item] of
+      values.items.entries()) {
+      const product = products.find(
+        (product) =>
+          product.id === item.productId,
+      );
+
+      if (!product) {
+        continue;
+      }
+
+      const gross =
+        item.quantity *
+        Number(product.sellingPrice);
+
+      if (item.discount > gross) {
+        setError(
+          `items.${index}.discount`,
+          {
+            type: "manual",
+            message:
+              "Item discount cannot exceed item gross amount",
+          },
+        );
+
+        return;
+      }
+    }
+
+    const computedSubtotal =
+      values.items.reduce(
+        (total, item) => {
+          const product = products.find(
+            (product) =>
+              product.id === item.productId,
+          );
+
+          if (!product) {
+            return total;
+          }
+
+          const gross =
+            item.quantity *
+            Number(product.sellingPrice);
+
+          return (
+            total +
+            gross -
+            item.discount
+          );
+        },
+        0,
+      );
+
+    if (
+      values.discount >
+      computedSubtotal
+    ) {
+      setError("discount", {
+        type: "manual",
+        message:
+          "Sale discount cannot exceed subtotal",
+      });
+
+      return;
+    }
+
     const payload = {
       customerId:
-      values.customerId || undefined,
+        values.customerId || undefined,
 
       saleDate: values.saleDate,
 
       paymentMethod:
-      values.paymentMethod,
+        values.paymentMethod,
 
       discount: values.discount,
 
@@ -196,17 +264,17 @@ export function SaleForm({
       updateSale.mutate(
         {
           id: sale.id,
-            data: {
-              customerId:
-                values.customerId || null,
-              saleDate:
-                values.saleDate,
-              paymentMethod:
-                values.paymentMethod,
-              discount:
-                values.discount,
-              items: payload.items,
-            },
+          data: {
+            customerId:
+              values.customerId || null,
+            saleDate:
+              values.saleDate,
+            paymentMethod:
+              values.paymentMethod,
+            discount:
+              values.discount,
+            items: payload.items,
+          },
         },
         {
           onSuccess: () => {
@@ -216,6 +284,7 @@ export function SaleForm({
           },
         },
       );
+
       return;
     }
 
@@ -457,8 +526,8 @@ export function SaleForm({
                         },
                       )}
                       type="number"
-                      min="1"
-                      step="1"
+                      min="0.01"
+                      step="0.01"
                       disabled={isPending}
                       className="rounded-xl"
                     />

@@ -65,6 +65,19 @@ export class SaleService {
         (item) => item.productId,
       );
 
+      const uniqueProductIds =
+        new Set(productIds);
+
+      if (
+        uniqueProductIds.size !==
+        productIds.length
+      ) {
+        throw new AppError(
+          "Sale cannot contain duplicate products",
+          400,
+        );
+      }
+
       const products = await tx.product.findMany({
         where: {
           id: {
@@ -414,7 +427,18 @@ export class SaleService {
         );
       }
 
-      if (sale.status !== "PENDING") {
+      const pendingClaim =
+        await tx.sale.updateMany({
+          where: {
+            id: sale.id,
+            status: "PENDING",
+          },
+          data: {
+            updatedAt: new Date(),
+          },
+        });
+
+      if (pendingClaim.count !== 1) {
         throw new AppError(
           "Only PENDING sales can be updated",
           400,
@@ -449,6 +473,19 @@ export class SaleService {
           (item) => item.productId,
         );
 
+        const uniqueProductIds =
+          new Set(productIds);
+
+        if (
+          uniqueProductIds.size !==
+          productIds.length
+        ) {
+          throw new AppError(
+            "Sale cannot contain duplicate products",
+            400,
+          );
+        }
+
         const products =
           await tx.product.findMany({
             where: {
@@ -478,6 +515,19 @@ export class SaleService {
 
         const saleItems = data.items.map(
           (item) => {
+            if (item.quantity <= 0) {
+              throw new AppError(
+                "Sale quantity must be greater than zero",
+                400,
+              );
+            }
+
+            if (item.discount < 0) {
+              throw new AppError(
+                "Sale item discount cannot be negative",
+                400,
+              );
+            }
             const product =
               productMap.get(item.productId);
 

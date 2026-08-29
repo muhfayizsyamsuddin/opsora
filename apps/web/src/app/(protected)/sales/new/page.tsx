@@ -8,27 +8,45 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function NewSalePage() {
   const { hasPermission } = usePermissions();
   const canCreateSale = hasPermission("sales.create");
+  const canReadCustomers = hasPermission("customers.read");
+  const canReadProducts = hasPermission("products.read");
 
-  const customers = useCustomers({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const customers = useCustomers(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canCreateSale && canReadCustomers,
+  );
 
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-    status: "ACTIVE",
-  });
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    canCreateSale && canReadProducts,
+  );
 
   if (!canCreateSale) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">
           You do not have permission to create sales.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadCustomers || !canReadProducts) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view customers or products required to create sales.
         </p>
       </div>
     );

@@ -39,7 +39,11 @@ export default function SaleInvoicePage({
   const { hasPermission } = usePermissions();
   const canReadSale = hasPermission("sales.read");
 
-  const invoice = useSaleInvoice(id);
+  const invoice = useSaleInvoice(
+    id,
+    canReadSale
+  );
+  
   const downloadInvoice = useDownloadSaleInvoice();
 
   if (!canReadSale) {

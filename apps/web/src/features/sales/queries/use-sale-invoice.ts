@@ -4,10 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getSaleInvoice } from "@/services/sale.service";
 
-export function useSaleInvoice(id?: string) {
+export function useSaleInvoice(
+  id?: string,
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["sales", id, "invoice"],
     queryFn: () => getSaleInvoice(id!),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }

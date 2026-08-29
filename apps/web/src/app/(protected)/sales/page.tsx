@@ -33,7 +33,10 @@ export default function SalesPage() {
       DEFAULT_PARAMS,
     );
 
-  const sales = useSales(params);
+  const sales = useSales(
+    params,
+    canReadSales,
+  );
 
   const customers = useCustomers({
     page: 1,

@@ -63,19 +63,33 @@ export default function SaleDetailPage({
   const { id } = use(params);
   const router = useRouter();
 
-  const sale = useSale(id);
-  const pay = usePaySale();
-  const cancel = useCancelSale();
-
   const { hasPermission } = usePermissions();
   const canRead = hasPermission("sales.read");
   const canUpdate = hasPermission("sales.update");
   const canPay = hasPermission("sales.pay");
   const canCancel = hasPermission("sales.cancel");
 
+  const sale = useSale(
+    id,
+    canRead,
+  );
+  const pay = usePaySale();
+  const cancel = useCancelSale();
+
+
   const [action, setAction] = useState<
     "pay" | "cancel" | null
   >(null);
+
+  if (!canRead) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this sale.
+        </p>
+      </div>
+    );
+  }
 
   if (sale.isLoading) {
     return (
@@ -115,16 +129,6 @@ export default function SaleDetailPage({
   const isActionPending =
     pay.isPending ||
     cancel.isPending;
-  
-  if (!canRead) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this sale.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

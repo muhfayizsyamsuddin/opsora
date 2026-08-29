@@ -24,24 +24,60 @@ export default function EditSalePage({
   const router = useRouter();
 
   const { hasPermission } = usePermissions();
+  const canReadSale = hasPermission("sales.read");
   const canUpdateSale = hasPermission("sales.update");
+  const canReadCustomers = hasPermission("customers.read");
+  const canReadProducts = hasPermission("products.read");
 
-  const sale = useSale(id);
+  const sale = useSale(
+    id,
+    canReadSale && canUpdateSale,
+  );
 
-  const customers = useCustomers({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const customers = useCustomers(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadSale &&
+      canUpdateSale &&
+      canReadCustomers,
+  );
 
-  const products = useProducts({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-    status: "ACTIVE",
-  });
+  const products = useProducts(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    canReadSale &&
+      canUpdateSale &&
+      canReadProducts,
+  );
+
+  if (!canReadSale || !canUpdateSale) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit sales.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadCustomers || !canReadProducts) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view customers or products required to edit sales.
+        </p>
+      </div>
+    );
+  }
 
   if (
     sale.isLoading ||
@@ -93,16 +129,6 @@ export default function EditSalePage({
   if (sale.data.status !== "PENDING") {
     router.replace(`/sales/${id}`);
     return null;
-  }
-
-  if (!canUpdateSale) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit this sale.
-        </p>
-      </div>
-    );
   }
 
   return (

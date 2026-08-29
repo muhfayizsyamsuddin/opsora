@@ -33,7 +33,25 @@ export const saleFormSchema = z.object({
 
   items: z
     .array(saleItemFormSchema)
-    .min(1, "At least one item is required"),
+    .min(1, "At least one item is required")
+    .superRefine((items, ctx) => {
+      const seen = new Set<string>();
+
+      items.forEach((item, index) => {
+        if (seen.has(item.productId)) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              "This product has already been added",
+            path: [index, "productId"],
+          });
+
+          return;
+        }
+
+        seen.add(item.productId);
+      });
+    }),
 });
 
 export type SaleFormValues =
