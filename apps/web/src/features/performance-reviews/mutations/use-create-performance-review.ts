@@ -25,6 +25,14 @@ export function useCreatePerformanceReview() {
         queryKey: ["performance-reviews"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Performance review created successfully",
       );

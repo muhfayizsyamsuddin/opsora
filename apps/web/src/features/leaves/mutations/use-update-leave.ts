@@ -38,6 +38,14 @@ export function useUpdateLeave() {
         leave,
       );
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Leave request updated successfully.",
       );

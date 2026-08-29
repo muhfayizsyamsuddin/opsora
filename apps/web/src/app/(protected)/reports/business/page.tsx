@@ -25,14 +25,18 @@ export default function BusinessReportsPage() {
 
   const [dateTo, setDateTo] =
     useState("");
-
-  const reports = useBusinessReports({
-    date_from: dateFrom || undefined,
-    date_to: dateTo || undefined,
-  });
-
+  
   const { hasPermission } = usePermissions();
   const canReadReports = hasPermission("reports.read");
+    
+  const reports = useBusinessReports(
+    {
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+    },
+    canReadReports,
+  );
+
   
   if (!canReadReports) {
     return (
@@ -335,7 +339,7 @@ export default function BusinessReportsPage() {
           <section>
             <div className="mb-4">
               <h2 className="text-base font-semibold">
-                Profit
+                Net Trading Difference
               </h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
@@ -361,7 +365,7 @@ export default function BusinessReportsPage() {
               />
 
               <ReportStatCard
-                label="Profit"
+                label="Net Difference"
                 value={formatCurrency(
                   reports.profit.data
                     ?.profit ?? 0,

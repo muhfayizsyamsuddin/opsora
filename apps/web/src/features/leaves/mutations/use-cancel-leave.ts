@@ -27,6 +27,14 @@ export function useCancelLeave() {
         leave,
       );
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Leave request cancelled successfully.",
       );

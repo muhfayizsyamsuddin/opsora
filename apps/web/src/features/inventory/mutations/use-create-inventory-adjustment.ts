@@ -36,6 +36,10 @@ export function useCreateInventoryAdjustment() {
         queryKey: ["dashboard"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Inventory adjustment created successfully",
       );

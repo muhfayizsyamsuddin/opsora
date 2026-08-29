@@ -19,6 +19,14 @@ export function useDeletePayroll() {
         queryKey: ["payrolls"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Payroll deleted successfully",
       );

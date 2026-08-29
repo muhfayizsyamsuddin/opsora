@@ -12,25 +12,30 @@ import {
 
 export function useBusinessReports(
   params: ReportDateParams,
+  enabled = true,
 ) {
   const sales = useQuery({
     queryKey: ["reports", "sales", params],
     queryFn: () => getSalesReport(params),
+    enabled,
   });
 
   const purchases = useQuery({
     queryKey: ["reports", "purchases", params],
     queryFn: () => getPurchasesReport(params),
+    enabled,
   });
 
   const inventory = useQuery({
     queryKey: ["reports", "inventory", params],
     queryFn: () => getInventoryReport(params),
+    enabled,
   });
 
   const profit = useQuery({
     queryKey: ["reports", "profit", params],
     queryFn: () => getProfitReport(params),
+    enabled,
   });
 
   return {

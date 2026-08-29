@@ -9,25 +9,31 @@ import {
   getPerformanceReport,
 } from "@/services/report.service";
 
-export function usePeopleReports() {
+export function usePeopleReports(
+  enabled = true,
+) {
   const attendance = useQuery({
     queryKey: ["reports", "attendance"],
     queryFn: getAttendanceReport,
+    enabled,
   });
 
   const leave = useQuery({
     queryKey: ["reports", "leave"],
     queryFn: getLeaveReport,
+    enabled,
   });
 
   const payroll = useQuery({
     queryKey: ["reports", "payroll"],
     queryFn: getPayrollReport,
+    enabled,
   });
 
   const performance = useQuery({
     queryKey: ["reports", "performance"],
     queryFn: getPerformanceReport,
+    enabled,
   });
 
   return {

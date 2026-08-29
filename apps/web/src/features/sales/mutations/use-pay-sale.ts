@@ -34,6 +34,10 @@ export function usePaySale() {
       });
 
       queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
+      queryClient.invalidateQueries({
         queryKey: ["inventory", "stock"],
       });
 

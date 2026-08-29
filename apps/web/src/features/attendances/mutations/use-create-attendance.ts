@@ -20,6 +20,14 @@ export function useCreateAttendance() {
         queryKey: ["attendances"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Attendance created successfully",
       );

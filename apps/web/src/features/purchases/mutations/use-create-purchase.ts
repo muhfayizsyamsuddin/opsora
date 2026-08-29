@@ -25,6 +25,10 @@ export function useCreatePurchase() {
         queryKey: ["dashboard"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Purchase created successfully",
       );

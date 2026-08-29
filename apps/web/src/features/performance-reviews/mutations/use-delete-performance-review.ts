@@ -23,6 +23,14 @@ export function useDeletePerformanceReview() {
         queryKey: ["performance-reviews"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Performance review deleted successfully",
       );

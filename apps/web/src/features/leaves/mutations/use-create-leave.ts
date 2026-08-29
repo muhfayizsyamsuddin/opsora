@@ -19,6 +19,14 @@ export function useCreateLeave() {
         queryKey: ["leaves"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Leave request created successfully",
       );

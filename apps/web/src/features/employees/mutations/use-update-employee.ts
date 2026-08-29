@@ -35,6 +35,14 @@ export function useUpdateEmployee() {
         queryKey: ["employees"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Employee updated successfully",
       );

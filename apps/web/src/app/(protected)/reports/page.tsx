@@ -24,10 +24,12 @@ function formatDate(value: string) {
 
 export default function ReportsPage() {
   const router = useRouter();
-  const report = useDashboardReport();
 
   const { hasPermission } = usePermissions();
   const canReadReports = hasPermission("reports.read");
+
+  const report = useDashboardReport(canReadReports);
+
 
   if (!canReadReports) {
     return (

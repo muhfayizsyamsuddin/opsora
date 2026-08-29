@@ -42,6 +42,14 @@ export function useUpdateAttendance() {
         queryKey: ["attendances"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Attendance updated successfully",
       );

@@ -14,6 +14,20 @@ type RecentActivity = {
   createdAt: Date;
 };
 
+function toLocalDateKey(date: Date) {
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1,
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate(),
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export class ReportRepository {
   static async getDashboardReport() {
     const today = new Date();
@@ -45,7 +59,11 @@ export class ReportRepository {
       recentPerformanceReviews,
       upcomingLeaves,
     ] = await Promise.all([
-      prisma.employee.count(),
+      prisma.employee.count({
+        where: {
+          status: "ACTIVE",
+        },
+      }),
 
       prisma.department.count(),
 
@@ -104,13 +122,20 @@ export class ReportRepository {
         _avg: {
           salary: true,
         },
+        where: {
+          status: "ACTIVE",
+        },
       }),
 
       prisma.department.findMany({
         include: {
           _count: {
             select: {
-              employees: true,
+              employees: {
+                where: {
+                  status: "ACTIVE",
+                },
+              },
             },
           },
         },
@@ -211,8 +236,8 @@ export class ReportRepository {
       prisma.leave.findMany({
         where: {
           status: "APPROVED",
-          endDate: {
-            gte: new Date(),
+          startDate: {
+            gte: startOfDay,
           },
         },
         orderBy: {
@@ -242,17 +267,15 @@ export class ReportRepository {
           startDate.getDate() + index,
         );
 
-        const dateKey = date
-          .toISOString()
-          .slice(0, 10);
+        const dateKey = toLocalDateKey(date);
 
         const employeeIds = new Set(
           weeklyAttendances
             .filter((attendance) => {
               return (
-                attendance.checkIn
-                  .toISOString()
-                  .slice(0, 10) === dateKey
+                toLocalDateKey(
+                  attendance.checkIn,
+                ) === dateKey
               );
             })
             .map(
@@ -683,7 +706,11 @@ export class ReportRepository {
       stockIn,
       stockOut,
     ] = await Promise.all([
-      prisma.product.count(),
+      prisma.product.count({
+        where: {
+          deletedAt: null,
+        },
+      }),
 
       prisma.product.count({
         where: productFilter,

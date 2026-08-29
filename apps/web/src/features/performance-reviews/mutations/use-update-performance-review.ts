@@ -44,6 +44,14 @@ export function useUpdatePerformanceReview() {
         ],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Performance review updated successfully",
       );

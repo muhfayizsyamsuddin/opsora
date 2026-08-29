@@ -22,6 +22,14 @@ export function useCreatePayroll() {
         queryKey: ["payrolls"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Payroll created successfully",
       );

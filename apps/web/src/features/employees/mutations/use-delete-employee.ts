@@ -19,6 +19,14 @@ export function useDeleteEmployee() {
         queryKey: ["employees"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Employee deleted successfully",
       );

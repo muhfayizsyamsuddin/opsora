@@ -23,9 +23,9 @@ function formatScore(value: string | number) {
 export default function PeopleReportsPage() {
   const router = useRouter();
 
-  const reports = usePeopleReports();
   const { hasPermission } = usePermissions();
   const canReadReports = hasPermission("reports.read");
+  const reports = usePeopleReports(canReadReports);
   
   if (!canReadReports) {
     return (

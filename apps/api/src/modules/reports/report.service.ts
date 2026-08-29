@@ -1,5 +1,22 @@
 import { ReportRepository } from "./report.repository.js";
 
+function endOfDay(date?: Date) {
+  if (!date) {
+    return undefined;
+  }
+
+  const result = new Date(date);
+
+  result.setHours(
+    23,
+    59,
+    59,
+    999,
+  );
+
+  return result;
+}
+
 export class ReportService {
     static async getDashboardReport() {
         return ReportRepository.getDashboardReport();
@@ -25,10 +42,10 @@ export class ReportService {
         dateFrom?: Date,
         dateTo?: Date,
     ) {
-        return ReportRepository.getSalesReport(
+      return ReportRepository.getSalesReport(
         dateFrom,
-        dateTo,
-        );
+        endOfDay(dateTo),
+      );
     }
 
     static async getPurchasesReport(
@@ -37,7 +54,7 @@ export class ReportService {
     ) {
         return ReportRepository.getPurchasesReport(
         dateFrom,
-        dateTo,
+        endOfDay(dateTo),
         );
     }
 
@@ -47,7 +64,7 @@ export class ReportService {
     ) {
         return ReportRepository.getInventoryReport(
         dateFrom,
-        dateTo,
+        endOfDay(dateTo),
         );
     }
 
@@ -57,7 +74,7 @@ export class ReportService {
     ) {
         return ReportRepository.getProfitReport(
         dateFrom,
-        dateTo,
+        endOfDay(dateTo),
         );
     }
 }
