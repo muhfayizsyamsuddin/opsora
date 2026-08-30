@@ -26,13 +26,17 @@ export default function PayrollDetailPage() {
 
   const { hasPermission } = usePermissions();
   const canReadPayroll = hasPermission("payroll.read");
+  const canDeletePayroll = hasPermission("payroll.delete");
 
   const id = String(params.id);
 
   const [deleteOpen, setDeleteOpen] =
     useState(false);
 
-  const payroll = usePayroll(id);
+  const payroll = usePayroll(
+    id,
+    canReadPayroll,
+  );
   const deletePayroll = useDeletePayroll();
 
   const data: Payroll | undefined =
@@ -71,6 +75,16 @@ export default function PayrollDetailPage() {
     });
   };
 
+  if (!canReadPayroll) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this payroll.
+        </p>
+      </div>
+    );
+  }
+
   if (payroll.isLoading) {
     return (
       <div className="space-y-6">
@@ -106,16 +120,6 @@ export default function PayrollDetailPage() {
     );
   }
 
-  if (!canReadPayroll) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this payroll.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -147,16 +151,18 @@ export default function PayrollDetailPage() {
             Back
           </Button>
 
-          <Button
-            type="button"
-            variant="destructive"
-            className="rounded-xl"
-            onClick={() =>
-              setDeleteOpen(true)
-            }
-          >
-            Delete
-          </Button>
+          {canDeletePayroll && (
+            <Button
+              type="button"
+              variant="destructive"
+              className="rounded-xl"
+              onClick={() =>
+                setDeleteOpen(true)
+              }
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 

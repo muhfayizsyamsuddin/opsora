@@ -40,6 +40,7 @@ export function PayrollForm() {
     per_page: 100,
     sort_by: "name",
     sort_order: "asc",
+    status: "ACTIVE",
   });
 
   const {

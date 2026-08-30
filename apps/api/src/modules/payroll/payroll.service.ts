@@ -18,6 +18,13 @@ export class PayrollService {
       throw new AppError("Employee not found", 404);
     }
 
+    if (employee.status !== "ACTIVE") {
+      throw new AppError(
+        "Inactive employee cannot receive payroll",
+        400,
+      );
+    }
+
     // Cek payroll sudah ada atau belum
     const existingPayroll =
       await PayrollRepository.findByEmployeeAndPeriod(
@@ -37,6 +44,13 @@ export class PayrollService {
     const baseSalary = employee.salary;
     const totalSalary =
       baseSalary + data.bonus - data.deduction;
+
+    if (totalSalary < 0) {
+      throw new AppError(
+        "Deduction cannot exceed base salary plus bonus",
+        400,
+      );
+    }
 
     return PayrollRepository.create({
       employeeId: data.employeeId,

@@ -6,12 +6,16 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function CreatePayrollPage() {
   const { hasPermission } = usePermissions();
   const canCreatePayroll = hasPermission("payroll.create");
+  const canReadEmployees = hasPermission("employees.read");
 
-  if (!canCreatePayroll) {
+  if (
+    !canCreatePayroll ||
+    !canReadEmployees
+  ) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">
-          You do not have permission to create payrolls.
+          You do not have permission to create payroll.
         </p>
       </div>
     );

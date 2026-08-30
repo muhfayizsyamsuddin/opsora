@@ -43,6 +43,7 @@ export default function PayrollsPage() {
   const canReadPayrolls = hasPermission("payroll.read");
   const canCreatePayroll = hasPermission("payroll.create");
   const canDeletePayroll = hasPermission("payroll.delete");
+  const canReadEmployees = hasPermission("employees.read");
 
   const [params, setParams] =
     useState<PayrollQueryParams>(
@@ -52,14 +53,20 @@ export default function PayrollsPage() {
   const [deleteTarget, setDeleteTarget] =
     useState<Payroll | null>(null);
 
-  const payrolls = usePayrolls(params);
+  const payrolls = usePayrolls(
+    params,
+    canReadPayrolls,
+  );
 
-  const employees = useEmployees({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const employees = useEmployees(
+    {
+      page: 1,
+      per_page: 100,
+      status: "ACTIVE",
+    },
+    canReadPayrolls &&
+      canReadEmployees,
+  );
 
   const deletePayroll = useDeletePayroll();
 
@@ -68,6 +75,24 @@ export default function PayrollsPage() {
 
   const meta =
     payrolls.data?.meta;
+  
+  if (!canReadPayrolls) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view payrolls.
+        </p>
+      </div>
+    );
+  }
+
+  const isLoading =
+    payrolls.isLoading ||
+    (canReadEmployees && employees.isLoading);
+
+  const isError =
+    payrolls.isError ||
+    (canReadEmployees && employees.isError);
 
   const handleDelete = () => {
     if (!deleteTarget) {
@@ -80,20 +105,6 @@ export default function PayrollsPage() {
       },
     });
   };
-
-  if (!canReadPayrolls) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view payrolls.
-        </p>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your account does not have the required access.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -136,11 +147,9 @@ export default function PayrollsPage() {
       />
 
       {/* Content */}
-      {payrolls.isLoading ||
-      employees.isLoading ? (
+      {isLoading ? (
         <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
-      ) : payrolls.error ||
-        employees.error ? (
+      ) : isError? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
           <p className="font-medium">
             Unable to load payrolls.
@@ -156,7 +165,9 @@ export default function PayrollsPage() {
             className="mt-4 rounded-xl"
             onClick={() => {
               payrolls.refetch();
-              employees.refetch();
+              if (canReadEmployees) {
+                employees.refetch();
+              }
             }}
           >
             Try Again
