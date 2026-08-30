@@ -2,11 +2,8 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-
+import { useLeave } from "@/features/leaves/queries/use-leave";
 import { Button } from "@/components/ui/button";
-
-import { getLeaveById } from "@/services/leave.service";
 import { useApproveLeave } from "@/features/leaves/mutations/use-approve-leave";
 import { useRejectLeave } from "@/features/leaves/mutations/use-reject-leave";
 import { useCancelLeave } from "@/features/leaves/mutations/use-cancel-leave";
@@ -80,10 +77,10 @@ export default function LeaveDetailPage({
   const canReject = hasPermission("leaves.reject");
   const canCancel = hasPermission("leaves.cancel");
 
-  const leave = useQuery({
-    queryKey: ["leaves", id],
-    queryFn: () => getLeaveById(id),
-  });
+ const leave = useLeave(
+    id,
+    canRead,
+  );
 
   if (!canRead) {
     return (

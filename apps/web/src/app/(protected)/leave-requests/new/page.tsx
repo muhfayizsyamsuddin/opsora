@@ -7,15 +7,32 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function NewLeavePage() {
   const { hasPermission } = usePermissions();
   const canCreateLeaveRequest = hasPermission("leaves.create");
+  const canReadEmployees = hasPermission("employees.read");
 
-  const employees =
-    useEmployees({
+  const employees = useEmployees(
+    {
       page: 1,
       per_page: 100,
       sort_by: "name",
       sort_order: "asc",
       status: "ACTIVE",
-    });
+    },
+    canCreateLeaveRequest &&
+      canReadEmployees,
+  );
+
+  if (
+    !canCreateLeaveRequest ||
+    !canReadEmployees
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to create leave requests.
+        </p>
+      </div>
+    );
+  }
 
   if (employees.isLoading) {
     return (
@@ -36,16 +53,6 @@ export default function NewLeavePage() {
 
         <p className="mt-1 text-sm text-muted-foreground">
           Please try again.
-        </p>
-      </div>
-    );
-  }
-
-  if (!canCreateLeaveRequest) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to create leave requests.
         </p>
       </div>
     );

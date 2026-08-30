@@ -30,20 +30,28 @@ export default function LeavesPage() {
   const canReadLeaves = hasPermission("leaves.read");
   const canCreateLeave = hasPermission("leaves.create");
   const canUpdateLeave = hasPermission("leaves.update");
+  const canReadEmployees = hasPermission("employees.read");
 
   const [params, setParams] =
     useState<LeaveQueryParams>(
       DEFAULT_PARAMS,
     );
 
-  const leaves = useLeaves(params);
+  const leaves = useLeaves(
+    params,
+    canReadLeaves,
+  );
 
-  const employees = useEmployees({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const employees = useEmployees(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadLeaves &&
+      canReadEmployees,
+  );
 
   const data =
     leaves.data?.data ?? [];
@@ -103,10 +111,10 @@ export default function LeavesPage() {
 
       {/* Content */}
       {leaves.isLoading ||
-      employees.isLoading ? (
+      (canReadEmployees && employees.isLoading) ? (
         <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
       ) : leaves.error ||
-        employees.error ? (
+        (canReadEmployees && employees.error) ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
           <p className="font-medium">
             Unable to load leave requests.
@@ -122,7 +130,9 @@ export default function LeavesPage() {
             className="mt-4 rounded-xl"
             onClick={() => {
               leaves.refetch();
-              employees.refetch();
+              if (canReadEmployees) {
+                employees.refetch();
+              }
             }}
           >
             Try Again

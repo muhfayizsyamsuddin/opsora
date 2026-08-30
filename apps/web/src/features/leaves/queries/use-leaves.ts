@@ -10,9 +10,11 @@ import type {
 
 export function useLeaves(
   params: LeaveQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["leaves", params],
     queryFn: () => getLeaves(params),
+    enabled,
   });
 }

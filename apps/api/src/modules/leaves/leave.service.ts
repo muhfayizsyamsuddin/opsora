@@ -17,6 +17,13 @@ export class LeaveService {
       throw new AppError("Employee not found", 404);
     }
 
+    if (employee.status !== "ACTIVE") {
+      throw new AppError(
+        "Inactive employee cannot create leave requests",
+        400,
+      );
+    }
+
     if (data.startDate > data.endDate) {
       throw new AppError(
         "Start date cannot be after end date",

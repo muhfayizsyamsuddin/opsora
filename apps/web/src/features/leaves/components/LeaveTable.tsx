@@ -157,7 +157,8 @@ export function LeaveTable({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {canUpdate && (
+                    {canUpdate &&
+                      leave.status === "PENDING" && (
                       <Button
                         type="button"
                         variant="ghost"
