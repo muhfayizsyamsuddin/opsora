@@ -53,8 +53,10 @@ export default function DepartmentsPage() {
       DEFAULT_PARAMS,
     );
 
-  const departments =
-    useDepartments(params);
+  const departments = useDepartments(
+    params,
+    canReadDepartments,
+  );
 
   const data =
     departments.data?.data ?? [];

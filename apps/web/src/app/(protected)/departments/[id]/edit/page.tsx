@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 import { DepartmentForm } from "@/features/departments/components/DepartmentForm";
-import { useQuery } from "@tanstack/react-query";
-import { getDepartmentById } from "@/services/department.service";
+import { useDepartment } from "@/features/departments/queries/use-department";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export default function EditDepartmentPage({
@@ -19,12 +18,26 @@ export default function EditDepartmentPage({
   const router = useRouter();
   
   const { hasPermission } = usePermissions();
+  const canReadDepartment = hasPermission("departments.read");
   const canUpdateDepartment = hasPermission("departments.update");
 
-  const department = useQuery({
-    queryKey: ["departments", id],
-    queryFn: () => getDepartmentById(id),
-  });
+  const department = useDepartment(
+    id,
+    canReadDepartment && canUpdateDepartment,
+  );
+
+  if (
+    !canReadDepartment ||
+    !canUpdateDepartment
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit departments.
+        </p>
+      </div>
+    );
+  }
 
   if (department.isLoading) {
     return (
@@ -57,16 +70,6 @@ export default function EditDepartmentPage({
         >
           Back to Department
         </Button>
-      </div>
-    );
-  }
-
-  if (!canUpdateDepartment) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit departments.
-        </p>
       </div>
     );
   }

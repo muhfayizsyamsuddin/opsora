@@ -1,12 +1,10 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { DeleteDepartmentDialog } from "@/features/departments/components/DeleteDepartmentDialog";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-
-import { getDepartmentById } from "@/services/department.service";
+import { useDepartment } from "@/features/departments/queries/use-department";
 import { usePermissions } from "@/hooks/use-permissions";
 
 function formatDate(value: string) {
@@ -23,14 +21,27 @@ export default function DepartmentDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const [showDelete, setShowDelete] = useState(false);
 
   const { hasPermission } = usePermissions();
   const canReadDepartment = hasPermission("departments.read");
+  const canUpdateDepartment = hasPermission("departments.update");
+  const canDeleteDepartment = hasPermission("departments.delete");
 
-  const department = useQuery({
-    queryKey: ["departments", id],
-    queryFn: () => getDepartmentById(id),
-  });
+  const department = useDepartment(
+    id,
+    canReadDepartment,
+  );
+
+  if (!canReadDepartment) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this department.
+        </p>
+      </div>
+    );
+  }
 
   if (department.isLoading) {
     return (
@@ -67,16 +78,6 @@ export default function DepartmentDetailPage({
 
   const data = department.data;
 
-  if (!canReadDepartment) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this department.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -102,18 +103,32 @@ export default function DepartmentDetailPage({
             Back to Departments
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl"
-            onClick={() =>
-              router.push(
-                `/departments/${data.id}/edit`,
-              )
-            }
-          >
-            Edit
-          </Button>
+          {canUpdateDepartment && (  
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() =>
+                router.push(
+                  `/departments/${data.id}/edit`,
+                )
+              }
+            >
+              Edit
+            </Button>
+          )}
+          {canDeleteDepartment && (
+            <Button
+              type="button"
+              variant="destructive"
+              className="rounded-xl"
+              onClick={() =>
+                setShowDelete(true)
+              }
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 
@@ -150,6 +165,17 @@ export default function DepartmentDetailPage({
           </div>
         </div>
       </section>
+      <DeleteDepartmentDialog
+        department={{
+          id: data.id,
+          name: data.name,
+        }}
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        onSuccess={() =>
+          router.replace("/departments")
+        }
+      />
     </div>
   );
 }
