@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { usePermissions } from "@/hooks/use-permissions";
 import { useEmployees } from "@/features/employees/queries/use-employees";
 import { useUsers } from "@/features/users/queries/use-users";
 
@@ -29,8 +29,12 @@ export function PerformanceReviewForm({
   reviewId,
 }: PerformanceReviewFormProps) {
   const router = useRouter();
-
   const isEdit = Boolean(reviewId);
+
+  const { hasPermission } = usePermissions();
+  const canReadPerformanceReviews = hasPermission("performance_reviews.read");
+  const canReadEmployees = hasPermission("employees.read");
+  const canReadUsers = hasPermission("users.read");
 
   const createReview =
     useCreatePerformanceReview();
@@ -40,21 +44,29 @@ export function PerformanceReviewForm({
 
   const review = usePerformanceReview(
     reviewId ?? "",
+    isEdit && canReadPerformanceReviews,
   );
 
-  const employees = useEmployees({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const employees = useEmployees(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+      status: "ACTIVE",
+    },
+    !isEdit && canReadEmployees,
+  );
 
-  const users = useUsers({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const users = useUsers(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadUsers,
+  );
 
   const {
     register,
@@ -62,21 +74,21 @@ export function PerformanceReviewForm({
     reset,
     formState: { errors },
   } = useForm<
-  PerformanceReviewFormInput,
-  unknown,
-  PerformanceReviewFormValues
->({
-  resolver: zodResolver(
-    performanceReviewFormSchema,
-  ),
-  defaultValues: {
-    employeeId: "",
-    reviewerId: "",
-    reviewPeriod: "",
-    score: undefined,
-    comments: "",
-  },
-});
+    PerformanceReviewFormInput,
+    unknown,
+    PerformanceReviewFormValues
+  >({
+    resolver: zodResolver(
+      performanceReviewFormSchema,
+    ),
+    defaultValues: {
+      employeeId: "",
+      reviewerId: "",
+      reviewPeriod: "",
+      score: undefined,
+      comments: "",
+    },
+  });
 
   useEffect(() => {
     if (!isEdit || !review.data) {
@@ -199,38 +211,53 @@ export function PerformanceReviewForm({
             Employee
           </label>
 
-          <select
-            {...register("employeeId")}
-            disabled={isEdit}
-            className="h-10 w-full rounded-xl border bg-background px-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <option value="">
-              Select employee
-            </option>
+           {isEdit ? (
+            <>
+              <Input
+                value={
+                  review.data
+                    ? `${review.data.employee.name} — ${review.data.employee.employeeCode}`
+                    : ""
+                }
+                disabled
+                className="h-10 rounded-xl"
+              />
 
-            {employeeList.map(
-              (employee) => (
-                <option
-                  key={employee.id}
-                  value={employee.id}
-                >
-                  {employee.name} —{" "}
-                  {employee.employeeCode}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Employee cannot be changed when editing a review.
+              </p>
+            </>
+          ) : (
+            <>
+              <select
+                {...register("employeeId")}
+                className="h-10 w-full rounded-xl border bg-background px-3 text-sm outline-none"
+              >
+                <option value="">
+                  Select employee
                 </option>
-              ),
-            )}
-          </select>
+
+                {employeeList.map((employee) => (
+                  <option
+                    key={employee.id}
+                    value={employee.id}
+                  >
+                    {employee.name} — {employee.employeeCode}
+                  </option>
+                ))}
+              </select>
+
+              {errors.employeeId && (
+                <p className="mt-1 text-xs text-destructive">
+                  {errors.employeeId.message}
+                </p>
+              )}
+            </>
+          )}
 
           {errors.employeeId && (
             <p className="mt-1 text-xs text-destructive">
               {errors.employeeId.message}
-            </p>
-          )}
-
-          {isEdit && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Employee cannot be changed
-              when editing a review.
             </p>
           )}
         </div>

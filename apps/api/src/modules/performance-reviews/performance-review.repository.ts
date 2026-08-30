@@ -32,6 +32,18 @@ export class PerformanceReviewRepository {
     });
   }
 
+  static async findByEmployeeAndPeriod(
+    employeeId: string,
+    reviewPeriod: string,
+  ) {
+    return prisma.performanceReview.findFirst({
+      where: {
+        employeeId,
+        reviewPeriod,
+      },
+    });
+  }
+
   static async findById(id: string) {
     return prisma.performanceReview.findUnique({
       where: {

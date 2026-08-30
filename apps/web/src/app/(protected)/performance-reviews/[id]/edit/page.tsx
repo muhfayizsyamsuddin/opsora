@@ -16,12 +16,16 @@ export default function EditPerformanceReviewPage({
 }: EditPerformanceReviewPageProps) {
   const { id } = use(params);
 
-  const { hasPermission } =
-    usePermissions();
-
+  const { hasPermission } = usePermissions();
+  const canReadPerformanceReview = hasPermission("performance_reviews.read");
   const canUpdatePerformanceReview = hasPermission("performance_reviews.update");
+  const canReadUsers = hasPermission("users.read");
 
-  if (!canUpdatePerformanceReview) {
+  if (
+    !canReadPerformanceReview ||
+    !canUpdatePerformanceReview ||
+    !canReadUsers
+  ) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">

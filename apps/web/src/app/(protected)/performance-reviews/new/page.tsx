@@ -8,9 +8,17 @@ import { usePermissions } from "@/hooks/use-permissions";
 
 export default function NewPerformanceReviewPage() {
   const router = useRouter();
-  const { hasPermission } = usePermissions();
 
-  if (!hasPermission("performance_reviews.create")) {
+  const { hasPermission } = usePermissions();
+  const canCreatePerformanceReview = hasPermission("performance_reviews.create");
+  const canReadEmployees = hasPermission("employees.read");
+  const canReadUsers = hasPermission("users.read");
+
+  if (
+    !canCreatePerformanceReview ||
+    !canReadEmployees ||
+    !canReadUsers
+  ) {
     return (
       <div className="space-y-6">
         <div>

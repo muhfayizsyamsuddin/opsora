@@ -10,6 +10,7 @@ import type {
 
 export function usePerformanceReviews(
   params?: PerformanceReviewQueryParams,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -18,5 +19,6 @@ export function usePerformanceReviews(
     ],
     queryFn: () =>
       getPerformanceReviews(params),
+    enabled,
   });
 }

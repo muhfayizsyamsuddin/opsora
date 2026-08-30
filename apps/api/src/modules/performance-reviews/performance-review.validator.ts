@@ -59,14 +59,14 @@ export const getPerformanceReviewsSchema = z.object({
     score_min: z.coerce
       .number()
       .int()
-      .min(0)
+      .min(1)
       .max(100)
       .optional(),
 
     score_max: z.coerce
       .number()
       .int()
-      .min(0)
+      .min(1)
       .max(100)
       .optional(),
 
@@ -120,14 +120,14 @@ export const getPerformanceReviewEmployeeSchema = z.object({
     score_min: z.coerce
       .number()
       .int()
-      .min(0)
+      .min(1)
       .max(100)
       .optional(),
 
     score_max: z.coerce
       .number()
       .int()
-      .min(0)
+      .min(1)
       .max(100)
       .optional(),
 

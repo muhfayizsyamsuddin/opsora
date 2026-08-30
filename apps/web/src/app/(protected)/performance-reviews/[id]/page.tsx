@@ -67,10 +67,26 @@ export default function PerformanceReviewDetailPage() {
 
   const { hasPermission } = usePermissions();
   const canReadPerformanceReview = hasPermission("performance_reviews.read");
+  const canUpdatePerformanceReview = hasPermission("performance_reviews.update");
+  const canDeletePerformanceReview = hasPermission("performance_reviews.delete");
+  const canReadUsers = hasPermission("users.read");
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteReview = useDeletePerformanceReview();
-  const review = usePerformanceReview(params.id);
+  const review = usePerformanceReview(
+    params.id,
+    canReadPerformanceReview,
+  );
+  
+  if (!canReadPerformanceReview) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this performance review.
+        </p>
+      </div>
+    );
+  }
 
   if (review.isLoading) {
     return (
@@ -124,16 +140,6 @@ export default function PerformanceReviewDetailPage() {
 
   const data = review.data;
 
-  if (!canReadPerformanceReview) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this performance review.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -168,9 +174,8 @@ export default function PerformanceReviewDetailPage() {
         </div>
 
         <div className="flex gap-2">
-          {hasPermission(
-            "performance_reviews.update",
-          ) && (
+          {canUpdatePerformanceReview &&
+            canReadUsers && (
             <Button
               type="button"
               variant="outline"
@@ -186,9 +191,7 @@ export default function PerformanceReviewDetailPage() {
             </Button>
           )}
 
-          {hasPermission(
-            "performance_reviews.delete",
-          ) && (
+          {canDeletePerformanceReview && (
             <Button
               type="button"
               variant="outline"

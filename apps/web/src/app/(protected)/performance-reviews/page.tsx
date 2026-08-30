@@ -36,23 +36,29 @@ const DEFAULT_PARAMS: PerformanceReviewQueryParams = {
 export default function PerformanceReviewsPage() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
-  const canReadPerformanceReviews =
-    hasPermission(
-      "performance_reviews.read",
-    );
+  const canReadPerformanceReviews = hasPermission("performance_reviews.read");
+  const canReadEmployees = hasPermission("employees.read");
+  const canReadUsers = hasPermission("users.read");
+
   const [deleteTarget, setDeleteTarget] = useState<PerformanceReview | null>(null);
 
   const deletePerformanceReview = useDeletePerformanceReview();
 
   const [params, setParams] = useState<PerformanceReviewQueryParams>( DEFAULT_PARAMS, ); 
-  const reviews = usePerformanceReviews(params);
+  const reviews = usePerformanceReviews(
+    params,
+    canReadPerformanceReviews,
+  );
 
-  const employees = useEmployees({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const employees = useEmployees(
+    {
+      page: 1,
+      per_page: 100,
+      status: "ACTIVE",
+    },
+    canReadPerformanceReviews &&
+      canReadEmployees,
+  );
   const data =
     reviews.data?.data ?? [];
 
@@ -68,6 +74,14 @@ export default function PerformanceReviewsPage() {
       </div>
     );
   }
+
+  const isLoading =
+    reviews.isLoading ||
+    (canReadEmployees && employees.isLoading);
+
+  const isError =
+    reviews.isError ||
+    (canReadEmployees && employees.isError);
 
   return (
     <div className="space-y-6">
@@ -107,9 +121,9 @@ export default function PerformanceReviewsPage() {
       />
   
       {/* Content */}
-      {reviews.isLoading ? (
+      {isLoading ? (
         <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
-      ) : reviews.error ? (
+      ) : isError ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
           <p className="font-medium">
             Unable to load performance reviews.
@@ -123,9 +137,13 @@ export default function PerformanceReviewsPage() {
             type="button"
             variant="outline"
             className="mt-4 rounded-xl"
-            onClick={() =>
-              reviews.refetch()
-            }
+            onClick={() => {
+              reviews.refetch();
+
+              if (canReadEmployees) {
+                employees.refetch();
+              }
+            }}
           >
             Try Again
           </Button>
@@ -147,7 +165,8 @@ export default function PerformanceReviewsPage() {
               router.push(`/performance-reviews/${review.id}`)
             }
             onEdit={
-              hasPermission("performance_reviews.update")
+              hasPermission("performance_reviews.update") &&
+              canReadUsers
                 ? (review) =>
                     router.push(
                       `/performance-reviews/${review.id}/edit`,

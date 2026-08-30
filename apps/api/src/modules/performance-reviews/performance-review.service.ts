@@ -24,6 +24,13 @@ export class PerformanceReviewService {
       );
     }
 
+    if (employee.status !== "ACTIVE") {
+      throw new AppError(
+        "Inactive employee cannot receive performance reviews",
+        400,
+      );
+    }
+
     const reviewer =
       await UserRepository.findById(
         data.reviewerId,
@@ -33,6 +40,19 @@ export class PerformanceReviewService {
       throw new AppError(
         "Reviewer not found",
         404,
+      );
+    }
+
+    const existingReview =
+      await PerformanceReviewRepository.findByEmployeeAndPeriod(
+        data.employeeId,
+        data.reviewPeriod,
+      );
+
+    if (existingReview) {
+      throw new AppError(
+        "Performance review already exists for this employee and review period",
+        409,
       );
     }
 
@@ -100,6 +120,24 @@ export class PerformanceReviewService {
         throw new AppError(
           "Reviewer not found",
           404,
+        );
+      }
+    }
+
+    if (data.reviewPeriod) {
+      const existingReview =
+        await PerformanceReviewRepository.findByEmployeeAndPeriod(
+          review.employeeId,
+          data.reviewPeriod,
+        );
+
+      if (
+        existingReview &&
+        existingReview.id !== id
+      ) {
+        throw new AppError(
+          "Performance review already exists for this employee and review period",
+          409,
         );
       }
     }

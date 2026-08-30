@@ -6,6 +6,7 @@ import {
 
 export function usePerformanceReview(
   id: string,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -14,6 +15,6 @@ export function usePerformanceReview(
     ],
     queryFn: () =>
       getPerformanceReviewById(id),
-    enabled: Boolean(id),
+    enabled: Boolean(id) && enabled,
   });
 }
