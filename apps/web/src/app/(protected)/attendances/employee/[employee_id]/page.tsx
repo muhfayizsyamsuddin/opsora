@@ -71,13 +71,20 @@ export default function EmployeeAttendancePage({
   const [queryParams, setQueryParams] =
     useState(DEFAULT_PARAMS);
 
-  const employee =
-    useEmployee(employee_id);
+  const canReadHistory =
+    canReadAttendances &&
+    canReadEmployees;
+
+  const employee = useEmployee(
+    employee_id,
+    canReadHistory,
+  );
 
   const attendances =
     useEmployeeAttendance(
       employee_id,
       queryParams,
+      canReadHistory,
     );
 
   if (

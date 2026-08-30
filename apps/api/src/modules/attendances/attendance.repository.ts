@@ -194,4 +194,31 @@ export class AttendanceRepository {
             },
         });
     }
+
+  static async findByEmployeeAndDate(
+    employeeId: string,
+    date: Date,
+  ) {
+    const start = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+    );
+
+    const end = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate() + 1,
+    );
+
+    return prisma.attendance.findFirst({
+      where: {
+        employeeId,
+        checkIn: {
+          gte: start,
+          lt: end,
+        },
+      },
+    });
+  }
 }

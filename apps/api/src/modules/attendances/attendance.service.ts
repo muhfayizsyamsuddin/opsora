@@ -16,6 +16,26 @@ export class AttendanceService {
       throw new AppError("Employee not found", 404);
     }
 
+    if (employee.status !== "ACTIVE") {
+      throw new AppError(
+        "Inactive employee cannot create attendance",
+        400,
+      );
+    }
+
+    const existingAttendance =
+      await AttendanceRepository.findByEmployeeAndDate(
+        data.employeeId,
+        data.checkIn,
+      );
+
+    if (existingAttendance) {
+      throw new AppError(
+        "Attendance for this employee already exists on this date",
+        409,
+      );
+    }
+
     if (
       data.checkOut &&
       data.checkOut.getTime() < data.checkIn.getTime()

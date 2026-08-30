@@ -8,15 +8,32 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function NewAttendancePage() {
   const { hasPermission } = usePermissions();
   const canCreateAttendance = hasPermission("attendances.create");
+  const canReadEmployees = hasPermission("employees.read");
 
-  const employees =
-    useEmployees({
+  const employees = useEmployees(
+    {
       page: 1,
       per_page: 100,
       sort_by: "name",
       sort_order: "asc",
       status: "ACTIVE",
-    });
+    },
+    canCreateAttendance &&
+      canReadEmployees,
+  );
+
+  if (
+    !canCreateAttendance ||
+    !canReadEmployees
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to create attendances.
+        </p>
+      </div>
+    );
+  }
 
   if (employees.isLoading) {
     return (
@@ -37,16 +54,6 @@ export default function NewAttendancePage() {
 
         <p className="mt-1 text-sm text-muted-foreground">
           Please try again.
-        </p>
-      </div>
-    );
-  }
-
-  if (!canCreateAttendance) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to create attendances.
         </p>
       </div>
     );

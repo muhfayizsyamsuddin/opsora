@@ -57,9 +57,22 @@ export default function AttendanceDetailPage({
   
   const { hasPermission } = usePermissions();
   const canReadAttendance = hasPermission("attendances.read");
+  const canUpdateAttendance = hasPermission("attendances.update");
 
-  const attendance =
-    useAttendance(id);
+  const attendance = useAttendance(
+    id,
+    canReadAttendance,
+  );
+
+  if (!canReadAttendance) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this attendance.
+        </p>
+      </div>
+    );
+  }
 
   if (attendance.isLoading) {
     return (
@@ -99,16 +112,6 @@ export default function AttendanceDetailPage({
 
   const data = attendance.data;
 
-  if (!canReadAttendance) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this attendance.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -140,18 +143,20 @@ export default function AttendanceDetailPage({
             Back to Attendance
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl"
-            onClick={() =>
-              router.push(
-                `/attendances/${data.id}/edit`,
-              )
-            }
-          >
-            Edit
-          </Button>
+          {canUpdateAttendance && (
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() =>
+                router.push(
+                  `/attendances/${data.id}/edit`,
+                )
+              }
+            >
+              Edit
+            </Button>
+          )}
         </div>
       </div>
 

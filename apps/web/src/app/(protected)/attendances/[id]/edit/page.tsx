@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AttendanceForm } from "@/features/attendances/components/AttendanceForm";
 import { useAttendance } from "@/features/attendances/queries/use-attendance";
-import { useEmployees } from "@/features/employees/queries/use-employees";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export default function EditAttendancePage({
@@ -19,24 +18,28 @@ export default function EditAttendancePage({
   const router = useRouter();
 
   const { hasPermission } = usePermissions();
+  const canReadAttendance = hasPermission("attendances.read");
   const canUpdateAttendance = hasPermission("attendances.update");
 
-  const attendance =
-    useAttendance(id);
-
-  const employees =
-    useEmployees({
-      page: 1,
-      per_page: 100,
-      sort_by: "name",
-      sort_order: "asc",
-      status: "ACTIVE",
-    });
+  const attendance = useAttendance(
+    id,
+    canReadAttendance && canUpdateAttendance,
+  );
 
   if (
-    attendance.isLoading ||
-    employees.isLoading
+    !canReadAttendance ||
+    !canUpdateAttendance
   ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit attendances.
+        </p>
+      </div>
+    );
+  }
+
+  if (attendance.isLoading) {
     return (
       <div className="space-y-6">
         <div className="h-24 animate-pulse rounded-2xl border bg-muted/30" />
@@ -48,7 +51,6 @@ export default function EditAttendancePage({
 
   if (
     attendance.error ||
-    employees.error ||
     !attendance.data
   ) {
     return (
@@ -73,16 +75,6 @@ export default function EditAttendancePage({
     );
   }
 
-  if (!canUpdateAttendance) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit attendances.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -100,12 +92,8 @@ export default function EditAttendancePage({
       </div>
 
       <AttendanceForm
-        attendance={
-          attendance.data
-        }
-        employees={
-          employees.data?.data ?? []
-        }
+        attendance={attendance.data}
+        employees={[]}
       />
     </div>
   );

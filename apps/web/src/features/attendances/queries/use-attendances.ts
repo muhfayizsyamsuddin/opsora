@@ -10,9 +10,11 @@ import type {
 
 export function useAttendances(
   params: AttendanceQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["attendances", params],
     queryFn: () => getAttendances(params),
+    enabled,
   });
 }

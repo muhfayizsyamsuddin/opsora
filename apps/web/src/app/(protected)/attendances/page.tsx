@@ -32,6 +32,7 @@ export default function AttendancesPage() {
   const canReadAttendances = hasPermission("attendances.read");
   const canCreateAttendance = hasPermission("attendances.create");
   const canUpdateAttendance = hasPermission("attendances.update");
+  const canReadEmployees = hasPermission("employees.read");
 
   const [
     params,
@@ -41,16 +42,21 @@ export default function AttendancesPage() {
       DEFAULT_PARAMS,
     );
 
-  const attendances =
-    useAttendances(params);
+  const attendances = useAttendances(
+    params,
+    canReadAttendances,
+  );
 
-  const employees =
-    useEmployees({
+  const employees = useEmployees(
+    {
       page: 1,
       per_page: 100,
       sort_by: "name",
       sort_order: "asc",
-    });
+    },
+    canReadAttendances &&
+      canReadEmployees,
+  );
 
   const data =
     attendances.data?.data ?? [];
@@ -113,10 +119,12 @@ export default function AttendancesPage() {
       />
 
       {attendances.isLoading ||
-      employees.isLoading ? (
+      (canReadEmployees &&
+        employees.isLoading) ? (
         <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
       ) : attendances.error ||
-        employees.error ? (
+        (canReadEmployees &&
+          employees.error) ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
           <p className="font-medium">
             Unable to load attendance.
