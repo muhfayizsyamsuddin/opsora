@@ -2,14 +2,12 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 
 import { EmployeeForm } from "@/features/employees/components/EmployeeForm";
 import { useDepartments } from "@/features/departments/queries/use-departments";
-
-import { getEmployeeById } from "@/services/employee.service";
+import { useEmployee } from "@/features/employees/queries/use-employee";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export default function EditEmployeePage({
@@ -21,20 +19,46 @@ export default function EditEmployeePage({
   const router = useRouter();
 
   const { hasPermission } = usePermissions();
+  const canReadEmployee = hasPermission("employees.read");
   const canUpdateEmployee = hasPermission("employees.update");
+  const canReadDepartments = hasPermission("departments.read");
 
-  const employee = useQuery({
-    queryKey: ["employees", id],
-    queryFn: () => getEmployeeById(id),
-  });
+  const employee = useEmployee(
+    id,
+    canReadEmployee && canUpdateEmployee,
+  );
 
-  const departments =
-    useDepartments({
+  const departments = useDepartments(
+    {
       page: 1,
       per_page: 100,
       sort_by: "name",
       sort_order: "asc",
-    });
+    },
+    canReadEmployee &&
+      canUpdateEmployee &&
+      canReadDepartments,
+  );
+  
+  if (!canReadEmployee || !canUpdateEmployee) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit employees.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadDepartments) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view departments required to edit employees.
+        </p>
+      </div>
+    );
+  }
 
   if (
     employee.isLoading ||
@@ -69,16 +93,6 @@ export default function EditEmployeePage({
         >
           Back to Employee
         </Button>
-      </div>
-    );
-  }
-
-  if (!canUpdateEmployee) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit employees.
-        </p>
       </div>
     );
   }

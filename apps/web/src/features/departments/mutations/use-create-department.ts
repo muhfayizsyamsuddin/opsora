@@ -19,6 +19,14 @@ export function useCreateDepartment() {
         queryKey: ["departments"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Department created successfully",
       );

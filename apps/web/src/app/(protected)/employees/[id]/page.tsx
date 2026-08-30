@@ -1,15 +1,15 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-
-import { getEmployeeById } from "@/services/employee.service";
+import { useEmployee } from "@/features/employees/queries/use-employee";
 import { useEmployeeAttendance } from "@/features/attendances/queries/use-employee-attendance";
 import { usePerformanceReviewHistory } from "@/features/performance-reviews/queries/use-performance-review-history";
 import { usePermissions } from "@/hooks/use-permissions";
+import { DeactivateEmployeeDialog } from "@/features/employees/components/DeactivateEmployeeDialog";
+
 function formatCurrency(
   value: string | number,
 ) {
@@ -57,27 +57,52 @@ export default function EmployeeDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const [showDeactivate, setShowDeactivate] = useState(false);
 
   const { hasPermission } = usePermissions();
   const canReadEmployee = hasPermission("employees.read");
+  const canUpdateEmployee = hasPermission("employees.update");
+  const canDeactivateEmployee = hasPermission("employees.delete");
+  const canReadAttendances = hasPermission("attendances.read");
+  const canReadPerformanceReviews = hasPermission("performance_reviews.read");
 
-  const employee = useQuery({
-    queryKey: ["employees", id],
-    queryFn: () => getEmployeeById(id),
-  });
+  const employee = useEmployee(
+    id,
+    canReadEmployee,
+  );
 
-  const attendance = useEmployeeAttendance(id, {
-    page: 1,
-    per_page: 10,
-    sort_by: "checkIn",
-    sort_order: "desc",
-  });
-  const performanceHistory = usePerformanceReviewHistory(id, {
-    page: 1,
-    per_page: 10,
-    sort_by: "reviewDate",
-    sort_order: "desc",
-  });
+  const attendance = useEmployeeAttendance(
+    id,
+    {
+      page: 1,
+      per_page: 10,
+      sort_by: "checkIn",
+      sort_order: "desc",
+    },
+    canReadEmployee && canReadAttendances,
+  );
+  const performanceHistory =
+    usePerformanceReviewHistory(
+      id,
+      {
+        page: 1,
+        per_page: 10,
+        sort_by: "reviewDate",
+        sort_order: "desc",
+      },
+      canReadEmployee &&
+        canReadPerformanceReviews,
+    );
+
+  if (!canReadEmployee) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this employee.
+        </p>
+      </div>
+    );
+  }
 
   if (employee.isLoading) {
     return (
@@ -113,16 +138,6 @@ export default function EmployeeDetailPage({
   }
 
   const data = employee.data;
-
-  if (!canReadEmployee) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this employee.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -167,19 +182,33 @@ export default function EmployeeDetailPage({
           >
             View Attendance
           </Button> */}
-
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl"
-            onClick={() =>
-              router.push(
-                `/employees/${data.id}/edit`,
-              )
-            }
-          >
-            Edit
-          </Button>
+          {canUpdateEmployee && (
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() =>
+                router.push(
+                  `/employees/${data.id}/edit`,
+                )
+              }
+            >
+              Edit
+            </Button>
+          )}
+          {canDeactivateEmployee &&
+            data.status === "ACTIVE" && (
+              <Button
+                type="button"
+                variant="destructive"
+                className="rounded-xl"
+                onClick={() =>
+                  setShowDeactivate(true)
+                }
+              >
+                Deactivate
+              </Button>
+            )}
         </div>
       </div>
 
@@ -280,8 +309,9 @@ export default function EmployeeDetailPage({
           </div>
         </div>
       </section>
-
-      <section
+      
+      {canReadAttendances && (
+        <section
         id="attendance-history"
         className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6"
       >
@@ -355,6 +385,8 @@ export default function EmployeeDetailPage({
           </div>
         )}
         </section>
+      )}
+      {canReadPerformanceReviews && (
         <section className="rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -447,6 +479,15 @@ export default function EmployeeDetailPage({
             </div>
           )}
         </section>
+      )}
+      <DeactivateEmployeeDialog
+        employee={{
+          id: data.id,
+          name: data.name,
+        }}
+        open={showDeactivate}
+        onOpenChange={setShowDeactivate}
+      />
     </div>
   );
 }

@@ -12,6 +12,7 @@ export function usePerformanceReviewHistory(
     PerformanceReviewQueryParams,
     "employee_id"
   >,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -25,6 +26,6 @@ export function usePerformanceReviewHistory(
         employeeId,
         params,
       ),
-    enabled: Boolean(employeeId),
+    enabled: Boolean(employeeId) && enabled,
   });
 }

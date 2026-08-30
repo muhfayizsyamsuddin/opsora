@@ -88,12 +88,28 @@ export class DepartmentService {
     }
 
     static async delete(id: string) {
-        const department = await DepartmentRepository.findById(id);
+      const department =
+        await DepartmentRepository.findById(id);
 
-        if (!department) {
-            throw new AppError("Department not found", 404);
-        }
+      if (!department) {
+        throw new AppError(
+          "Department not found",
+          404,
+        );
+      }
 
-        await DepartmentRepository.delete(id);
+      const employeeCount =
+        await DepartmentRepository.countEmployees(
+          id,
+        );
+
+      if (employeeCount > 0) {
+        throw new AppError(
+          "Department cannot be deleted while it still has employees",
+          409,
+        );
+      }
+
+      await DepartmentRepository.delete(id);
     }
 }

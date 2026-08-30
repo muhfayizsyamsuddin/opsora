@@ -28,13 +28,13 @@ export function useDeleteEmployee() {
       });
 
       toast.success(
-        "Employee deleted successfully",
+        "Employee deactivated successfully",
       );
     },
 
     onError: () => {
       toast.error(
-        "Failed to delete employee.",
+        "Failed to deactivate employee.",
       );
     },
   });

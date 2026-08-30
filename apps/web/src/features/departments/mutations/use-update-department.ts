@@ -30,6 +30,14 @@ export function useUpdateDepartment() {
         queryKey: ["departments"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Department updated successfully",
       );

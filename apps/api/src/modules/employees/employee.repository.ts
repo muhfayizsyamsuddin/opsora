@@ -90,73 +90,76 @@ export class EmployeeRepository {
         });
     }
 
-    static async update(
-        id: string,
-        data: {
-            name?: string;
-            email?: string;
-            position?: string;
-            salary?: number;
-            hireDate?: Date;
-            departmentId?: string;
-            status?: EmployeeStatus;
+  static async update(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      position?: string;
+      salary?: number;
+      hireDate?: Date;
+      departmentId?: string;
+      status?: EmployeeStatus;
+    },
+  ) {
+    return prisma.employee.update({
+      where: {
+        id,
+      },
+        data,
+        include: {
+          department: true,
         },
-    ) {
-        return prisma.employee.update({
-            where: {
-            id,
-            },
-            data,
-            include: {
-            department: true,
-            },
-        });
-    }
+    });
+  }
 
-    static async delete(id: string) {
-        return prisma.employee.delete({
-            where: {
-            id,
-            },
-        });
-    }
+  static async deactivate(id: string) {
+    return prisma.employee.update({
+      where: {
+        id,
+      },
+        data: {
+          status: "INACTIVE",
+        },
+    });
+  }
 
-    static async count(
-        search?: string,
-        departmentId?: string,
-        status?: EmployeeStatus,
-    ) {
-        return prisma.employee.count({
-            where: {
-            ...(search && {
-                OR: [
-                {
-                    name: {
-                    contains: search,
-                    mode: "insensitive",
-                    },
-                },
-                {
-                    email: {
-                    contains: search,
-                    mode: "insensitive",
-                    },
-                },
-                {
-                    position: {
-                    contains: search,
-                    mode: "insensitive",
-                    },
-                },
-                ],
-            }),
-            ...(departmentId && {
-                departmentId,
-            }),
-            ...(status && {
-                status,
-            }),
+  static async count(
+    search?: string,
+    departmentId?: string,
+    status?: EmployeeStatus,
+  ) {
+    return prisma.employee.count({
+      where: {
+        ...(search && {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
             },
-        });
-    }
+            {
+              email: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              position: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          ],
+        }),
+          ...(departmentId && {
+            departmentId,
+          }),
+          ...(status && {
+            status,
+          }),
+      },
+    });
+  }
 }

@@ -19,6 +19,14 @@ export function useDeleteDepartment() {
         queryKey: ["departments"],
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["reports"],
+      });
+
       toast.success(
         "Department deleted successfully",
       );

@@ -193,7 +193,7 @@ export function EmployeeTable({
                         variant="ghost"
                         size="icon"
                         className="rounded-lg text-destructive hover:text-destructive"
-                        aria-label={`Delete ${employee.name}`}
+                        aria-label={`Deactivate ${employee.name}`}
                         onClick={() =>
                           onDelete(employee)
                         }

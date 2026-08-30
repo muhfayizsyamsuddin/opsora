@@ -10,9 +10,11 @@ import type {
 
 export function useEmployees(
   params: EmployeeQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["employees", params],
     queryFn: () => getEmployees(params),
+    enabled,
   });
 }

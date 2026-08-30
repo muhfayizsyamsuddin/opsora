@@ -14,6 +14,7 @@ export function useEmployeeAttendance(
     AttendanceQueryParams,
     "employee_id" | "search" | "date"
   > = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: [
@@ -27,6 +28,6 @@ export function useEmployeeAttendance(
         employeeId,
         params,
       ),
-    enabled: Boolean(employeeId),
+    enabled: Boolean(employeeId) && enabled,
   });
 }

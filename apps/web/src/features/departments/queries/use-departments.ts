@@ -10,9 +10,11 @@ import type {
 
 export function useDepartments(
   params: DepartmentQueryParams = {},
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["departments", params],
     queryFn: () => getDepartments(params),
+    enabled,
   });
 }

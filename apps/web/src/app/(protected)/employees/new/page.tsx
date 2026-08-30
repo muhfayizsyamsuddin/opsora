@@ -7,14 +7,38 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function NewEmployeePage() {
   const { hasPermission } = usePermissions();
   const canCreateEmployee = hasPermission("employees.create");
+  const canReadDepartments = hasPermission("departments.read");
   
-  const departments =
-    useDepartments({
+  const departments = useDepartments(
+    {
       page: 1,
       per_page: 100,
       sort_by: "name",
       sort_order: "asc",
-    });
+    },
+    canCreateEmployee && canReadDepartments,
+  );
+
+  
+  if (!canCreateEmployee) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to create employees.
+        </p>
+      </div>
+    );
+  }
+
+  if (!canReadDepartments) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view departments required to create employees.
+        </p>
+      </div>
+    );
+  }
 
   if (departments.isLoading) {
     return (
@@ -35,16 +59,6 @@ export default function NewEmployeePage() {
 
         <p className="mt-1 text-sm text-muted-foreground">
           Please try again.
-        </p>
-      </div>
-    );
-  }
-
-  if (!canCreateEmployee) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to create employees.
         </p>
       </div>
     );

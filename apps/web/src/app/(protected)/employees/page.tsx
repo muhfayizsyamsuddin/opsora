@@ -4,21 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useDeleteEmployee } from "@/features/employees/mutations/use-delete-employee";
 import { EmployeePagination } from "@/features/employees/components/EmployeePagination";
 import { EmployeeTable } from "@/features/employees/components/EmployeeTable";
 import { EmployeeToolbar } from "@/features/employees/components/EmployeeToolbar";
-
+import { DeactivateEmployeeDialog } from "@/features/employees/components/DeactivateEmployeeDialog";
 import { useEmployees } from "@/features/employees/queries/use-employees";
 import { useDepartments } from "@/features/departments/queries/use-departments";
 
@@ -39,8 +28,6 @@ export default function EmployeesPage() {
   const router = useRouter();
   const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
 
-  const deleteEmployee = useDeleteEmployee();
-
   const { hasPermission } = usePermissions();
   const canReadEmployee = hasPermission("employees.read");
   const canCreateEmployee = hasPermission("employees.create");
@@ -52,8 +39,10 @@ export default function EmployeesPage() {
       DEFAULT_PARAMS,
     );
 
-  const employees =
-    useEmployees(params);
+  const employees = useEmployees(
+    params,
+    canReadEmployee,
+  );
 
   const departments =
     useDepartments({
@@ -181,64 +170,22 @@ export default function EmployeesPage() {
           )}
         </>
       )}
-      <AlertDialog
+      <DeactivateEmployeeDialog
+        employee={
+          deleteTarget
+            ? {
+                id: deleteTarget.id,
+                name: deleteTarget.name,
+              }
+            : null
+        }
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => {
-          if (
-            !open &&
-            !deleteEmployee.isPending
-          ) {
+          if (!open) {
             setDeleteTarget(null);
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete employee?
-            </AlertDialogTitle>
-
-            <AlertDialogDescription>
-              This will permanently delete{" "}
-              <span className="font-medium text-foreground">
-                {deleteTarget?.name}
-              </span>
-                . This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={deleteEmployee.isPending}
-            >
-              Back
-            </AlertDialogCancel>
-
-            <AlertDialogAction
-              disabled={deleteEmployee.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                if (!deleteTarget) {
-                    return;
-                }
-
-                deleteEmployee.mutate(
-                    deleteTarget.id,
-                    {
-                    onSuccess: () => {
-                        setDeleteTarget(null);
-                    },
-                    },
-                );
-                }}
-            >
-                {deleteEmployee.isPending
-                ? "Deleting..."
-                : "Delete Employee"}
-            </AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-        </AlertDialog>
+      />
     </div>
   );
 }
