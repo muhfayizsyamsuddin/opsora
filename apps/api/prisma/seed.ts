@@ -127,9 +127,6 @@ const permissions = [
 
   // Permissions
   ["permissions.read", "View permissions"],
-  ["permissions.create", "Create permissions"],
-  ["permissions.update", "Update permissions"],
-  ["permissions.delete", "Delete permissions"],
 
   // System configuration
   ["settings.read", "View system configuration"],

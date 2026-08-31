@@ -44,7 +44,10 @@ export default function PermissionDetailPage() {
   const { hasPermission } = usePermissions();
   const canReadPermission = hasPermission("permissions.read");
 
-  const permission = usePermission(params.id);
+  const permission = usePermission(
+    params.id,
+    canReadPermission,
+  );
 
   if (!canReadPermission) {
     return (
@@ -55,7 +58,6 @@ export default function PermissionDetailPage() {
       </div>
     );
   }
-
 
   if (permission.isLoading) {
     return (

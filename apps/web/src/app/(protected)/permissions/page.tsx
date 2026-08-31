@@ -28,8 +28,10 @@ export default function PermissionsPage() {
       sort_order: "asc",
     });
 
-  const permissions =
-    usePermissionsQuery(params);
+  const permissions = usePermissionsQuery(
+    params,
+    canReadPermissions,
+  );
 
   const data =
     permissions.data?.data ?? [];
