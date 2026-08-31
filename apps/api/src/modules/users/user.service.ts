@@ -69,6 +69,13 @@ export class UserService {
       throw new AppError("User not found", 404);
     }
 
+    if (!user.isActive) {
+      throw new AppError(
+        "Account is inactive",
+        401,
+      );
+    }
+
     return sanitizeUser(user);
   }
 

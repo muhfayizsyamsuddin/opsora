@@ -20,23 +20,30 @@ export function requirePermission(permissionName: string) {
             id: req.user.id,
         },
         select: {
-            roleId: true,
-            roleRef: {
+          isActive: true,
+          roleId: true,
+          roleRef: {
             select: {
-                name: true,
-                permissions: {
+              name: true,
+              permissions: {
                 select: {
-                    permission: {
+                  permission: {
                     select: {
-                        name: true,
+                      name: true,
                     },
-                    },
+                  },
                 },
-                },
+              },
             },
-            },
+          },
         },
       });
+
+      if (!user || !user.isActive) {
+        return next(
+          new AppError("Account is inactive", 401),
+        );
+      }
 
       if (!user?.roleId || !user.roleRef) {
         return next(

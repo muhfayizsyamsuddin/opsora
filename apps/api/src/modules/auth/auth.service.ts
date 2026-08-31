@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 
 import { AppError } from "../../errors/AppError.js";
 import { UserRepository } from "../users/user.repository.js";
-import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken, getRefreshTokenExpiresAt, verifyRefreshToken } from "../../utils/jwt.js";
 import { prisma } from "../../lib/prisma.js";
 
 export class AuthService {
@@ -83,9 +83,7 @@ export class AuthService {
       data: {
         token: refreshToken,
         userId: user.id,
-        expiresAt: new Date(
-          Date.now() + 30 * 24 * 60 * 60 * 1000,
-        ),
+        expiresAt: getRefreshTokenExpiresAt(),
       },
     });
 
@@ -219,26 +217,50 @@ export class AuthService {
         id: user.id,
       });
 
-    await prisma.$transaction([
-      prisma.refreshToken.update({
+    const rotationSucceeded =
+      await prisma.$transaction(async (tx) => {
+        const revoked =
+          await tx.refreshToken.updateMany({
+            where: {
+              id: stored.id,
+              revokedAt: null,
+            },
+            data: {
+              revokedAt: new Date(),
+            },
+          });
+
+        if (revoked.count !== 1) {
+          return false;
+        }
+
+        await tx.refreshToken.create({
+          data: {
+            token: newRefreshToken,
+            userId: user.id,
+            expiresAt: getRefreshTokenExpiresAt(),
+          },
+        });
+
+        return true;
+      });
+
+    if (!rotationSucceeded) {
+      await prisma.refreshToken.updateMany({
         where: {
-          id: stored.id,
+          userId: stored.userId,
+          revokedAt: null,
         },
         data: {
           revokedAt: new Date(),
         },
-      }),
-      prisma.refreshToken.create({
-        data: {
-          token: newRefreshToken,
-          userId: user.id,
-          expiresAt: new Date(
-            Date.now() +
-              30 * 24 * 60 * 60 * 1000,
-          ),
-        },
-      }),
-    ]);
+      });
+
+      throw new AppError(
+        "Refresh token reuse detected",
+        401,
+      );
+    }
 
     return {
       access_token: accessToken,

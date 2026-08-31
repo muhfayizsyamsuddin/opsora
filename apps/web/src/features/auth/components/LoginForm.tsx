@@ -12,8 +12,7 @@ export function LoginForm() {
 
   const loginMutation = useLogin();
 
-  const onSubmit = form.handleSubmit(async (values) => {
-    console.log("SUBMIT", values);
+  const onSubmit = form.handleSubmit((values) => {
     loginMutation.mutate(values);
   });
 
@@ -29,7 +28,7 @@ export function LoginForm() {
 
         <Input
           id="email"
-          placeholder="admin@example.com"
+          placeholder="user@example.com"
           {...form.register("email")}
         />
 
@@ -62,7 +61,6 @@ export function LoginForm() {
       <Button
         type="submit"
         className="w-full"
-        onClick={() => console.log("BUTTON CLICK")}
         disabled={loginMutation.isPending}
       >
         Sign In
