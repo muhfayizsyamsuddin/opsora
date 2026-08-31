@@ -123,4 +123,97 @@ export class ReportController {
             return success(res, report);
         },
     );
+
+    static exportSalesReport = asyncHandler(
+        async (req: Request, res: Response) => {
+            const csv =
+            await ReportService.exportSalesReport(
+                req.query.date_from
+                ? new Date(req.query.date_from.toString())
+                : undefined,
+                req.query.date_to
+                ? new Date(req.query.date_to.toString())
+                : undefined,
+            );
+
+            const fileName =
+            `sales-report-${new Date()
+                .toISOString()
+                .slice(0, 10)}.csv`;
+
+            res.setHeader(
+            "Content-Type",
+            "text/csv; charset=utf-8",
+            );
+
+            res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${fileName}"`,
+            );
+
+            return res.status(200).send(csv);
+        },
+        );
+    
+    static exportPurchasesReport = asyncHandler(
+    async (req: Request, res: Response) => {
+        const csv =
+        await ReportService.exportPurchasesReport(
+            req.query.date_from
+            ? new Date(req.query.date_from.toString())
+            : undefined,
+            req.query.date_to
+            ? new Date(req.query.date_to.toString())
+            : undefined,
+        );
+
+        const fileName =
+        `purchases-report-${new Date()
+            .toISOString()
+            .slice(0, 10)}.csv`;
+
+        res.setHeader(
+        "Content-Type",
+        "text/csv; charset=utf-8",
+        );
+
+        res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName}"`,
+        );
+
+        return res.status(200).send(csv);
+    },
+    );
+
+    static exportInventoryReport = asyncHandler(
+        async (req: Request, res: Response) => {
+            const csv =
+            await ReportService.exportInventoryReport(
+                req.query.date_from
+                ? new Date(req.query.date_from.toString())
+                : undefined,
+                req.query.date_to
+                ? new Date(req.query.date_to.toString())
+                : undefined,
+            );
+
+            const fileName =
+            `inventory-report-${new Date()
+                .toISOString()
+                .slice(0, 10)}.csv`;
+
+            res.setHeader(
+            "Content-Type",
+            "text/csv; charset=utf-8",
+            );
+
+            res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${fileName}"`,
+            );
+
+            return res.status(200).send(csv);
+        },
+        );
 }

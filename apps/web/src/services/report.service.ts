@@ -41,6 +41,20 @@ export async function getSalesReport(
   return response.data.data;
 }
 
+export async function exportSalesReport(
+  params?: ReportDateParams,
+): Promise<Blob> {
+  const response = await api.get(
+    `${API.REPORTS}/sales/export`,
+    {
+      params,
+      responseType: "blob",
+    },
+  );
+
+  return response.data;
+}
+
 export async function getPurchasesReport(
   params?: ReportDateParams,
 ): Promise<PurchasesReport> {
@@ -53,6 +67,20 @@ export async function getPurchasesReport(
   return response.data.data;
 }
 
+export async function exportPurchasesReport(
+  params?: ReportDateParams,
+): Promise<Blob> {
+  const response = await api.get(
+    `${API.REPORTS}/purchases/export`,
+    {
+      params,
+      responseType: "blob",
+    },
+  );
+
+  return response.data;
+}
+
 export async function getInventoryReport(
   params?: ReportDateParams,
 ): Promise<InventoryReport> {
@@ -63,6 +91,20 @@ export async function getInventoryReport(
     );
 
   return response.data.data;
+}
+
+export async function exportInventoryReport(
+  params?: ReportDateParams,
+): Promise<Blob> {
+  const response = await api.get(
+    `${API.REPORTS}/inventory/export`,
+    {
+      params,
+      responseType: "blob",
+    },
+  );
+
+  return response.data;
 }
 
 export async function getProfitReport(

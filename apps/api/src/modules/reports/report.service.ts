@@ -77,4 +77,130 @@ export class ReportService {
         endOfDay(dateTo),
         );
     }
+
+    static async exportSalesReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+    ) {
+    const report =
+        await this.getSalesReport(
+        dateFrom,
+        dateTo,
+        );
+
+    const rows = [
+        ["Metric", "Value"],
+        ["Total Sales", report.totalSales],
+        ["Completed Sales", report.completedSales],
+        ["Cancelled Sales", report.cancelledSales],
+        [
+        "Total Revenue",
+        report.totalRevenue.toString(),
+        ],
+    ];
+
+    return rows
+        .map((row) =>
+        row
+            .map((value) => {
+            const stringValue = String(value);
+
+            return `"${stringValue.replace(/"/g, '""')}"`;
+            })
+            .join(","),
+        )
+        .join("\n");
+    }
+
+    static async exportPurchasesReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const report =
+      await this.getPurchasesReport(
+        dateFrom,
+        dateTo,
+      );
+
+    const rows = [
+      ["Metric", "Value"],
+      ["Total Purchases", report.totalPurchases],
+      [
+        "Completed Purchases",
+        report.completedPurchases,
+      ],
+      [
+        "Draft Purchases",
+        report.draftPurchases,
+      ],
+      [
+        "Cancelled Purchases",
+        report.cancelledPurchases,
+      ],
+      [
+        "Total Purchase Amount",
+        report.totalPurchaseAmount.toString(),
+      ],
+    ];
+
+    return rows
+      .map((row) =>
+        row
+          .map((value) => {
+            const stringValue = String(value);
+
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          })
+          .join(","),
+      )
+      .join("\n");
+  }
+
+  static async exportInventoryReport(
+    dateFrom?: Date,
+    dateTo?: Date,
+  ) {
+    const report =
+      await this.getInventoryReport(
+        dateFrom,
+        dateTo,
+      );
+
+    const rows = [
+      ["Metric", "Value"],
+      ["Total Products", report.totalProducts],
+      [
+        "Active Products",
+        report.totalActiveProducts,
+      ],
+      [
+        "Total Stock Quantity",
+        report.totalStockQuantity,
+      ],
+      [
+        "Low Stock Count",
+        report.lowStockCount,
+      ],
+      [
+        "Total Stock In",
+        report.totalStockIn.toString(),
+      ],
+      [
+        "Total Stock Out",
+        report.totalStockOut.toString(),
+      ],
+    ];
+
+    return rows
+      .map((row) =>
+        row
+          .map((value) => {
+            const stringValue = String(value);
+
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          })
+          .join(","),
+      )
+      .join("\n");
+  }
 }

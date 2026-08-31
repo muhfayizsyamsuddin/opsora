@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { exportInventoryReport, exportPurchasesReport, exportSalesReport } from "@/services/report.service";
 import { ReportStatCard } from "@/features/reports/components/ReportStatCard";
 import { useBusinessReports } from "@/features/reports/queries/use-business-reports";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -55,6 +55,81 @@ export default function BusinessReportsPage() {
   const resetDates = () => {
     setDateFrom("");
     setDateTo("");
+  };
+
+  const handleExportSales = async () => {
+    const blob = await exportSalesReport({
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `sales-report-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportPurchases = async () => {
+    const blob = await exportPurchasesReport({
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `purchases-report-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportInventory = async () => {
+    const blob = await exportInventoryReport({
+      date_from: dateFrom || undefined,
+      date_to: dateTo || undefined,
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `inventory-report-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -178,14 +253,25 @@ export default function BusinessReportsPage() {
       ) : (
         <div className="space-y-6">
           <section>
-            <div className="mb-4">
-              <h2 className="text-base font-semibold">
-                Sales
-              </h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold">
+                  Sales
+                </h2>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                Sales transaction performance.
-              </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Sales transaction performance.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={handleExportSales}
+              >
+                Export CSV
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -221,14 +307,25 @@ export default function BusinessReportsPage() {
           </section>
 
           <section>
-            <div className="mb-4">
-              <h2 className="text-base font-semibold">
-                Purchases
-              </h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold">
+                  Purchases
+                </h2>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                Supplier purchase performance.
-              </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Supplier purchase performance.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={handleExportPurchases}
+              >
+                Export CSV
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -275,14 +372,25 @@ export default function BusinessReportsPage() {
           </section>
 
           <section>
-            <div className="mb-4">
-              <h2 className="text-base font-semibold">
-                Inventory
-              </h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold">
+                  Inventory
+                </h2>
 
-              <p className="mt-1 text-sm text-muted-foreground">
-                Current inventory and movement overview.
-              </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Current inventory and movement overview.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl"
+                onClick={handleExportInventory}
+              >
+                Export CSV
+              </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">

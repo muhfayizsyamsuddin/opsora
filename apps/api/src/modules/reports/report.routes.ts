@@ -51,6 +51,14 @@ router.get(
 );
 
 router.get(
+  "/sales/export",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.exportSalesReport,
+);
+
+router.get(
   "/purchases",
   authenticate,
   requirePermission("reports.read"),
@@ -59,11 +67,27 @@ router.get(
 );
 
 router.get(
+  "/purchases/export",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.exportPurchasesReport,
+);
+
+router.get(
   "/inventory",
   authenticate,
   requirePermission("reports.read"),
   validate(getReportSchema),
   ReportController.getInventoryReport,
+);
+
+router.get(
+  "/inventory/export",
+  authenticate,
+  requirePermission("reports.read"),
+  validate(getReportSchema),
+  ReportController.exportInventoryReport,
 );
 
 router.get(
