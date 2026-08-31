@@ -43,6 +43,7 @@ export default function SettingsPage() {
       </div>
 
       <SettingsForm
+        canRead={canReadSettings}
         canUpdate={canUpdateSettings}
       />
     </div>

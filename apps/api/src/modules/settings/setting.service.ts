@@ -1,5 +1,6 @@
 import { SettingRepository } from "./setting.repository.js";
 import { AppError } from "../../errors/AppError.js";
+import { prisma } from "../../lib/prisma.js";
 
 const ALLOWED_SETTING_KEYS = new Set([
   "company.name",
@@ -59,35 +60,39 @@ export class SettingService {
     company?: Record<string, string>;
     system?: Record<string, string>;
   }) {
-    if (data.company) {
+    await prisma.$transaction(async (tx) => {
+      if (data.company) {
         for (const [key, value] of Object.entries(
-        data.company,
+          data.company,
         )) {
-        const settingKey = `company.${key}`;
+          const settingKey = `company.${key}`;
 
-        assertAllowedKey(settingKey);
+          assertAllowedKey(settingKey);
 
-        await SettingRepository.upsert(
+          await SettingRepository.upsert(
             settingKey,
             value,
-        );
+            tx,
+          );
         }
-    }
+      }
 
-    if (data.system) {
+      if (data.system) {
         for (const [key, value] of Object.entries(
-        data.system,
+          data.system,
         )) {
-        const settingKey = `system.${key}`;
+          const settingKey = `system.${key}`;
 
-        assertAllowedKey(settingKey);
+          assertAllowedKey(settingKey);
 
-        await SettingRepository.upsert(
+          await SettingRepository.upsert(
             settingKey,
             value,
-        );
+            tx,
+          );
         }
-    }
+      }
+    });
 
     return SettingService.getAll();
   }

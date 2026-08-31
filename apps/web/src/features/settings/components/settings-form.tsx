@@ -17,11 +17,13 @@ import {
 import { useTheme } from "next-themes";
 
 export function SettingsForm({
+  canRead,
   canUpdate,
 }: {
+  canRead: boolean;
   canUpdate: boolean;
 }) {
-  const settings = useSettings();
+  const settings = useSettings(canRead);
   const updateSettings = useUpdateSettings();
   const { setTheme } = useTheme();
 

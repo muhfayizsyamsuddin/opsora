@@ -1,3 +1,5 @@
+import type { Prisma } from "../../generated/prisma/client.js";
+
 import { prisma } from "../../lib/prisma.js";
 
 export class SettingRepository {
@@ -9,8 +11,12 @@ export class SettingRepository {
     });
   }
 
-  static async upsert(key: string, value: string) {
-    return prisma.setting.upsert({
+  static async upsert(
+    key: string,
+    value: string,
+    tx: Prisma.TransactionClient = prisma,
+  ) {
+    return tx.setting.upsert({
       where: { key },
       update: { value },
       create: {
