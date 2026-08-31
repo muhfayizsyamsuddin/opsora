@@ -6,8 +6,9 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function CreateRolePage() {
   const { hasPermission } = usePermissions();
   const canCreateRole = hasPermission("roles.create");
+  const canReadPermissions = hasPermission("permissions.read");
 
-  if (!canCreateRole) {
+  if (!canCreateRole || !canReadPermissions) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { usePermissions } from "@/hooks/use-permissions";
 import { useRole } from "@/features/roles/queries/use-role";
 import { useUpdateRole } from "@/features/roles/mutations/use-update-role";
 
@@ -23,7 +23,14 @@ export function RoleEditForm({
 }) {
   const router = useRouter();
 
-  const role = useRole(roleId);
+  const { hasPermission } = usePermissions();
+  const canReadRole = hasPermission("roles.read");
+  const canUpdateRole = hasPermission("roles.update");
+
+  const role = useRole(
+    roleId,
+    canReadRole && canUpdateRole,
+  );
   const updateRole = useUpdateRole();
 
   const {

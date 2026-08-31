@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 
 import { usePermissionsQuery } from "@/features/permissions/queries/use-permissions";
 import { useCreateRole } from "@/features/roles/mutations/use-create-role";
-
+import { usePermissions } from "@/hooks/use-permissions";
 import {
   createRoleFormSchema,
   type CreateRoleFormValues,
@@ -18,12 +18,18 @@ import {
 export function RoleCreateForm() {
   const router = useRouter();
 
-  const permissions = usePermissionsQuery({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const { hasPermission } = usePermissions();
+  const canReadPermissions = hasPermission("permissions.read");
+
+  const permissions = usePermissionsQuery(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canReadPermissions,
+  );
 
   const createRole = useCreateRole();
 

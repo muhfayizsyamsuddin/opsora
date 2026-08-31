@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-
+import { usePermissions } from "@/hooks/use-permissions";
 import { usePermissionsQuery } from "@/features/permissions/queries/use-permissions";
 import { useRole } from "@/features/roles/queries/use-role";
 import { useUpdateRolePermissions } from "@/features/roles/mutations/use-update-role-permissions";
@@ -18,14 +18,30 @@ export function RolePermissionsForm({
 }: {
   roleId: string;
 }) {
-  const role = useRole(roleId);
+  const { hasPermission } = usePermissions();
+  const canReadRole = hasPermission("roles.read");
+  const canUpdateRole = hasPermission("roles.update");
+  const canReadPermissions = hasPermission("permissions.read");
+  
+  const canManagePermissions =
+  canReadRole &&
+  canUpdateRole &&
+  canReadPermissions;
+  
+  const role = useRole(
+    roleId,
+    canManagePermissions,
+  );
 
-  const permissions = usePermissionsQuery({
-    page: 1,
-    per_page: 100,
-    sort_by: "name",
-    sort_order: "asc",
-  });
+  const permissions = usePermissionsQuery(
+    {
+      page: 1,
+      per_page: 100,
+      sort_by: "name",
+      sort_order: "asc",
+    },
+    canManagePermissions,
+  );
 
   const updatePermissions =
     useUpdateRolePermissions();
@@ -101,6 +117,10 @@ export function RolePermissionsForm({
       },
     );
   };
+
+  if (!canManagePermissions) {
+    return null;
+  }
 
   if (
     role.isLoading ||

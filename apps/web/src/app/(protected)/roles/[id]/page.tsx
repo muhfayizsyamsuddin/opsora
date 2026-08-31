@@ -48,21 +48,32 @@ export default function RoleDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-
   const router = useRouter();
 
-  const [showDeleteDialog, setShowDeleteDialog] =
-    useState(false);
-
-  const role = useRole(id);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteRole = useDeleteRole();
-
+    
   const { hasPermission } = usePermissions();
-  const canReadPermissions = hasPermission("permissions.read");
   const canReadRole = hasPermission("roles.read");
   const canUpdate = hasPermission("roles.update");
   const canDelete = hasPermission("roles.delete");
+  const canReadPermissions = hasPermission("permissions.read");
+    
+  const role = useRole(
+    id,
+    canReadRole,
+  );
 
+  if (!canReadRole) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this role.
+        </p>
+      </div>
+    );
+  }
+  
   if (role.isLoading) {
     return (
       <div className="space-y-6">
@@ -127,16 +138,6 @@ export default function RoleDetailPage({
       },
     );
   };
-
-  if (!canReadRole) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this role.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

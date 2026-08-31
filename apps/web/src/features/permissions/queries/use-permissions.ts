@@ -12,9 +12,11 @@ import type {
 
 export function usePermissionsQuery(
   params?: PermissionQueryParams,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["permissions", params],
     queryFn: () => getPermissions(params),
+    enabled,
   });
 }

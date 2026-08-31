@@ -14,9 +14,13 @@ export function useDeleteRole() {
   return useMutation({
     mutationFn: deleteRole,
 
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({
         queryKey: ["roles"],
+      });
+
+       queryClient.removeQueries({
+        queryKey: ["roles", id],
       });
 
       toast.success(

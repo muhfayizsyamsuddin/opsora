@@ -38,7 +38,12 @@ const DEFAULT_PARAMS: RoleQueryParams = {
 
 export default function RolesPage() {
   const router = useRouter();
+
   const { hasPermission } = usePermissions();
+  const canReadRoles = hasPermission("roles.read");
+  const canCreateRole = hasPermission("roles.create");
+  const canUpdateRole = hasPermission("roles.update");
+  const canDeleteRole = hasPermission("roles.delete");
 
   const [params, setParams] =
     useState<RoleQueryParams>(
@@ -48,7 +53,10 @@ export default function RolesPage() {
   const [deleteTarget, setDeleteTarget] =
     useState<Role | null>(null);
 
-  const roles = useRoleList(params);
+  const roles = useRoleList(
+    params,
+    canReadRoles,
+  );
   const deleteRole = useDeleteRole();
 
   const data =
@@ -57,17 +65,15 @@ export default function RolesPage() {
   const meta =
     roles.data?.meta;
 
-  const canRead =
-    hasPermission("roles.read");
-
-  const canCreate =
-    hasPermission("roles.create");
-
-  const canUpdate =
-    hasPermission("roles.update");
-
-  const canDelete =
-    hasPermission("roles.delete");
+  if (!canReadRoles) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view roles.
+        </p>
+      </div>
+    );
+  }
 
   const handleDelete = () => {
     if (!deleteTarget) {
@@ -102,7 +108,7 @@ export default function RolesPage() {
           </p>
         </div>
 
-        {canCreate && (
+        {canCreateRole && (
           <Button
             type="button"
             className="rounded-xl"
@@ -156,9 +162,9 @@ export default function RolesPage() {
 
           <RoleTable
             roles={data}
-            canRead={canRead}
-            canUpdate={canUpdate}
-            canDelete={canDelete}
+            canRead={canReadRoles}
+            canUpdate={canUpdateRole}
+            canDelete={canDeleteRole}
             onView={(role) =>
               router.push(
                 `/roles/${role.id}`,

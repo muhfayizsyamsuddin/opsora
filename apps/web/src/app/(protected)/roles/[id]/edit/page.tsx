@@ -11,10 +11,12 @@ export default function EditRolePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+
   const { hasPermission } = usePermissions();
+  const canReadRole = hasPermission("roles.read");
   const canUpdateRole = hasPermission("roles.update");
 
-  if (!canUpdateRole) {
+  if (!canReadRole || !canUpdateRole) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">

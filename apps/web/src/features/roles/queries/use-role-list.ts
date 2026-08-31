@@ -10,9 +10,11 @@ import type {
 
 export function useRoleList(
   params?: RoleQueryParams,
+  enabled = true,
 ) {
   return useQuery({
     queryKey: ["roles", "list", params],
     queryFn: () => getRoles(params),
+    enabled,
   });
 }
