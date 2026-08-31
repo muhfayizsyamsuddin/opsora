@@ -58,6 +58,13 @@ enum InventoryReferenceType {
   PURCHASE
   SALE
   ADJUSTMENT
+  PURCHASE_RETURN
+}
+
+enum PurchaseReturnStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
 }
 
 model User {
@@ -66,16 +73,17 @@ model User {
   email    String @unique
   password String
 
-  roleId String
-  roleRef Role?   @relation(fields: [roleId], references: [id])
+  roleId  String
+  roleRef Role?  @relation(fields: [roleId], references: [id])
 
   isActive Boolean @default(true)
 
-  purchases          Purchase[]
-  sales              Sale[]
-  inventoryMovements InventoryMovement[]
-  refreshTokens RefreshToken[]
-  leaveReviews Leave[] @relation("LeaveReviewer")
+  purchases               Purchase[]
+  sales                   Sale[]
+  purchaseReturns         PurchaseReturn[]
+  inventoryMovements      InventoryMovement[]
+  refreshTokens           RefreshToken[]
+  leaveReviews            Leave[]             @relation("LeaveReviewer")
   performanceReviewsGiven PerformanceReview[] @relation("PerformanceReviewReviewer")
 
   createdAt DateTime @default(now())
@@ -126,8 +134,8 @@ model Setting {
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
+  id        String    @id @default(uuid())
+  token     String    @unique
   userId    String
   expiresAt DateTime
   revokedAt DateTime?
@@ -193,7 +201,7 @@ model Leave {
   employee   Employee @relation(fields: [employeeId], references: [id])
 
   reviewerId String?
-  reviewer   User? @relation("LeaveReviewer", fields: [reviewerId], references: [id])
+  reviewer   User?   @relation("LeaveReviewer", fields: [reviewerId], references: [id])
 
   startDate DateTime
   endDate   DateTime
@@ -238,12 +246,12 @@ model PerformanceReview {
   reviewerLegacy String? @map("reviewer")
 
   reviewerId String?
-  reviewer   User? @relation("PerformanceReviewReviewer", fields: [reviewerId], references: [id])
+  reviewer   User?   @relation("PerformanceReviewReviewer", fields: [reviewerId], references: [id])
 
   reviewPeriod String?
 
-  score Int
-  comments String?
+  score      Int
+  comments   String?
   reviewDate DateTime
 
   createdAt DateTime @default(now())
@@ -278,9 +286,10 @@ model Product {
   imageUrl      String?
   status        ProductStatus @default(ACTIVE)
 
-  purchaseItems      PurchaseItem[]
-  saleItems          SaleItem[]
-  inventoryMovements InventoryMovement[]
+  purchaseItems       PurchaseItem[]
+  saleItems           SaleItem[]
+  purchaseReturnItems PurchaseReturnItem[]
+  inventoryMovements  InventoryMovement[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -323,9 +332,10 @@ model Purchase {
   totalAmount  Decimal
   status       PurchaseStatus @default(DRAFT)
 
-  supplier Supplier       @relation(fields: [supplierId], references: [id])
-  user     User           @relation(fields: [userId], references: [id])
+  supplier Supplier         @relation(fields: [supplierId], references: [id])
+  user     User             @relation(fields: [userId], references: [id])
   items    PurchaseItem[]
+  returns  PurchaseReturn[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -339,8 +349,42 @@ model PurchaseItem {
   unitPrice  Decimal
   subtotal   Decimal
 
-  purchase Purchase @relation(fields: [purchaseId], references: [id])
-  product  Product  @relation(fields: [productId], references: [id])
+  purchase    Purchase             @relation(fields: [purchaseId], references: [id])
+  product     Product              @relation(fields: [productId], references: [id])
+  returnItems PurchaseReturnItem[]
+
+  createdAt DateTime @default(now())
+}
+
+model PurchaseReturn {
+  id          String               @id @default(uuid())
+  purchaseId  String
+  userId      String
+  returnDate  DateTime
+  reason      String?
+  status      PurchaseReturnStatus @default(DRAFT)
+  totalAmount Decimal
+
+  purchase Purchase             @relation(fields: [purchaseId], references: [id])
+  user     User                 @relation(fields: [userId], references: [id])
+  items    PurchaseReturnItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PurchaseReturnItem {
+  id               String  @id @default(uuid())
+  purchaseReturnId String
+  purchaseItemId   String
+  productId        String
+  quantity         Decimal
+  unitPrice        Decimal
+  subtotal         Decimal
+
+  purchaseReturn PurchaseReturn @relation(fields: [purchaseReturnId], references: [id])
+  purchaseItem   PurchaseItem   @relation(fields: [purchaseItemId], references: [id])
+  product        Product        @relation(fields: [productId], references: [id])
 
   createdAt DateTime @default(now())
 }

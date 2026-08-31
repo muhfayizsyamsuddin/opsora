@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Menu,
   Package,
+  RotateCcw,
   SettingsIcon,
   ShieldCheck,
   ShoppingCart,
@@ -79,6 +80,12 @@ const coreMenuItems: MenuItem[] = [
     name: "Purchases",
     href: "/purchases",
     icon: ClipboardList,
+    permission: "purchases.read",
+  },
+  {
+    name: "Purchase Returns",
+    href: "/purchase-returns",
+    icon: RotateCcw,
     permission: "purchases.read",
   },
   {

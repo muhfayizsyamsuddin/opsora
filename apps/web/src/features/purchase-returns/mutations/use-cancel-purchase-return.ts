@@ -1,0 +1,39 @@
+"use client";
+
+import {
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import { cancelPurchaseReturn } from "@/services/purchase-return.service";
+
+export function useCancelPurchaseReturn() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      cancelPurchaseReturn(id),
+
+    onSuccess: (purchaseReturn) => {
+      queryClient.setQueryData(
+        ["purchase-returns", purchaseReturn.id],
+        purchaseReturn,
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: ["purchase-returns"],
+      });
+
+      toast.success(
+        "Purchase return cancelled successfully",
+      );
+    },
+
+    onError: () => {
+      toast.error(
+        "Failed to cancel purchase return.",
+      );
+    },
+  });
+}
