@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getRoles } from "@/services/role.service";
 
-export function useRoles() {
+export function useRoles(
+  enabled = true,
+) {
   return useQuery({
     queryKey: ["roles"],
     queryFn: () =>
@@ -12,5 +14,6 @@ export function useRoles() {
         sort_by: "name",
         sort_order: "asc",
       }),
+    enabled,
   });
 }

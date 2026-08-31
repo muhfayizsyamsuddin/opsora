@@ -27,9 +27,7 @@ export function useLogout() {
       storage.clearTokens();
       clearAuth();
 
-      queryClient.removeQueries({
-        queryKey: ["auth", "me"],
-      });
+      queryClient.clear();
 
       router.replace("/login");
     }

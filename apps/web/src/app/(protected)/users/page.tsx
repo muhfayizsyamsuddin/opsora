@@ -17,7 +17,7 @@ import {
 
 import { useUsers } from "@/features/users/queries/use-users";
 import { useDeleteUser } from "@/features/users/mutations/use-delete-user";
-
+import { useCurrentUser } from "@/features/users/queries/use-current-user";
 import { UserToolbar } from "@/features/users/components/user-toolbar";
 import { UserTable } from "@/features/users/components/user-table";
 import { UserPagination } from "@/features/users/components/user-pagination";
@@ -36,6 +36,9 @@ const DEFAULT_PARAMS: UserQueryParams = {
 export default function UsersPage() {
   const router = useRouter();
   const { hasPermission } = usePermissions();
+  const canReadUsers = hasPermission("users.read");
+
+  const currentUser = useCurrentUser();
 
   const [params, setParams] =
     useState<UserQueryParams>(
@@ -45,7 +48,10 @@ export default function UsersPage() {
   const [deleteTarget, setDeleteTarget] =
     useState<User | null>(null);
 
-  const users = useUsers(params);
+  const users = useUsers(
+    params,
+    canReadUsers,
+  );
 
   const deleteUser = useDeleteUser();
 
@@ -54,6 +60,16 @@ export default function UsersPage() {
 
   const meta =
     users.data?.meta;
+
+  if (!canReadUsers) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view users.
+        </p>
+      </div>
+    );
+  }
 
   const handleDelete = () => {
     if (!deleteTarget) {
@@ -144,11 +160,9 @@ export default function UsersPage() {
 
           <UserTable
             users={data}
-            onView={
-              hasPermission("users.read")
-                ? (user) =>
-                    router.push(`/users/${user.id}`)
-                : undefined
+            currentUserId={currentUser.data?.id}
+            onView={(user) =>
+              router.push(`/users/${user.id}`)
             }
             onEdit={
               hasPermission("users.update")

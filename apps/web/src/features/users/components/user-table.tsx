@@ -15,6 +15,7 @@ type UserTableProps = {
   onView?: (user: User) => void;
   onEdit?: (user: User) => void;
   onDelete?: (user: User) => void;
+  currentUserId?: string;
 };
 
 export function UserTable({
@@ -22,6 +23,7 @@ export function UserTable({
   onView,
   onEdit,
   onDelete,
+  currentUserId,
 }: UserTableProps) {
   if (users.length === 0) {
     return (
@@ -138,18 +140,19 @@ export function UserTable({
                       </Button>
                     )}
 
-                    {onDelete && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-xl text-destructive hover:text-destructive"
-                        title="Deactivate user"
-                        onClick={() => onDelete(user)}
-                      >
-                        <UserX className="size-4" />
-                      </Button>
-                    )}
+                    {onDelete &&
+                      user.id !== currentUserId && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-xl text-destructive hover:text-destructive"
+                          title="Deactivate user"
+                          onClick={() => onDelete(user)}
+                        >
+                          <UserX className="size-4" />
+                        </Button>
+                      )}
                   </div>
                 </td>
               </tr>

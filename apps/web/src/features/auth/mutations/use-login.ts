@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -10,11 +10,13 @@ import { useAuthStore } from "@/stores/auth.store";
 
 export function useLogin() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: login,
 
     onSuccess(data) {
+      queryClient.clear();
       storage.setAccessToken(data.access_token);
       storage.setRefreshToken(data.refresh_token);
       useAuthStore.getState().setUser(data.user);

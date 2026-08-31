@@ -26,10 +26,14 @@ export default function UserPermissionsPage({
   const { id } = use(params);
 
   const { hasPermission } = usePermissions();
+  const canReadUsers = hasPermission("users.read");
 
-  const permissions = useUserPermissions(id);
+  const permissions = useUserPermissions(
+    id,
+    canReadUsers,
+  );
 
-  if (!hasPermission("users.read")) {
+  if (!canReadUsers) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
         <div className="rounded-2xl border bg-card p-6 shadow-sm">

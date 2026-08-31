@@ -22,12 +22,16 @@ export default function EditUserPage({
   const { id } = use(params);
 
   const router = useRouter();
-
-  const user = useUser(id);
   const updateUser = useUpdateUser();
-  const { hasPermission } = usePermissions();
 
-const canUpdateUser = hasPermission("users.update");
+  const { hasPermission } = usePermissions();
+  const canReadUser = hasPermission("users.read");
+  const canUpdateUser = hasPermission("users.update");
+
+  const user = useUser(
+    id,
+    canReadUser && canUpdateUser,
+  );
 
   const {
     register,
@@ -73,6 +77,32 @@ const canUpdateUser = hasPermission("users.update");
     );
   };
 
+  if (
+    !canReadUser ||
+    !canUpdateUser
+  ) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to edit users.
+        </p>
+
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your account does not have the required access.
+        </p>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-4 rounded-xl"
+          onClick={() => router.push("/users")}
+        >
+          Back to Users
+        </Button>
+      </div>
+    );
+  }
+
   if (user.isLoading) {
     return (
       <div className="min-h-72 animate-pulse rounded-2xl border bg-muted/30" />
@@ -97,29 +127,6 @@ const canUpdateUser = hasPermission("users.update");
           onClick={() => user.refetch()}
         >
           Try Again
-        </Button>
-      </div>
-    );
-  }
-
-  if (!canUpdateUser) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to edit users.
-        </p>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Your account does not have the required access.
-        </p>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-4 rounded-xl"
-          onClick={() => router.push("/users")}
-        >
-          Back to Users
         </Button>
       </div>
     );

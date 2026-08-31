@@ -14,9 +14,13 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: deleteUser,
 
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({
         queryKey: ["users"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["users", id],
       });
 
       toast.success(

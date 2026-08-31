@@ -41,6 +41,17 @@ export class UserService {
       throw new AppError("Email already exists", 409);
     }
 
+    const role = await prisma.role.findUnique({
+      where: { id: data.roleId },
+    });
+
+    if (!role) {
+      throw new AppError(
+        "Role not found",
+        404,
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await UserRepository.create({
@@ -135,6 +146,19 @@ export class UserService {
 
       if (existingUser) {
         throw new AppError("Email already exists", 409);
+      }
+    }
+
+    if (data.roleId) {
+      const role = await prisma.role.findUnique({
+        where: { id: data.roleId },
+      });
+
+      if (!role) {
+        throw new AppError(
+          "Role not found",
+          404,
+        );
       }
     }
 

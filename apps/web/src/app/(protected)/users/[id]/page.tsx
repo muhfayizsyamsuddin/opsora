@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-
+import { useCurrentUser } from "@/features/users/queries/use-current-user";
 import { useUser } from "@/features/users/queries/use-user";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useDeleteUser } from "@/features/users/mutations/use-delete-user";
@@ -42,21 +42,38 @@ export default function UserDetailPage({
 
   const router = useRouter();
   const deleteUser = useDeleteUser();
-  const roles = useRoles();
   const assignUserRole = useAssignUserRole();
   
   const { hasPermission } = usePermissions();
   const canReadUser = hasPermission("users.read");
   const canDeleteUser = hasPermission("users.delete");
   const canUpdateUser = hasPermission("users.update");
+  const canReadRoles = hasPermission("roles.read");
   
   const { id } = use(params);
+  const currentUser = useCurrentUser();
   
-  const user = useUser(id);
+  const user = useUser(
+    id,
+    canReadUser,
+  );
+  const roles = useRoles(
+    canReadUser && canUpdateUser && canReadRoles,
+  );
 
   useEffect(() => {
     setSelectedRoleId(user.data?.roleId ?? "");
   }, [user.data?.roleId]);
+
+  if (!canReadUser) {
+    return (
+      <div className="rounded-2xl border bg-card p-6">
+        <p className="font-medium">
+          You do not have permission to view this user.
+        </p>
+      </div>
+    );
+  }
 
   if (user.isLoading) {
     return (
@@ -121,16 +138,6 @@ export default function UserDetailPage({
     }).format(new Date(value));
   };
 
-  if (!canReadUser) {
-    return (
-      <div className="rounded-2xl border bg-card p-6">
-        <p className="font-medium">
-          You do not have permission to view this user.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -187,18 +194,19 @@ export default function UserDetailPage({
               Edit User
             </Button>
           )}
-          {canDeleteUser && (
-            <Button
-              type="button"
-              variant="destructive"
-              className="rounded-xl"
-              disabled={deleteUser.isPending}
-              onClick={() => setShowDeactivateDialog(true)}
-            >
-              {deleteUser.isPending
-                ? "Deactivating..."
-                : "Deactivate User"}
-            </Button>
+          {canDeleteUser &&
+            currentUser.data?.id !== data.id && (
+              <Button
+                type="button"
+                variant="destructive"
+                className="rounded-xl"
+                disabled={deleteUser.isPending}
+                onClick={() => setShowDeactivateDialog(true)}
+              >
+                {deleteUser.isPending
+                  ? "Deactivating..."
+                  : "Deactivate User"}
+              </Button>
           )}
         </div>
       </div>
@@ -372,7 +380,8 @@ export default function UserDetailPage({
             </div>
           </div>
 
-          {canUpdateUser && (
+          {canUpdateUser &&
+          canReadRoles && (
             <>
               <div>
                 <label className="mb-2 block text-xs font-medium text-muted-foreground">

@@ -17,10 +17,14 @@ import { usePermissions } from "@/hooks/use-permissions";
 export default function CreateUserPage() {
   const router = useRouter();
   const createUser = useCreateUser();
-  const roles = useRoles();
   
   const { hasPermission } = usePermissions();
   const canCreateUser = hasPermission("users.create");
+  const canReadRoles = hasPermission("roles.read");
+  
+  const roles = useRoles(
+    canCreateUser && canReadRoles,
+  );
 
   const {
     register,
@@ -45,7 +49,10 @@ export default function CreateUserPage() {
     });
   };
 
-  if (!canCreateUser) {
+  if (
+    !canCreateUser ||
+    !canReadRoles
+  ) {
     return (
       <div className="rounded-2xl border bg-card p-6">
         <p className="font-medium">
