@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export function RoleCreateForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<CreateRoleFormValues>({
@@ -50,8 +50,10 @@ export function RoleCreateForm() {
     },
   });
 
-  const selectedPermissions =
-    watch("permissions");
+  const selectedPermissions = useWatch({
+    control,
+    name: "permissions",
+  });
 
   const togglePermission = (
     permissionName: string,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -47,7 +47,7 @@ export function RolePermissionsForm({
     useUpdateRolePermissions();
 
   const {
-    watch,
+    control,
     setValue,
     reset,
     handleSubmit,
@@ -68,8 +68,10 @@ export function RolePermissionsForm({
     });
   }, [role.data, reset]);
 
-  const selectedPermissions =
-    watch("permissions");
+  const selectedPermissions = useWatch({
+    control,
+    name: "permissions",
+  });
 
   const togglePermission = (
     permissionName: string,

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -66,7 +66,6 @@ export function ProductForm({
     reset,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -143,7 +142,10 @@ export function ProductForm({
     );
   };
 
-  const barcodeValue = watch("barcode");
+  const barcodeValue = useWatch({
+    control,
+    name: "barcode",
+  });
 
   const handleGenerateBarcode = () => {
     setValue(

@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export function InventoryAdjustmentForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<InventoryAdjustmentFormValues>({
     resolver: zodResolver(
@@ -44,8 +44,10 @@ export function InventoryAdjustmentForm({
     },
   });
 
-  const selectedProductId =
-    watch("product_id");
+  const selectedProductId = useWatch({
+    control,
+    name: "product_id",
+  });
 
   const selectedProduct =
     products.find(
