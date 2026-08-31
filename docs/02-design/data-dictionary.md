@@ -1,12 +1,12 @@
 # Data Dictionary
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-11
+Last Updated: 2026-09-01
 
 ---
 
@@ -100,18 +100,11 @@ Stores system accounts used for authentication and authorization.
 | id | UUID | Yes | Primary key | Unique user identifier | `550e8400-e29b-41d4-a716-446655440000` |
 | name | VARCHAR(150) | Yes | Required | User display name | `Faiz` |
 | email | VARCHAR(255) | Yes | Unique, valid email | Login email | `admin@opsora.com` |
-| password_hash | VARCHAR(255) | Yes | Hashed value | Secure password hash | `hashed_password` |
-| status | UserStatus | Yes | Valid enum | Account status | `ACTIVE` |
-| employee_id | UUID | No | Valid employee FK | Optional employee reference | `...` |
+| password | VARCHAR(255) | Yes | Hashed value | Stored password hash | `hashed_password` |
+| role_id | UUID | Yes | FK → roles.id | Assigned role | `...` |
+| is_active | BOOLEAN | Yes | Default `true` | Whether account may access the system | `true` |
 | created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
-
-### UserStatus
-
-| Value | Description |
-|---|---|
-| ACTIVE | User can access the system |
-| INACTIVE | User cannot access the system |
 
 ---
 
@@ -174,34 +167,60 @@ inventory.read
 inventory.adjust
 employees.read
 employees.create
-attendance.read
-attendance.create
-leave.read
-leave.create
-leave.approve
-performance.read
-performance.create
+attendances.read
+attendances.create
+leaves.read
+leaves.create
+leaves.approve
+performance_reviews.read
+performance_reviews.create
+payroll.read
+payroll.create
 ```
 
 ---
 
-## User Roles
+---
 
-Junction table connecting users and roles.
+## Settings
+
+Stores application configuration values.
 
 | Field | Type | Required | Validation | Description | Example |
 |---|---|---:|---|---|---|
-| user_id | UUID | Yes | FK → users.id | User reference | `...` |
-| role_id | UUID | Yes | FK → roles.id | Role reference | `...` |
-| created_at | TIMESTAMP | Yes | Valid timestamp | Assignment timestamp | `2026-08-11 08:00:00` |
+| id | UUID | Yes | Primary key | Setting identifier | `...` |
+| key | VARCHAR(255) | Yes | Unique | Setting key | `company_name` |
+| value | TEXT | Yes | Required | Setting value | `Opsora` |
+| created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
+| updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
 
-### Constraint
-
-```text
-PRIMARY KEY (user_id, role_id)
-```
 
 ---
+
+## Refresh Tokens
+
+Stores refresh-token sessions used for access-token renewal.
+
+| Field | Type | Required | Validation | Description | Example |
+|---|---|---:|---|---|---|
+| id | UUID | Yes | Primary key | Refresh token identifier | `...` |
+| token | VARCHAR(255) | Yes | Unique | Stored refresh token | `...` |
+| user_id | UUID | Yes | FK → users.id | Token owner | `...` |
+| expires_at | TIMESTAMP | Yes | Valid future timestamp | Token expiration time | `2026-09-30T00:00:00Z` |
+| revoked_at | TIMESTAMP | No | Nullable timestamp | Revocation time | `NULL` |
+| created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-09-01 00:30:00` |
+
+### Business Rules
+
+- A refresh token belongs to one user.
+- Refresh tokens expire at `expires_at`.
+- Revoked refresh tokens cannot be used again.
+- Successful refresh rotates the refresh token.
+- Reuse of a previously revoked refresh token is treated as token reuse and may revoke active refresh-token sessions.
+- Refresh tokens are deleted when their owning user is deleted at the database level.
+
+---
+
 
 ## Role Permissions
 
@@ -449,10 +468,8 @@ Stores organizational departments.
 |---|---|---:|---|---|---|
 | id | UUID | Yes | Primary key | Department identifier | `...` |
 | name | VARCHAR(100) | Yes | Unique | Department name | `Operations` |
-| description | TEXT | No | Nullable | Department description | `Business operations team` |
 | created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
-| deleted_at | TIMESTAMP NULL | No | Nullable | Soft deletion timestamp | `NULL` |
 
 ---
 
@@ -463,17 +480,16 @@ Stores employee information.
 | Field | Type | Required | Validation | Description | Example |
 |---|---|---:|---|---|---|
 | id | UUID | Yes | Primary key | Employee identifier | `...` |
-| department_id | UUID | Yes | FK → departments.id | Department reference | `...` |
 | employee_code | VARCHAR(50) | Yes | Unique | Employee identifier | `EMP-000001` |
-| full_name | VARCHAR(150) | Yes | Required | Employee full name | `John Doe` |
-| email | VARCHAR(255) | No | Valid email if provided | Employee email | `john@example.com` |
-| phone | VARCHAR(30) | No | Nullable | Employee phone | `08123456789` |
-| position | VARCHAR(100) | No | Nullable | Employee position | `Sales Staff` |
-| join_date | DATE | Yes | Valid date | Employment start date | `2026-01-10` |
+| name | VARCHAR(150) | Yes | Required | Employee name | `John Doe` |
+| email | VARCHAR(255) | Yes | Unique, valid email | Employee email | `john@example.com` |
+| position | VARCHAR(100) | Yes | Required | Employee position | `Sales Staff` |
+| salary | FLOAT | Yes | >= 0 | Employee base salary | `5000000` |
+| hire_date | TIMESTAMP | Yes | Valid timestamp | Employment start date | `2026-01-10T00:00:00Z` |
 | status | EmployeeStatus | Yes | Valid enum | Employment status | `ACTIVE` |
+| department_id | UUID | Yes | FK → departments.id | Department reference | `...` |
 | created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
-| deleted_at | TIMESTAMP NULL | No | Nullable | Soft deletion timestamp | `NULL` |
 
 ### EmployeeStatus
 
@@ -492,12 +508,10 @@ Stores employee attendance records.
 |---|---|---:|---|---|---|
 | id | UUID | Yes | Primary key | Attendance identifier | `...` |
 | employee_id | UUID | Yes | FK → employees.id | Employee reference | `...` |
-| attendance_date | DATE | Yes | Valid date | Attendance date | `2026-08-11` |
-| check_in | TIME | No | Valid time | Check-in time | `08:05:00` |
-| check_out | TIME | No | Valid time | Check-out time | `17:00:00` |
+| check_in | TIMESTAMP | Yes | Valid timestamp | Employee check-in time | `2026-08-11 08:05:00` |
+| check_out | TIMESTAMP | No | Nullable, valid timestamp | Employee check-out time | `2026-08-11 17:00:00` |
 | status | AttendanceStatus | Yes | Valid enum | Attendance status | `PRESENT` |
-| notes | TEXT | No | Nullable | Attendance notes | `Arrived late due to traffic` |
-| created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
+| created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:05:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 17:00:00` |
 
 ### AttendanceStatus
@@ -523,24 +537,14 @@ Stores employee leave requests.
 |---|---|---:|---|---|---|
 | id | UUID | Yes | Primary key | Leave request identifier | `...` |
 | employee_id | UUID | Yes | FK → employees.id | Employee reference | `...` |
-| leave_type | LeaveType | Yes | Valid enum | Leave category | `ANNUAL` |
-| start_date | DATE | Yes | Valid date | Leave start date | `2026-08-20` |
-| end_date | DATE | Yes | >= start_date | Leave end date | `2026-08-22` |
-| reason | TEXT | No | Nullable | Leave reason | `Family event` |
+| reviewer_id | UUID | No | FK → users.id | Reviewer user | `...` |
+| start_date | TIMESTAMP | Yes | Valid timestamp | Leave start date | `2026-08-20T00:00:00Z` |
+| end_date | TIMESTAMP | Yes | >= start_date | Leave end date | `2026-08-22T00:00:00Z` |
+| reason | TEXT | Yes | Required | Leave reason | `Family event` |
 | status | LeaveStatus | Yes | Valid enum | Request status | `PENDING` |
-| reviewed_by | UUID | No | FK → users.id | Reviewer user | `...` |
 | reviewed_at | TIMESTAMP | No | Nullable | Review timestamp | `NULL` |
 | created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
-
-### LeaveType
-
-| Value | Description |
-|---|---|
-| ANNUAL | Annual leave |
-| SICK | Sick leave |
-| PERSONAL | Personal leave |
-| OTHER | Other leave category |
 
 ### LeaveStatus
 
@@ -554,8 +558,11 @@ Stores employee leave requests.
 ### Business Rules
 
 - `start_date` cannot be later than `end_date`.
+- Employee must be active when creating a leave request.
+- Overlapping leave requests are not allowed where applicable.
 - Only authorized users may approve or reject leave.
-- `reviewed_by` should be set when the request is approved or rejected.
+- `reviewer_id` and `reviewed_at` should be set when the request is reviewed.
+- Only pending leave requests may be edited where applicable.
 - Historical leave decisions should remain available.
 
 ---
@@ -568,21 +575,55 @@ Stores employee performance review records.
 |---|---|---:|---|---|---|
 | id | UUID | Yes | Primary key | Review identifier | `...` |
 | employee_id | UUID | Yes | FK → employees.id | Employee reference | `...` |
-| reviewer_id | UUID | Yes | FK → users.id | Reviewer user | `...` |
-| review_period | VARCHAR(50) | Yes | Required | Review period | `2026-Q3` |
-| performance_score | DECIMAL(5,2) | Yes | Valid configured range | Performance score | `85.00` |
-| review_notes | TEXT | No | Nullable | Review notes | `Consistently meets targets` |
-| review_date | DATE | Yes | Valid date | Review date | `2026-08-11` |
+| reviewer_id | UUID | No | FK → users.id, nullable | Reviewer user | `...` |
+| review_period | VARCHAR(50) | No | Nullable | Review period | `2026-Q3` |
+| score | INTEGER | Yes | Valid configured range | Performance score | `85` |
+| comments | TEXT | No | Nullable | Review comments | `Consistently meets targets` |
+| review_date | TIMESTAMP | Yes | Valid timestamp | Review date | `2026-08-11T00:00:00Z` |
 | created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-11 08:00:00` |
 | updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-11 08:00:00` |
 
 ### Business Rules
 
-- Employee is required.
-- Reviewer must be an authorized user.
-- Review period is required.
-- Performance score must be within the configured valid range.
+- Employee must exist and be active when creating a review.
+- Reviewer must be an authorized user when provided.
+- Score must be within the valid configured range.
+- Duplicate reviews for the same employee and review period are not allowed where applicable.
 - Review history should remain available.
+
+---
+
+## Payroll
+
+Stores monthly employee payroll records.
+
+| Field | Type | Required | Validation | Description | Example |
+|---|---|---:|---|---|---|
+| id | UUID | Yes | Primary key | Payroll identifier | `...` |
+| employee_id | UUID | Yes | FK → employees.id | Employee reference | `...` |
+| month | INTEGER | Yes | 1–12 | Payroll month | `8` |
+| year | INTEGER | Yes | Valid year | Payroll year | `2026` |
+| base_salary | FLOAT | Yes | >= 0 | Base salary for the payroll period | `5000000` |
+| bonus | FLOAT | Yes | >= 0 | Additional bonus | `500000` |
+| deduction | FLOAT | Yes | >= 0 | Payroll deduction | `250000` |
+| total_salary | FLOAT | Yes | Calculated | Final salary amount | `5250000` |
+| created_at | TIMESTAMP | Yes | Valid timestamp | Creation timestamp | `2026-08-31 08:00:00` |
+| updated_at | TIMESTAMP | Yes | Valid timestamp | Last update timestamp | `2026-08-31 08:00:00` |
+
+### Constraints
+
+```text
+UNIQUE (employee_id, month, year)
+```
+
+### Business Rules
+
+- Employee must exist and be active when creating payroll.
+- Month must be between 1 and 12.
+- Base salary, bonus, and deduction cannot be negative.
+- Only one payroll record may exist for the same employee, month, and year.
+- total_salary is calculated from base salary, bonus, and deduction.
+- Historical payroll records should remain available.
 
 ---
 
@@ -732,21 +773,44 @@ Update Product Stock
 
 ---
 
-# Soft Delete Strategy
+# Data Preservation Strategy
 
-Soft deletion is used for master data where historical references may exist.
+Opsora preserves historical data using either soft deletion or status-based
+deactivation depending on the entity.
+
+## Soft Delete
 
 Entities supporting `deleted_at`:
 
-- Users
 - Categories
 - Products
 - Suppliers
 - Customers
-- Departments
+
+Soft-deleted records remain in the database so historical transactions can
+retain their references.
+
+## Status-Based Deactivation
+
+Entities using an active/inactive state instead of `deleted_at`:
+
+- Users
 - Employees
 
-Transactional records should not be physically deleted when deletion would compromise business history.
+Inactive users cannot authenticate or access protected application resources.
+
+Inactive employees remain available for historical People Operations records
+but are not eligible for new operational records where an active employee is
+required.
+
+## Restricted Deletion
+
+Departments do not use `deleted_at`.
+
+A department may only be deleted when it has no associated employees.
+
+Transactional and historical records should not be physically deleted when
+doing so would compromise business or operational history.
 
 ---
 

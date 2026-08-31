@@ -1,10 +1,10 @@
 # User Stories
 
-Version: 2.0
+Version: 1.1
 
 Project: Opsora
 
-Last Updated: 2026-08-10
+Last Updated: 2026-09-01
 
 ---
 

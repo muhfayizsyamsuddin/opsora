@@ -1,12 +1,12 @@
 # Product Requirements
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-10
+Last Updated: 2026-09-01
 
 ---
 
@@ -54,6 +54,7 @@ The People Operations scope includes:
 - Attendance management
 - Leave management
 - Performance review management
+- Payroll management
 
 ---
 
@@ -673,7 +674,6 @@ delivered separately from the Core Business MVP.
 The following capabilities are outside the current product scope:
 
 - Accounting system
-- Payroll
 - Multi-company
 - Multi-currency
 - Multi-warehouse

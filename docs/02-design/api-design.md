@@ -1,12 +1,12 @@
 # API Design
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-11
+Last Updated: 2026-09-01
 
 ---
 
@@ -87,6 +87,7 @@ Examples:
 /api/v1/purchases
 /api/v1/leave-requests
 /api/v1/performance-reviews
+/api/v1/payrolls
 ```
 
 ---
@@ -178,7 +179,7 @@ Default roles include:
 - STAFF
 - CASHIER
 
-A user may have one or more roles.
+A user has one assigned role.
 
 ## Authorization Matrix
 
@@ -200,6 +201,7 @@ A user may have one or more roles.
 | Attendance | Full | Read | Full | Manage | Manage* | No |
 | Leave | Full | Read | Full | Manage | Own Request | No |
 | Performance Reviews | Full | Read | Full | Manage | Read | No |
+| Payroll | Full | Read | Full | Read | Read | No |
 
 `*` Access depends on the assigned permission set.
 
@@ -328,9 +330,15 @@ Base URL:
 | GET | `/:id` | User detail |
 | POST | `/` | Create user |
 | PUT | `/:id` | Update user |
-| DELETE | `/:id` | Soft delete user |
-| PUT | `/:id/roles` | Assign roles |
-| GET | `/:id/permissions` | View effective permissions |
+| DELETE | `/:id` | Deactivate user |
+| PUT | `/:id/roles` | Assign user roles |
+| GET | `/:id/permissions` | Get effective user permissions |
+
+User Deactivation Rules:
+
+- User deactivation preserves the account and historical references.
+- An inactive user cannot authenticate or access protected resources.
+- A user cannot deactivate their own account.
 
 ---
 
@@ -352,6 +360,25 @@ Base URL:
 | PUT | `/:id` | Update role |
 | DELETE | `/:id` | Delete role |
 | PUT | `/:id/permissions` | Assign permissions |
+
+## Role Rules
+
+- Role names must be unique.
+- Role names are normalized consistently before duplicate validation.
+- Assigned permissions must reference valid permission records.
+- A role that is assigned to users cannot be deleted.
+- System roles cannot be renamed or deleted.
+
+## Protected system roles:
+
+- SUPER_ADMIN
+- OWNER
+- ADMIN
+- MANAGER
+- STAFF
+- CASHIER
+
+Custom roles may be created and managed separately from protected system roles.
 
 ## Permissions
 
@@ -742,6 +769,7 @@ Base URL:
 | GET | `/:id` | Review detail |
 | POST | `/` | Create review |
 | PUT | `/:id` | Update review |
+| DELETE | `/:id` | Delete review |
 | GET | `/employee/:employee_id` | Employee review history |
 
 Supported filters:
@@ -760,7 +788,34 @@ Validation:
 
 ---
 
-# 24. Dashboard
+# 24. Payroll
+
+Base URL:
+
+```text
+/api/v1/payrolls
+```
+
+| Method | Endpoint | Description           |
+| ------ | -------- | --------------------- |
+| GET    | `/`      | List payroll records  |
+| GET    | `/:id`   | Payroll detail        |
+| POST   | `/`      | Create payroll record |
+| PUT    | `/:id`   | Update payroll record |
+| DELETE | `/:id`   | Delete payroll record |
+
+Payroll Rules:
+
+- Employee must exist and be active when creating payroll.
+- Month must be between 1 and 12.
+- Year must be valid.
+- Base salary, bonus, and deduction cannot be negative.
+- Only one payroll record may exist for the same employee, month, and year.
+- Total salary is calculated from base salary, bonus, and deduction.
+
+---
+
+# 25. Dashboard
 
 Base URL:
 
@@ -779,7 +834,26 @@ Dashboard responses must respect the authenticated user's permissions.
 
 ---
 
-# 25. Validation Standards
+# 26. Settings
+
+Base URL:
+
+```text
+/api/v1/settings
+```
+
+| Method | Endpoint | Description                 |
+| ------ | -------- | --------------------------- |
+| GET    | `/`      | Get application settings    |
+| PUT    | `/`      | Update application settings |
+
+Authorization:
+- Reading settings requires settings.read.
+- Updating settings requires settings.update.
+
+---
+
+# 26. Validation Standards
 
 Validation should occur at the API boundary and in the business/service layer.
 
@@ -812,7 +886,7 @@ Validation should occur at the API boundary and in the business/service layer.
 
 ---
 
-# 26. Business Transaction Integrity
+# 27. Business Transaction Integrity
 
 Operations that affect multiple records must be processed atomically.
 
@@ -840,7 +914,7 @@ The same principle applies to sales completion.
 
 ---
 
-# 27. API Security
+# 28. API Security
 
 The API must:
 
@@ -855,7 +929,7 @@ The API must:
 
 ---
 
-# 28. API Versioning
+# 29. API Versioning
 
 Current version:
 
@@ -881,7 +955,7 @@ Backward-compatible changes may be introduced within the current version accordi
 
 ---
 
-# 29. Related Documents
+# 30. Related Documents
 
 - requirements.md
 - user-stories.md
@@ -895,7 +969,7 @@ Backward-compatible changes may be introduced within the current version accordi
 
 ---
 
-# 30. Revision History
+# 31. Revision History
 
 | Version | Date | Description |
 |---|---|---|

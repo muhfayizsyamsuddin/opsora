@@ -1,12 +1,12 @@
 # Product Roadmap
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-10
+Last Updated: 2026-09-01
 
 ---
 
@@ -142,7 +142,7 @@ People Operations.
 
 ## Status
 
-Planned
+Completed
 
 ---
 
@@ -267,7 +267,7 @@ The roadmap is considered successful when:
 | Version | Goal | Status |
 | ------- | ---- | ------ |
 | v1.0 | Core Business Operations | Core MVP |
-| v1.1 | People Operations | Planned |
+| v1.1 | People Operations | Completed  |
 | v1.2 | Business & Inventory Improvements | Planned |
 | v2.0 | Operational Scalability | Future |
 | v3.0 | Enterprise Features | Future |

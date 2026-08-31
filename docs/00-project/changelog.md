@@ -13,23 +13,47 @@ This project follows:
 
 ## Added
 
-- People Operations direction covering Employees, Departments, Attendance,
-  Leave, and Performance Review.
+- People Operations modules:
+  - Employees
+  - Departments
+  - Attendance
+  - Leave
+  - Performance Reviews
+  - Payroll
+- System Administration modules:
+  - Users
+  - Roles
+  - Permissions
+  - Settings
+- Refresh token rotation and reuse detection.
+- Product image upload support.
+- Barcode support.
+- Inventory stock adjustments.
 
 ## Changed
 
 - Product vision aligned with Opsora as a Business Operations Management
   System.
-- Product direction separated into Core Business Operations and People
-  Operations.
-- Product roadmap reorganized into incremental releases from Core Business
-  Operations to future enterprise capabilities.
-- Product glossary expanded with People Operations terminology.
-- Product requirements aligned with the updated product vision and roadmap.
+- Product direction separated into Core Business Operations, People Operations,
+  and System Administration.
+- Product roadmap updated to reflect completed People Operations work.
+- Product requirements updated to include Payroll in the implemented scope.
+- Authorization aligned with permission-based RBAC across protected modules.
+- User deactivation now preserves historical records instead of deleting users.
+- Employee deactivation preserves historical People Operations data.
 
 ## Fixed
 
--
+- Hardened authentication and session handling for inactive users.
+- Prevented refresh-token rotation race conditions.
+- Improved validation and business-rule enforcement across audited modules.
+- Cleaned legacy permission naming and React Compiler lint warnings.
+
+## Security
+
+- Enforced inactive-account rejection on authenticated and RBAC-protected routes.
+- Added refresh-token reuse detection and active-session revocation.
+- Improved authorization checks across Administration and People Operations.
 
 ---
 

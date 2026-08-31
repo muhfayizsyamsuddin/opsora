@@ -1,12 +1,12 @@
 # System Architecture
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-11
+Last Updated: 2026-09-01
 
 ---
 
@@ -107,6 +107,7 @@ Opsora is divided into the following modules.
 - Attendance
 - Leave
 - Performance Reviews
+- Payroll
 
 ## System Administration
 
@@ -388,7 +389,7 @@ Responsible for:
 
 Responsible for:
 
-- Checking authenticated user's roles
+- Checking authenticated user's assigned role
 - Checking required permissions
 - Rejecting unauthorized actions
 
@@ -430,10 +431,21 @@ attendance.read
 attendance.create
 attendance.update
 
-leave.read
-leave.create
-leave.approve
-leave.reject
+leaves.read
+leaves.create
+leaves.approve
+leaves.reject
+
+performance_reviews.read
+performance_reviews.create
+performance_reviews.update
+performance_reviews.delete
+
+payroll.read
+payroll.create
+payroll.update
+payroll.delete
+
 This approach allows the system to add or modify roles without rewriting
 authorization logic throughout the application.
 
@@ -473,6 +485,7 @@ The database contains entities covering:
 - Attendance
 - Leave Requests
 - Performance Reviews
+- Payroll
 
 ## Database Integrity
 
@@ -631,9 +644,10 @@ The API is divided into modules:
 /api/v1/reports
 /api/v1/employees
 /api/v1/departments
-/api/v1/attendance
+/api/v1/attendances
 /api/v1/leave-requests
 /api/v1/performance-reviews
+/api/v1/payrolls
 /api/v1/dashboard
 API details are defined in api-design.md.
 

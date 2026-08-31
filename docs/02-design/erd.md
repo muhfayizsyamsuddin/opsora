@@ -1,12 +1,12 @@
 # Entity Relationship Diagram (ERD)
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-11
+Last Updated: 2026-09-01
 
 ---
 
@@ -33,7 +33,6 @@ OPSORA
 │   ├── Users
 │   ├── Roles
 │   ├── Permissions
-│   ├── User Roles
 │   └── Role Permissions
 │
 ├── CORE BUSINESS OPERATIONS
@@ -60,23 +59,25 @@ OPSORA
 # ERD Overview
 
 ```text
-                              ┌──────────────┐
-                              │    USERS     │
-                              └──────┬───────┘
-                                     │
-                                USER_ROLES
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │    ROLES     │
-                              └──────┬───────┘
-                                     │
-                              ROLE_PERMISSIONS
-                                     │
-                                     ▼
-                              ┌──────────────┐
-                              │ PERMISSIONS  │
-                              └──────────────┘
+                               ┌──────────────┐
+                               │    ROLES     │
+                               └──────┬───────┘
+                                      │ 1:N
+                                      ▼
+                               ┌──────────────┐
+                               │    USERS     │
+                               └──────────────┘
+
+                               ┌──────────────┐
+                               │    ROLES     │
+                               └──────┬───────┘
+                                      │
+                               ROLE_PERMISSIONS
+                                      │
+                                      ▼
+                               ┌──────────────┐
+                               │ PERMISSIONS  │
+                               └──────────────┘
 
 
 ┌──────────────┐
@@ -166,30 +167,23 @@ Stores user accounts that can authenticate and access Opsora.
 | id | UUID | PK | Unique user identifier |
 | name | VARCHAR | NOT NULL | User display name |
 | email | VARCHAR | UNIQUE, NOT NULL | Login email |
-| password_hash | VARCHAR | NOT NULL | Hashed password |
-| status | ENUM | NOT NULL | Account status |
-| employee_id | UUID | FK, NULL | Optional employee reference |
+| password | VARCHAR | NOT NULL | Stored password hash |
+| role_id | UUID | FK, NOT NULL | Assigned role |
+| is_active | BOOLEAN | NOT NULL, DEFAULT true | Account active state |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
-
-### Status
-
-- ACTIVE
-- INACTIVE
 
 ### Relationships
 
 ```text
-Users
+Role
   │
-  ├── 1:N ── User Roles
-  │
-  └── 0:1 ── Employee
+  ├── 1:N ── Users
 ```
 
-A user account may optionally be associated with an employee.
+Each user has exactly one assigned role.
 
-Not every employee must have a user account.
+A role may be assigned to multiple users.
 
 ---
 
@@ -221,7 +215,7 @@ Defines access roles within Opsora.
 ```text
 Roles
   │
-  ├── N:M ── Users
+  ├── 1:N ── Users
   │
   └── N:M ── Permissions
 ```
@@ -262,28 +256,6 @@ Defines individual actions that can be performed in the system.
 | name | VARCHAR | UNIQUE, NOT NULL | Permission identifier |
 | description | TEXT | NULL | Permission description |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
-
----
-
-# User Roles
-
-Junction table connecting users and roles.
-
-### Fields
-
-| Field | Type | Constraints | Description |
-|---|---|---|---|
-| user_id | UUID | PK, FK | User reference |
-| role_id | UUID | PK, FK | Role reference |
-| created_at | TIMESTAMP | NOT NULL | Assignment timestamp |
-
-### Relationship
-
-```text
-Users N:M Roles
-```
-
-A user may have one or more roles.
 
 ---
 
@@ -607,10 +579,8 @@ Stores organizational departments.
 |---|---|---|---|
 | id | UUID | PK | Unique department identifier |
 | name | VARCHAR | UNIQUE, NOT NULL | Department name |
-| description | TEXT | NULL | Department description |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
-| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
 ### Relationships
 
@@ -631,17 +601,16 @@ Stores employee information.
 | Field | Type | Constraints | Description |
 |---|---|---|---|
 | id | UUID | PK | Unique employee identifier |
-| department_id | UUID | FK, NOT NULL | Department reference |
 | employee_code | VARCHAR | UNIQUE, NOT NULL | Employee identifier |
-| full_name | VARCHAR | NOT NULL | Employee full name |
-| email | VARCHAR | NULL | Employee email |
-| phone | VARCHAR | NULL | Employee phone |
-| position | VARCHAR | NULL | Employee position |
-| join_date | DATE | NOT NULL | Employment start date |
+| name | VARCHAR | NOT NULL | Employee name |
+| email | VARCHAR | UNIQUE, NOT NULL | Employee email |
+| position | VARCHAR | NOT NULL | Employee position |
+| salary | FLOAT | NOT NULL | Employee base salary |
+| hire_date | TIMESTAMP | NOT NULL | Employment start date |
 | status | ENUM | NOT NULL | Employment status |
+| department_id | UUID | FK, NOT NULL | Department reference |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
-| deleted_at | TIMESTAMP | NULL | Soft delete timestamp |
 
 ### Status
 
@@ -672,11 +641,9 @@ Stores employee attendance records.
 |---|---|---|---|
 | id | UUID | PK | Unique attendance identifier |
 | employee_id | UUID | FK, NOT NULL | Employee reference |
-| attendance_date | DATE | NOT NULL | Attendance date |
-| check_in | TIME | NULL | Check-in time |
-| check_out | TIME | NULL | Check-out time |
+| check_in | TIMESTAMP | NOT NULL | Employee check-in timestamp |
+| check_out | TIMESTAMP | NULL | Employee check-out timestamp |
 | status | ENUM | NOT NULL | Attendance status |
-| notes | TEXT | NULL | Attendance notes |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
@@ -709,22 +676,14 @@ Stores employee leave requests and their approval status.
 |---|---|---|---|
 | id | UUID | PK | Unique leave request identifier |
 | employee_id | UUID | FK, NOT NULL | Employee reference |
-| leave_type | ENUM | NOT NULL | Leave category |
-| start_date | DATE | NOT NULL | Leave start date |
-| end_date | DATE | NOT NULL | Leave end date |
-| reason | TEXT | NULL | Leave reason |
+| reviewer_id | UUID | FK, NULL | Reviewer user |
+| start_date | TIMESTAMP | NOT NULL | Leave start timestamp |
+| end_date | TIMESTAMP | NOT NULL | Leave end timestamp |
+| reason | TEXT | NOT NULL | Leave reason |
 | status | ENUM | NOT NULL | Request status |
-| reviewed_by | UUID | FK, NULL | User who reviewed request |
 | reviewed_at | TIMESTAMP | NULL | Review timestamp |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
-
-### Leave Types
-
-- ANNUAL
-- SICK
-- PERSONAL
-- OTHER
 
 ### Status
 
@@ -761,11 +720,11 @@ Stores employee performance review records.
 |---|---|---|---|
 | id | UUID | PK | Unique performance review identifier |
 | employee_id | UUID | FK, NOT NULL | Employee reference |
-| reviewer_id | UUID | FK, NOT NULL | User who performed the review |
-| review_period | VARCHAR | NOT NULL | Review period |
-| performance_score | DECIMAL | NOT NULL | Performance score |
-| review_notes | TEXT | NULL | Review notes |
-| review_date | DATE | NOT NULL | Review date |
+| reviewer_id | UUID | FK, NULL | Reviewer user |
+| review_period | VARCHAR | NULL | Review period |
+| score | INTEGER | NOT NULL | Performance score |
+| comments | TEXT | NULL | Review comments |
+| review_date | TIMESTAMP | NOT NULL | Review timestamp |
 | created_at | TIMESTAMP | NOT NULL | Creation timestamp |
 | updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
 
@@ -784,6 +743,39 @@ User 1:N Performance Reviews
 - Review period is required.
 - Performance score must be within the configured valid range.
 - Only authorized users may create or edit reviews.
+
+---
+
+# Payroll
+
+Stores monthly payroll records for employees.
+
+### Fields
+
+| Field | Type | Constraints | Description |
+|---|---|---|---|
+| id | UUID | PK | Payroll identifier |
+| employee_id | UUID | FK, NOT NULL | Employee reference |
+| month | INTEGER | NOT NULL | Payroll month |
+| year | INTEGER | NOT NULL | Payroll year |
+| base_salary | FLOAT | NOT NULL | Base salary |
+| bonus | FLOAT | NOT NULL, DEFAULT 0 | Bonus amount |
+| deduction | FLOAT | NOT NULL, DEFAULT 0 | Deduction amount |
+| total_salary | FLOAT | NOT NULL | Final payroll amount |
+| created_at | TIMESTAMP | NOT NULL | Creation timestamp |
+| updated_at | TIMESTAMP | NOT NULL | Last update timestamp |
+
+### Constraints
+
+```text
+UNIQUE (employee_id, month, year)
+```
+
+### Relationship
+
+Employees
+  │
+  └── 1:N ── Payroll
 
 ---
 
@@ -910,45 +902,66 @@ The `before_stock` and `after_stock` values provide an audit trail for stock cha
 
 ## Attendance
 
-- Employee must exist.
-- Attendance date is required.
-- An employee should normally have one attendance record per date.
-
+- Employee must exist and be active when creating attendance.
+- `check_in` is required.
+- `check_out`, when provided, must represent a valid timestamp after check-in.
+- Attendance status must use a valid AttendanceStatus value.
 ---
 
 ## Leave Requests
 
-- Employee must exist.
+- Employee must exist and be active when creating a leave request.
 - Start date must not be later than end date.
+- Overlapping leave requests are not allowed where applicable.
 - Only authorized users may approve or reject requests.
-- Approved and rejected requests should preserve their decision history.
+- Reviewed requests should preserve reviewer and review timestamp information.
+- Historical leave decisions should remain available.
 
 ---
 
 ## Performance Reviews
 
-- Employee must exist.
-- Reviewer must be an authorized user.
-- Performance score must use the configured valid range.
+- Employee must exist and be active when creating a review.
+- Reviewer must be an authorized user when provided.
+- Score must use the valid configured range.
+- Duplicate reviews for the same employee and review period are not allowed where applicable.
 - Review history should remain available.
 
 ---
 
-# Soft Delete Strategy
+# Data Preservation Strategy
 
-The following entities support soft deletion where historical references may exist:
+Opsora preserves historical data using either soft deletion or status-based
+deactivation depending on the entity.
 
-- Users
+## Soft Delete
+
+The following entities support `deleted_at`:
+
 - Categories
 - Products
 - Suppliers
 - Customers
-- Departments
+
+## Status-Based Deactivation
+
+The following entities use active/inactive state instead of `deleted_at`:
+
+- Users
 - Employees
 
-Soft-deleted records remain in the database but are excluded from normal active queries.
+Users use `is_active`.
 
-Transactional and historical records should not be physically deleted when doing so would compromise business history.
+Employees use `status`.
+
+## Restricted Deletion
+
+Departments do not use soft deletion.
+
+A department may only be deleted when it has no associated employees.
+
+Historical and transactional records should remain available when deletion
+would compromise business history.
 
 ---
 
@@ -998,6 +1011,7 @@ The current ERD supports:
 - Attendance
 - Leave
 - Performance reviews
+- Payroll
 
 ---
 
@@ -1005,7 +1019,6 @@ The current ERD supports:
 
 The following entities are intentionally excluded from the current MVP ERD:
 
-- Payroll
 - Multi-company
 - Multi-warehouse
 - Warehouse transfers
@@ -1037,9 +1050,6 @@ Future
 ├── Returns
 │   ├── Purchase Returns
 │   └── Sales Returns
-│
-├── Payroll
-│   └── Employee Payroll
 │
 ├── Multi Company
 │   └── Company / Organization

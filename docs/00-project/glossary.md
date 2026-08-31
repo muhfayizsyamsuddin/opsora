@@ -1,12 +1,12 @@
 # Glossary
 
-Version: 2.0
+Version: 1.1
 
-Status: Draft
+Status: Completed
 
 Author: Faiz
 
-Last Updated: 2026-08-10
+Last Updated: 2026-09-01
 
 ---
 
@@ -115,6 +115,13 @@ period.
 
 ---
 
+## Payroll
+
+A monthly compensation record for an employee, including base salary, bonus,
+deductions, and total salary.
+
+---
+
 ## Product
 
 An item managed within the inventory system.
@@ -138,11 +145,16 @@ A single product included in a purchase transaction.
 A set of permissions that determines what actions a user can perform within
 the system.
 
-Opsora currently defines the following primary roles:
+Opsora defines the following protected system roles:
 
+- Super Admin
 - Owner
 - Admin
+- Manager
 - Staff
+- Cashier
+
+Additional custom roles may also be created.
 
 ---
 
@@ -227,6 +239,7 @@ People Operations includes:
 - Attendance
 - Leave
 - Performance Review
+- Payroll
 
 ---
 
@@ -380,6 +393,7 @@ Throughout the documentation:
 - "Attendance" refers to employee attendance records.
 - "Leave" refers to employee absence requests or records.
 - "Performance Review" refers to an employee performance evaluation.
+- "Payroll" refers to monthly employee compensation records.
 - "Core Business Operations" refers to the primary inventory and business
   transaction capabilities of Opsora.
 - "People Operations" refers to employee and workforce management capabilities.
