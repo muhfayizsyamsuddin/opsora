@@ -1,0 +1,64 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+            
+      - name: Build Docker image
+        run: |
+          docker build \
+            -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=https://api-opsora.faizms.com \
+            -t ${{ secrets.DOCKER_USERNAME }}/opsora-web:v1.2 \
+            .
+
+          docker build \
+            -f apps/api/Dockerfile \
+            --target runner \
+            -t ${{ secrets.DOCKER_USERNAME }}/opsora-api:v1.2 \
+            .
+
+          docker build \
+            -f apps/api/Dockerfile \
+            --target migrator \
+            -t ${{ secrets.DOCKER_USERNAME }}/opsora-api-migrator:v1.2 \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/opsora-web:v1.2
+          docker push ${{ secrets.DOCKER_USERNAME }}/opsora-api:v1.2
+          docker push ${{ secrets.DOCKER_USERNAME }}/opsora-api-migrator:v1.2
+
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_SERVER }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/project/opsora
+            cd ~/project/opsora
+            echo ${{ vars.APP_COMPOSE }} | base64 -d > docker-compose.yml
+            docker compose pull
+            docker compose up -d

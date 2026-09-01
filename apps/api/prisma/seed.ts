@@ -405,33 +405,37 @@ async function seed() {
       );
     }
 
-    const password = await bcrypt.hash(
-      bootstrapAdminPassword,
-      10,
-    );
+    const existingBootstrapAdmin =
+      await prisma.user.findUnique({
+        where: {
+          email: bootstrapAdminEmail,
+        },
+      });
 
-    await prisma.user.upsert({
-      where: {
-        email: bootstrapAdminEmail,
-      },
-      update: {
-        name: bootstrapAdminName,
-        password,
-        roleId: superAdminRoleId,
-        isActive: true,
-      },
-      create: {
-        name: bootstrapAdminName,
-        email: bootstrapAdminEmail,
-        password,
-        roleId: superAdminRoleId,
-        isActive: true,
-      },
-    });
+    if (!existingBootstrapAdmin) {
+      const password = await bcrypt.hash(
+        bootstrapAdminPassword,
+        10,
+      );
 
-    console.log(
-      `Bootstrap admin ready: ${bootstrapAdminEmail}`,
-    );
+      await prisma.user.create({
+        data: {
+          name: bootstrapAdminName,
+          email: bootstrapAdminEmail,
+          password,
+          roleId: superAdminRoleId,
+          isActive: true,
+        },
+      });
+
+      console.log(
+        `Bootstrap admin created: ${bootstrapAdminEmail}`,
+      );
+    } else {
+      console.log(
+        `Bootstrap admin already exists: ${bootstrapAdminEmail}`,
+      );
+    }
   }
 
   for (const [key, value] of defaultSettings) {
