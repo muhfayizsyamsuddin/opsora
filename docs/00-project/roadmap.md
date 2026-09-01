@@ -140,6 +140,11 @@ People Operations.
 - Performance review management
 - Performance review history
 
+### Payroll
+
+- Payroll management
+- Payroll history
+
 ## Status
 
 Completed
@@ -290,3 +295,4 @@ The roadmap is considered successful when:
 | 1.0 | 2026-07-27 | Initial version |
 | 2.0 | 2026-08-10 | Aligned roadmap with Core Business Operations and People Operations |
 | 2.1 | 2026-09-01 | Marked v1.2 Business & Inventory Improvements as completed |
+| 2.2 | 2026-09-02 | Added Payroll to completed v1.1 People Operations scope |

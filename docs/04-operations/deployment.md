@@ -1,6 +1,6 @@
 # Deployment
 
-Version: 1.1
+Version: 3.0
 
 Status: Completed
 
@@ -78,75 +78,91 @@ production.
 
 Production is the live Opsora environment.
 
-Production deployment should only occur after:
+Production deployment occurs after:
 
-- Tests pass
-- Build succeeds
-- Required migrations are verified
-- Pull Request is reviewed
-- Changes are merged into main
+- Type checking passes
+- Production builds succeed
+- Docker Compose configuration is valid
+- Required database migrations are reviewed
+- Environment variables are configured
+- Changes are merged into `main`
+
+## Production Architecture
+
+```text
+Internet
+   ↓
+Traefik
+   ├── opsora.faizms.com
+   │      ↓
+   │   Web Container
+   │
+   ├── api-opsora.faizms.com
+   │      ↓
+   │   API Container
+   │
+   └── db-opsora.faizms.com
+          ↓
+       Adminer
+
+API
+ ↓
+PostgreSQL
+
+API
+ ↓
+Cloudinary
+```
 
 ## Frontend
-Platform
-    Vercel
-The Next.js frontend is deployed through Vercel.
+The Next.js frontend runs in a Docker container.
 
-Responsibilities:
-- Build Next.js application
-- Serve frontend pages
-- Handle production deployments
-- Manage frontend environment variables
+Production URL:
+https://opsora.faizms.com
+
+The frontend image is built and pushed to Docker Hub by GitHub Actions.
 
 ## Backend
-Primary Platform
-    Railway
-The Express.js backend is deployed through Railway.
+The Express.js API runs in a Docker container.
 
-Responsibilities:
-- Run Express API
-- Handle authentication
-- Process business logic
-- Communicate with PostgreSQL
-- Communicate with Cloudinary
+Production URL:
 
-Alternative Platform
-Render may be used as an alternative backend deployment platform.
-The application should remain platform-independent where practical.
+https://api-opsora.faizms.com
+
+Health endpoint:
+
+https://api-opsora.faizms.com/health
+
+The API container is only exposed externally through Traefik.
 
 ## Database
-PostgreSQL
+Opsora uses PostgreSQL 16 running as a Docker container.
 
-Opsora uses PostgreSQL as the primary relational database.
-Primary deployment option:
-Neon PostgreSQL
+The database:
 
-Responsibilities:
-- Store application data
-- Store users and roles
-- Store master data
-- Store transactions
-- Store inventory data
-- Store People Operations data
-Database access is handled through Prisma ORM.
+- Is not exposed directly to the public internet
+- Uses a persistent Docker volume
+- Is accessed internally through the Docker network
+- Is managed through Prisma ORM
+
+## Database Administration
+Adminer connects to PostgreSQL through the internal Docker network.
 
 ## File Storage
-Cloudinary
 Cloudinary is used for product image storage.
-The application should store the Cloudinary URL in the database rather
-than storing image binary data directly in PostgreSQL.
 
-Upload flow:
-User
-  ↓
-Frontend
-  ↓
-Backend
-  ↓
-Cloudinary
-  ↓
-Image URL
-  ↓
-PostgreSQL
+The application stores the resulting Cloudinary URL in PostgreSQL rather than storing image binary data directly.
+
+## Reverse Proxy
+
+Traefik is used as the production reverse proxy.
+
+Responsibilities include:
+
+- HTTPS termination
+- TLS certificate management
+- Domain routing
+- Forwarding traffic to internal Docker services
 
 ## Environment Variables
 
@@ -184,17 +200,23 @@ No real credentials should be included.
 
 ## Database Migration
 
-Database schema changes must be managed through Prisma migrations.
+Prisma migrations are executed using the one-shot Docker service:
+migrate
 
-Development:
-```bash
-npx prisma migrate dev
-```
-Production deployment should use:
-```bash
-npx prisma migrate deploy
-```
-Database migrations must be reviewed before applying them to production.
+The service runs:
+pnpm exec prisma migrate deploy
+
+Migration order:
+
+db healthy
+   ↓
+migrate
+   ↓
+seed
+   ↓
+api
+   ↓
+web
 
 # Build Process
 ## Frontend
@@ -217,31 +239,53 @@ npm run build
 The production server should then start using the project's production
 start command.
 
+# CI/CD
+
+Production deployment is triggered by a push to:
+
+main
+
+The GitHub Actions workflow:
+
+- Checks out the repository.
+- Logs in to Docker Hub.
+- Builds the frontend Docker image.
+- Builds the API runtime image.
+- Builds the migration image.
+- Pushes all images to Docker Hub.
+- Connects to the VPS through SSH.
+- Writes the production docker-compose.yml.
+- Pulls the latest production images.
+- Runs Docker Compose.
+
 # Deployment Flow
-Developer
-    ↓
-Git Branch
-    ↓
-Pull Request
-    ↓
-Code Review
-    ↓
-CI Checks
-    ↓
-Merge to main
-    ↓
-Deployment
-    ├── Vercel
-    │     ↓
-    │   Next.js Frontend
-    │
-    └── Railway
-          ↓
-        Express API
-          ↓
-        Neon PostgreSQL
-          ↓
-        Cloudinary
+Feature Branch
+      ↓
+develop
+      ↓
+Validation
+      ↓
+main
+      ↓
+GitHub Actions
+      ↓
+Docker Build
+      ↓
+Docker Hub
+      ↓
+SSH Deployment
+      ↓
+VPS
+      ↓
+Docker Compose
+      ↓
+Database Migration
+      ↓
+Seed
+      ↓
+API
+      ↓
+Web
 
 # Release Flow
 Development
@@ -341,16 +385,20 @@ Production should monitor:
 Detailed monitoring tooling may be introduced as the project grows.
 
 # Infrastructure
-| Component           | Technology      |
-| ------------------- | --------------- |
-| Frontend            | Vercel          |
-| Backend             | Railway         |
-| Backend Alternative | Render          |
-| Database            | Neon PostgreSQL |
-| ORM                 | Prisma          |
-| File Storage        | Cloudinary      |
-| API                 | Express.js      |
-| Frontend Framework  | Next.js         |
+
+| Component | Technology |
+| --- | --- |
+| Frontend | Next.js 16 |
+| Backend API | Express.js |
+| Database | PostgreSQL 16 |
+| ORM | Prisma ORM |
+| File Storage | Cloudinary |
+| Containerization | Docker |
+| Orchestration | Docker Compose |
+| Reverse Proxy | Traefik |
+| CI/CD | GitHub Actions |
+| Container Registry | Docker Hub |
+| Production Host | VPS |
 
 # Related Documentation
 - architecture.md
@@ -362,7 +410,9 @@ Detailed monitoring tooling may be introduced as the project grows.
 - changelog.md
 
 # Revision History
-| Version | Date       | Description                                                                                                |
-| ------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| 1.0     | 2026-07-27 | Initial deployment documentation                                                                           |
-| 2.0     | 2026-08-11 | Expanded deployment environments, configuration, migration, release, security, and verification procedures |
+
+| Version | Date | Description |
+| --- | --- | --- |
+| 1.0 | 2026-07-27 | Initial deployment documentation |
+| 2.0 | 2026-08-11 | Expanded deployment environments, configuration, migration, release, security, and verification procedures |
+| 3.0 | 2026-09-02 | Updated production deployment to Docker Compose, GitHub Actions, Docker Hub, Traefik, and VPS infrastructure |

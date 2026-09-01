@@ -11,6 +11,12 @@ This project follows:
 
 # [Unreleased]
 
+No changes yet.
+
+---
+
+# [1.2.0] - 2026-09-02
+
 ## Added
 
 - People Operations modules:
