@@ -35,7 +35,7 @@ docs/
 │   ├── requirements.md
 │   ├── user-stories.md
 │   ├── user-flow.md
-│   └── wireframe.md
+│   └── wireframes.md
 │
 ├── 02-design/
 │   ├── erd.md
@@ -67,7 +67,7 @@ Planning documents define **what** the system should achieve.
 | requirements.md | Functional and non-functional requirements |
 | user-stories.md | User stories and acceptance criteria |
 | user-flow.md | User interaction flows |
-| wireframe.md | Low-fidelity UI layouts |
+| wireframes.md | Low-fidelity UI layouts |
 
 ---
 
@@ -114,6 +114,7 @@ Architecture Decision Records explain why important technical decisions were mad
 | ADR-001 | Authentication strategy |
 | ADR-002 | Database technology |
 | ADR-003 | File upload strategy |
+| ADR-004 | Authorization and RBAC strategy |
 
 ---
 
@@ -121,7 +122,7 @@ Architecture Decision Records explain why important technical decisions were mad
 
 | Layer | Technology |
 |--------|------------|
-| Frontend | Next.js 15 |
+| Frontend | Next.js 16|
 | Backend | Express.js |
 | Language | TypeScript |
 | Database | PostgreSQL |

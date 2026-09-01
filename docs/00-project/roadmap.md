@@ -167,7 +167,7 @@ Business and inventory improvements.
 
 ## Status
 
-Planned
+Completed
 
 ---
 

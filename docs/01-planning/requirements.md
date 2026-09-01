@@ -623,7 +623,7 @@ The application should provide:
 
 - Docker
 - Docker Compose
-- Nginx
+- Traefik
 - CI/CD pipeline
 
 ---
