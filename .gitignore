@@ -47,3 +47,5 @@ prisma/dev.db
 # Personal Notes
 note.md
 cli.md
+
+.env.docker

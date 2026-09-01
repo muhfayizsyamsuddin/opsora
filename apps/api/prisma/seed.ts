@@ -243,6 +243,7 @@ const rolePermissions: RolePermissionMap = {
 
 async function seed() {
   console.log("Seeding RBAC...");
+  const shouldSeedTestUsers = process.env.SEED_TEST_USERS === "true";
 
   const permissionMap = new Map<string, string>();
 
@@ -325,59 +326,113 @@ async function seed() {
     });
   }
 
-  const ownerRoleId = roleMap.get("OWNER");
-  const adminRoleId = roleMap.get("ADMIN");
-  const managerRoleId = roleMap.get("MANAGER");
-  const staffRoleId = roleMap.get("STAFF");
-  const superAdminRoleId = roleMap.get("SUPER_ADMIN");
-  const cashierRoleId = roleMap.get("CASHIER");
+  if (shouldSeedTestUsers) {
+    const ownerRoleId = roleMap.get("OWNER");
+    const adminRoleId = roleMap.get("ADMIN");
+    const managerRoleId = roleMap.get("MANAGER");
+    const staffRoleId = roleMap.get("STAFF");
+    const superAdminRoleId = roleMap.get("SUPER_ADMIN");
+    const cashierRoleId = roleMap.get("CASHIER");
 
-  if (
-    !ownerRoleId ||
-    !adminRoleId ||
-    !managerRoleId ||
-    !staffRoleId ||
-    !superAdminRoleId ||
-    !cashierRoleId
-  ) {
-    throw new Error("Required RBAC roles not found");
+    if (
+      !ownerRoleId ||
+      !adminRoleId ||
+      !managerRoleId ||
+      !staffRoleId ||
+      !superAdminRoleId ||
+      !cashierRoleId
+    ) {
+      throw new Error("Required RBAC roles not found");
+    }
+
+    await upsertTestUser(
+      "superadmin@opsora.test",
+      "Super Admin Test",
+      superAdminRoleId,
+    );
+
+    await upsertTestUser(
+      "owner@opsora.test",
+      "Owner Test",
+      ownerRoleId,
+    );
+
+    await upsertTestUser(
+      "admin@opsora.test",
+      "Admin Test",
+      adminRoleId,
+    );
+
+    await upsertTestUser(
+      "manager@opsora.test",
+      "Manager Test",
+      managerRoleId,
+    );
+
+    await upsertTestUser(
+      "staff@opsora.test",
+      "Staff Test",
+      staffRoleId,
+    );
+
+    await upsertTestUser(
+      "cashier@opsora.test",
+      "Cashier Test",
+      cashierRoleId,
+    );
   }
 
-  await upsertTestUser(
-    "superadmin@opsora.test",
-    "Super Admin Test",
-    superAdminRoleId,
-  );
+  const bootstrapAdminEmail =
+    process.env.BOOTSTRAP_ADMIN_EMAIL;
 
-  await upsertTestUser(
-    "owner@opsora.test",
-    "Owner Test",
-    ownerRoleId,
-  );
+  const bootstrapAdminName =
+    process.env.BOOTSTRAP_ADMIN_NAME;
 
-  await upsertTestUser(
-    "admin@opsora.test",
-    "Admin Test",
-    adminRoleId,
-  );
+  const bootstrapAdminPassword =
+    process.env.BOOTSTRAP_ADMIN_PASSWORD;
 
-  await upsertTestUser(
-    "manager@opsora.test",
-    "Manager Test",
-    managerRoleId,
-  );
+  if (
+    bootstrapAdminEmail &&
+    bootstrapAdminName &&
+    bootstrapAdminPassword
+  ) {
+    const superAdminRoleId =
+      roleMap.get("SUPER_ADMIN");
 
-  await upsertTestUser(
-    "staff@opsora.test",
-    "Staff Test",
-    staffRoleId,
-  );
+    if (!superAdminRoleId) {
+      throw new Error(
+        "SUPER_ADMIN role not found",
+      );
+    }
 
-  await upsertTestUser(
-    "cashier@opsora.test",
-    "Cashier Test",
-    cashierRoleId,
-  );
+    const password = await bcrypt.hash(
+      bootstrapAdminPassword,
+      10,
+    );
+
+    await prisma.user.upsert({
+      where: {
+        email: bootstrapAdminEmail,
+      },
+      update: {
+        name: bootstrapAdminName,
+        password,
+        roleId: superAdminRoleId,
+        isActive: true,
+      },
+      create: {
+        name: bootstrapAdminName,
+        email: bootstrapAdminEmail,
+        password,
+        roleId: superAdminRoleId,
+        isActive: true,
+      },
+    });
+
+    console.log(
+      `Bootstrap admin ready: ${bootstrapAdminEmail}`,
+    );
+  }
 
   for (const [key, value] of defaultSettings) {
     await prisma.setting.upsert({

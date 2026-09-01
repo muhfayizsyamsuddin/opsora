@@ -1,0 +1,142 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: opsora-db
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - opsora-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - opsora-net
+  
+  adminer:
+    image: adminer:latest
+    container_name: opsora-adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - proxy_net
+      - opsora-net
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_net
+      traefik.http.routers.opsora-adminer.rule: Host(`db-opsora.faizms.com`)
+      traefik.http.routers.opsora-adminer.entrypoints: websecure
+      traefik.http.routers.opsora-adminer.tls.certresolver: myresolver
+      traefik.http.services.opsora-adminer.loadbalancer.server.port: 8080
+
+  migrate:
+    image: faizms14/opsora-api-migrator:v1.2
+    container_name: opsora-migrate
+    restart: "no"
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - opsora-net
+
+  seed:
+    image: faizms14/opsora-api-migrator:v1.2
+    container_name: opsora-seed
+    restart: "no"
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SEED_TEST_USERS: "false"
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+    command: ["pnpm", "exec", "prisma", "db", "seed"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - opsora-net
+
+  api:
+    image: faizms14/opsora-api:v1.2
+    container_name: opsora-api
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3001/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - proxy_net
+      - opsora-net
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_net
+      traefik.http.routers.opsora-api.rule: Host(`api-opsora.faizms.com`)
+      traefik.http.routers.opsora-api.entrypoints: websecure
+      traefik.http.routers.opsora-api.tls.certresolver: myresolver
+      traefik.http.services.opsora-api.loadbalancer.server.port: 3001
+
+  web:
+    image: faizms14/opsora-web:v1.2
+    container_name: opsora-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - proxy_net
+      - opsora-net
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_net
+      traefik.http.routers.opsora.rule: Host(`opsora.faizms.com`)
+      traefik.http.routers.opsora.entrypoints: websecure
+      traefik.http.routers.opsora.tls.certresolver: myresolver
+      traefik.http.services.opsora.loadbalancer.server.port: 3000
+
+networks:
+  opsora-net:
+    driver: bridge
+
+  proxy_net:
+    external: true
+
+volumes:
+  opsora-db-volume:
