@@ -22,7 +22,7 @@ export function useLogin() {
       storage.setRefreshToken(data.refresh_token);
       useAuthStore.getState().setUser(data.user);
 
-      toast.success("Login berhasil");
+      toast.success("Login successful");
 
       router.replace("/dashboard");
     },
