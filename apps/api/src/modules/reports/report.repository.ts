@@ -568,11 +568,22 @@ export class ReportRepository {
           }
         : {};
 
+    const returnDateFilter =
+      dateFrom || dateTo
+        ? {
+            returnDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
+
     const [
       totalSales,
       completedSales,
       cancelledSales,
       revenueAggregate,
+      saleReturnAggregate,
     ] = await Promise.all([
       prisma.sale.count({
         where: dateFilter,
@@ -601,14 +612,32 @@ export class ReportRepository {
           status: "COMPLETED",
         },
       }),
+
+      prisma.saleReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...returnDateFilter,
+          status: "COMPLETED",
+        },
+      }),
     ]);
+
+    const grossRevenue =
+      revenueAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const returnedAmount =
+      saleReturnAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
 
     return {
       totalSales,
       completedSales,
       cancelledSales,
       totalRevenue:
-        revenueAggregate._sum.totalAmount ?? 0,
+        grossRevenue.sub(returnedAmount),
     };
   }
 
@@ -625,6 +654,15 @@ export class ReportRepository {
             },
           }
         : {};
+    const returnDateFilter =
+      dateFrom || dateTo
+        ? {
+            returnDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
 
     const [
       totalPurchases,
@@ -632,6 +670,7 @@ export class ReportRepository {
       draftPurchases,
       cancelledPurchases,
       amountAggregate,
+      purchaseReturnAggregate,
     ] = await Promise.all([
       prisma.purchase.count({
         where: dateFilter,
@@ -667,7 +706,25 @@ export class ReportRepository {
           status: "COMPLETED",
         },
       }),
+
+      prisma.purchaseReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...returnDateFilter,
+          status: "COMPLETED",
+        },
+      }),
     ]);
+
+    const grossPurchaseAmount =
+      amountAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const returnedPurchaseAmount =
+      purchaseReturnAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
 
     return {
       totalPurchases,
@@ -675,7 +732,9 @@ export class ReportRepository {
       draftPurchases,
       cancelledPurchases,
       totalPurchaseAmount:
-        amountAggregate._sum.totalAmount ?? 0,
+        grossPurchaseAmount.sub(
+          returnedPurchaseAmount,
+        ),
     };
   }
 
@@ -800,36 +859,96 @@ export class ReportRepository {
           }
         : {};
 
-    const [salesAggregate, purchasesAggregate] =
-      await Promise.all([
-        prisma.sale.aggregate({
-          _sum: {
-            totalAmount: true,
-          },
-          where: {
-            ...saleDateFilter,
-            status: "COMPLETED",
-          },
-        }),
+    const saleReturnDateFilter =
+      dateFrom || dateTo
+        ? {
+            returnDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
 
-        prisma.purchase.aggregate({
-          _sum: {
-            totalAmount: true,
-          },
-          where: {
-            ...purchaseDateFilter,
-            status: "COMPLETED",
-          },
-        }),
-      ]);
+    const purchaseReturnDateFilter =
+      dateFrom || dateTo
+        ? {
+            returnDate: {
+              ...(dateFrom && { gte: dateFrom }),
+              ...(dateTo && { lte: dateTo }),
+            },
+          }
+        : {};
 
-    const revenue =
+    const [
+      salesAggregate,
+      purchasesAggregate,
+      saleReturnsAggregate,
+      purchaseReturnsAggregate,
+    ] = await Promise.all([
+      prisma.sale.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...saleDateFilter,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.purchase.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...purchaseDateFilter,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.saleReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...saleReturnDateFilter,
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.purchaseReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          ...purchaseReturnDateFilter,
+          status: "COMPLETED",
+        },
+      }),
+    ]);
+
+    const grossRevenue =
       salesAggregate._sum.totalAmount ??
       new Prisma.Decimal(0);
 
-    const purchaseCost =
+    const saleReturns =
+      saleReturnsAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const grossPurchaseCost =
       purchasesAggregate._sum.totalAmount ??
       new Prisma.Decimal(0);
+
+    const purchaseReturns =
+      purchaseReturnsAggregate._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const revenue =
+      grossRevenue.sub(saleReturns);
+
+    const purchaseCost =
+      grossPurchaseCost.sub(
+        purchaseReturns,
+      );
 
     return {
       revenue,

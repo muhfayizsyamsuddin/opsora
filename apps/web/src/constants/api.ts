@@ -18,6 +18,7 @@ export const API = {
   CUSTOMERS: "/customers",
   PURCHASES: "/purchases",
   PURCHASE_RETURNS: "/purchase-returns",
+  SALE_RETURNS: "/sale-returns",
   SALES: "/sales",
   INVENTORY: "/inventory",
   REPORTS: "/reports",

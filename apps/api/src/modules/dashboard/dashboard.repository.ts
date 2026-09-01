@@ -1,6 +1,7 @@
 import {
   AttendanceStatus,
   LeaveStatus,
+  Prisma,
   PurchaseStatus,
   SaleStatus,
 } from "../../generated/prisma/client.js";
@@ -36,6 +37,8 @@ export class DashboardRepository {
       salesTodayAmount,
       completedSales,
       cancelledSales,
+      totalSaleReturnsAmount,
+      saleReturnsTodayAmount,
 
       // Purchases
       totalPurchasesCount,
@@ -45,6 +48,8 @@ export class DashboardRepository {
       completedPurchases,
       draftPurchases,
       cancelledPurchases,
+      totalPurchaseReturnsAmount,
+      purchaseReturnsTodayAmount,
 
       // Products / Inventory
       totalProducts,
@@ -185,6 +190,28 @@ export class DashboardRepository {
         },
       }),
 
+      prisma.saleReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.saleReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
+          returnDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      }),
+
       // =========================
       // PURCHASES
       // =========================
@@ -238,6 +265,28 @@ export class DashboardRepository {
       prisma.purchase.count({
         where: {
           status: PurchaseStatus.CANCELLED,
+        },
+      }),
+
+      prisma.purchaseReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
+        },
+      }),
+
+      prisma.purchaseReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
+          returnDate: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
         },
       }),
 
@@ -304,6 +353,38 @@ export class DashboardRepository {
         product.stock.lte(product.minimumStock),
     );
 
+    const grossSalesAmount =
+      totalSalesAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const saleReturnsAmount =
+      totalSaleReturnsAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const grossSalesTodayAmount =
+      salesTodayAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const saleReturnsToday =
+      saleReturnsTodayAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const grossPurchasesAmount =
+      totalPurchasesAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const purchaseReturnsAmount =
+      totalPurchaseReturnsAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const grossPurchasesTodayAmount =
+      purchasesTodayAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const purchaseReturnsToday =
+      purchaseReturnsTodayAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
     return {
       // =========================
       // PEOPLE
@@ -342,11 +423,12 @@ export class DashboardRepository {
       sales: {
         totalSalesCount,
         totalSalesAmount:
-          totalSalesAmount._sum.totalAmount ?? 0,
+          grossSalesAmount.sub(saleReturnsAmount),
 
-        salesTodayCount,
         salesTodayAmount:
-          salesTodayAmount._sum.totalAmount ?? 0,
+          grossSalesTodayAmount.sub(
+            saleReturnsToday,
+          ),
 
         completedSales,
         cancelledSales,
@@ -359,11 +441,14 @@ export class DashboardRepository {
       purchases: {
         totalPurchasesCount,
         totalPurchasesAmount:
-          totalPurchasesAmount._sum.totalAmount ?? 0,
+          grossPurchasesAmount.sub(
+            purchaseReturnsAmount,
+          ),
 
-        purchasesTodayCount,
         purchasesTodayAmount:
-          purchasesTodayAmount._sum.totalAmount ?? 0,
+          grossPurchasesTodayAmount.sub(
+            purchaseReturnsToday,
+          ),
 
         completedPurchases,
         draftPurchases,
@@ -395,8 +480,10 @@ export class DashboardRepository {
     const [
       totalSalesCount,
       totalSalesAmount,
+      totalSaleReturnsAmount,
       totalPurchasesCount,
       totalPurchasesAmount,
+      totalPurchaseReturnsAmount,
       totalProducts,
       totalActiveProducts,
       totalStockQuantity,
@@ -416,6 +503,15 @@ export class DashboardRepository {
         },
       }),
 
+      prisma.saleReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
+        },
+      }),
+
       prisma.purchase.count({
         where: {
           status: PurchaseStatus.COMPLETED,
@@ -428,6 +524,15 @@ export class DashboardRepository {
         },
         where: {
           status: PurchaseStatus.COMPLETED,
+        },
+      }),
+
+      prisma.purchaseReturn.aggregate({
+        _sum: {
+          totalAmount: true,
+        },
+        where: {
+          status: "COMPLETED",
         },
       }),
 
@@ -455,17 +560,35 @@ export class DashboardRepository {
       }),
     ]);
 
+    const grossSalesAmount =
+      totalSalesAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const saleReturnsAmount =
+      totalSaleReturnsAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const grossPurchasesAmount =
+      totalPurchasesAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
+    const purchaseReturnsAmount =
+      totalPurchaseReturnsAmount._sum.totalAmount ??
+      new Prisma.Decimal(0);
+
     return {
       sales: {
         totalCount: totalSalesCount,
         totalAmount:
-          totalSalesAmount._sum.totalAmount ?? 0,
+          grossSalesAmount.sub(saleReturnsAmount),
       },
 
       purchases: {
         totalCount: totalPurchasesCount,
         totalAmount:
-          totalPurchasesAmount._sum.totalAmount ?? 0,
+          grossPurchasesAmount.sub(
+            purchaseReturnsAmount,
+          ),
       },
 
       inventory: {

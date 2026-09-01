@@ -35,7 +35,9 @@ export type InventoryMovementType =
 export type InventoryReferenceType =
   | "PURCHASE"
   | "SALE"
-  | "ADJUSTMENT";
+  | "ADJUSTMENT"
+  | "PURCHASE_RETURN"
+  | "SALE_RETURN";
 
 export interface InventoryMovementProduct {
   id: string;

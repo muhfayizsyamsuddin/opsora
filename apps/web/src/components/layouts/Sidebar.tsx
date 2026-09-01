@@ -95,6 +95,12 @@ const coreMenuItems: MenuItem[] = [
     permission: "sales.read",
   },
   {
+    name: "Sale Returns",
+    href: "/sale-returns",
+    icon: RotateCcw,
+    permission: "sales.read",
+  },
+  {
     name: "Reports",
     href: "/reports",
     icon: CircleDollarSign,

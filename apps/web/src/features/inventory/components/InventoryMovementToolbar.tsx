@@ -101,6 +101,13 @@ export function InventoryMovementToolbar({
           <option value="ADJUSTMENT">
             Adjustment
           </option>
+          <option value="PURCHASE_RETURN">
+            Purchase Return
+          </option>
+
+          <option value="SALE_RETURN">
+            Sale Return
+          </option>
         </select>
       </div>
     </div>

@@ -15,6 +15,7 @@ import purchaseReturnRoutes from "./modules/purchase-returns/purchase-return.rou
 import inventoryRoutes from "./modules/inventory/inventory.routes.js";
 import inventoryMovementRoutes from "./modules/inventory-movements/inventory-movement.routes.js";
 import saleRoutes from "./modules/sales/sale.routes.js";
+import saleReturnRoutes from "./modules/sales-returns/sale-return.routes.js";
 import customerRoutes from "./modules/customers/customer.routes.js";
 import roleRoutes from "./modules/roles/role.routes.js";
 import permissionRoutes from "./modules/permissions/permission.routes.js";
@@ -61,6 +62,7 @@ app.use(`${API_PREFIX}/inventory/movements`, inventoryMovementRoutes);
 app.use(`${API_PREFIX}/inventory-movements`, inventoryMovementRoutes);
 app.use(`${API_PREFIX}/inventory`, inventoryRoutes);
 app.use(`${API_PREFIX}/sales`, saleRoutes);
+app.use(`${API_PREFIX}/sale-returns`, saleReturnRoutes);
 app.use(`${API_PREFIX}/customers`, customerRoutes);
 app.use(`${API_PREFIX}/roles`, roleRoutes);
 app.use(`${API_PREFIX}/permissions`, permissionRoutes);
