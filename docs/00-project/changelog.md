@@ -29,6 +29,11 @@ This project follows:
 - Product image upload support.
 - Barcode support.
 - Inventory stock adjustments.
+- Purchase return management.
+- Sales return management.
+- CSV export for business reports.
+- Search, advanced filtering, and pagination improvements.
+- Inventory transaction history with purchase and sales return references.
 
 ## Changed
 
@@ -41,6 +46,8 @@ This project follows:
 - Authorization aligned with permission-based RBAC across protected modules.
 - User deactivation now preserves historical records instead of deleting users.
 - Employee deactivation preserves historical People Operations data.
+- Sales, purchase, and profit reports now use net amounts after completed returns.
+- Dashboard sales and purchase totals now account for completed returns.
 
 ## Fixed
 

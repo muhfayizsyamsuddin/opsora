@@ -1,6 +1,6 @@
 # Product Roadmap
 
-Version: 1.1
+Version: 1.2
 
 Status: Completed
 
@@ -268,7 +268,7 @@ The roadmap is considered successful when:
 | ------- | ---- | ------ |
 | v1.0 | Core Business Operations | Core MVP |
 | v1.1 | People Operations | Completed  |
-| v1.2 | Business & Inventory Improvements | Planned |
+| v1.2 | Business & Inventory Improvements | Completed |
 | v2.0 | Operational Scalability | Future |
 | v3.0 | Enterprise Features | Future |
 
@@ -289,3 +289,4 @@ The roadmap is considered successful when:
 | ------- | ---- | ----------- |
 | 1.0 | 2026-07-27 | Initial version |
 | 2.0 | 2026-08-10 | Aligned roadmap with Core Business Operations and People Operations |
+| 2.1 | 2026-09-01 | Marked v1.2 Business & Inventory Improvements as completed |
