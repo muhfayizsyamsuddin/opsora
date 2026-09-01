@@ -57,8 +57,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             mkdir -p ~/project/opsora
             cd ~/project/opsora
-            echo ${{ vars.APP_COMPOSE }} | base64 -d > docker-compose.yml
+            echo "${{ vars.APP_COMPOSE }}" | base64 -d > docker-compose.yml
             docker compose pull
             docker compose up -d
