@@ -23,7 +23,7 @@ jobs:
         run: |
           docker build \
             -f apps/web/Dockerfile \
-            --build-arg NEXT_PUBLIC_API_URL=https://api-opsora.faizms.com \
+            --build-arg NEXT_PUBLIC_API_URL=https://api-opsora.faizms.com/api/v1 \
             -t ${{ secrets.DOCKER_USERNAME }}/opsora-web:v1.2 \
             .
 
