@@ -57,7 +57,7 @@ export function ChangePasswordForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5"
+      className="grid gap-5 lg:grid-cols-3"
     >
       <div>
         <label className="mb-2 block text-xs font-medium text-muted-foreground">
@@ -135,7 +135,7 @@ export function ChangePasswordForm() {
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end lg:col-span-3">
         <Button
           type="submit"
           disabled={

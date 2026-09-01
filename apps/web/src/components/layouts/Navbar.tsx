@@ -25,6 +25,8 @@ const titles: Record<string, string> = {
   "/customers": "Customers",
   "/inventory": "Inventory",
   "/purchases": "Purchases",
+  "/purchase-returns": "Purchase Returns",
+  "/sale-returns": "Sale Returns",
   "/sales": "Sales",
   "/reports": "Reports",
   "/departments": "Departments",
@@ -85,13 +87,9 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-xl">
-      <div className="flex h-20 items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
         <div className="min-w-0 flex-1 pl-14 lg:pl-0">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Workspace
-          </p>
-
-          <h1 className="mt-1 truncate text-xl font-semibold tracking-tight">
+          <h1 className="truncate text-lg font-semibold tracking-tight">
             {title}
           </h1>
         </div>
@@ -120,7 +118,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="flex items-center gap-3 rounded-xl outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex items-center gap-3 rounded-xl px-2 py-1.5 outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
             onClick={() =>
               router.push("/profile")
             }

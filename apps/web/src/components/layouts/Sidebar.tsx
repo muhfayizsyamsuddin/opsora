@@ -226,7 +226,7 @@ function SidebarContent({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-20 items-center justify-center border-b px-5">
+      <div className="flex h-16 items-center justify-center border-b px-5">
         <Link
           href="/dashboard"
           onClick={onNavigate}
@@ -283,7 +283,7 @@ function SidebarContent({
               >
                 <Icon
                   className={cn(
-                    "h-[18px] w-[18px] shrink-0 transition-transform duration-200",
+                    "h-4.5 w-4.5 shrink-0 transition-transform duration-200",
                     !isActive &&
                       "group-hover:translate-x-0.5",
                   )}
@@ -341,7 +341,7 @@ function SidebarContent({
                     >
                       <Icon
                         className={cn(
-                          "h-[18px] w-[18px] shrink-0 transition-transform duration-200",
+                          "h-4.5 w-4.5 shrink-0 transition-transform duration-200",
                           !isActive &&
                             "group-hover:translate-x-0.5",
                         )}
@@ -405,7 +405,7 @@ function SidebarContent({
                       >
                         <Icon
                           className={cn(
-                            "h-[18px] w-[18px] shrink-0 transition-transform duration-200",
+                            "h-4.5 w-4.5 shrink-0 transition-transform duration-200",
                             !isActive &&
                               "group-hover:translate-x-0.5",
                           )}

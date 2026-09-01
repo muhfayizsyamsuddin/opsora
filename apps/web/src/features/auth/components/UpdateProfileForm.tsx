@@ -65,7 +65,7 @@ export function UpdateProfileForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5"
+      className="grid gap-5 sm:grid-cols-2"
     >
       <div>
         <label className="mb-2 block text-xs font-medium text-muted-foreground">
@@ -104,7 +104,7 @@ export function UpdateProfileForm({
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end sm:col-span-2">
         <Button
           type="submit"
           disabled={

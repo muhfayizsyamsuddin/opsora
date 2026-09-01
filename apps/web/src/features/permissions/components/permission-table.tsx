@@ -48,7 +48,7 @@ export function PermissionTable({
   return (
     <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-205 text-sm">
           <thead className="border-b bg-muted/40">
             <tr>
               <th className="px-5 py-4 text-left font-medium">
