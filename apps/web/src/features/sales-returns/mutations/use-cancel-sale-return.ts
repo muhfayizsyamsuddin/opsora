@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { cancelSaleReturn } from "@/services/sale-return.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCancelSaleReturn() {
   const queryClient = useQueryClient();
@@ -30,9 +31,12 @@ export function useCancelSaleReturn() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to cancel sale return.",
+        getApiErrorMessage(
+          error,
+          "Failed to cancel sale return.",
+        ),
       );
     },
   });

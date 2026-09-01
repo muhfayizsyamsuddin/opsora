@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { createPayroll } from "@/services/payroll.service";
 
 import type { CreatePayrollInput } from "@/features/payrolls/types/payroll";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreatePayroll() {
   const queryClient = useQueryClient();
@@ -35,9 +36,12 @@ export function useCreatePayroll() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create payroll.",
+        getApiErrorMessage(
+          error,
+          "Failed to create payroll.",
+        ),
       );
     },
   });

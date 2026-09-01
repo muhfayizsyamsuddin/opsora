@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deletePayroll } from "@/services/payroll.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeletePayroll() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useDeletePayroll() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete payroll.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete payroll.",
+        ),
       );
     },
   });

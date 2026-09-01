@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { createRole } from "@/services/role.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateRole() {
   const queryClient = useQueryClient();
@@ -24,9 +25,12 @@ export function useCreateRole() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create role.",
+        getApiErrorMessage(
+          error,
+          "Failed to create role.",
+        ),
       );
     },
   });

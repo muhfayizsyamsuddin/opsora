@@ -290,4 +290,134 @@ export class AuthService {
 
     return null;
   }
+
+  static async updateMe(
+    userId: string,
+    data: {
+      name?: string;
+      email?: string;
+    },
+  ) {
+    const user = await UserRepository.findById(
+      userId,
+    );
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (!user.isActive) {
+      throw new AppError(
+        "Account is inactive",
+        401,
+      );
+    }
+
+    if (
+      data.email &&
+      data.email !== user.email
+    ) {
+      const existingUser =
+        await UserRepository.findByEmail(
+          data.email,
+        );
+
+      if (existingUser) {
+        throw new AppError(
+          "Email already exists",
+          409,
+        );
+      }
+    }
+
+    const updatedUser =
+      await UserRepository.update(userId, {
+        name: data.name,
+        email: data.email,
+      });
+
+    return {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role:
+        updatedUser.roleRef?.name ?? null,
+      roleId: updatedUser.roleId,
+      isActive: updatedUser.isActive,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
+  }
+
+  static async changePassword(
+    userId: string,
+    data: {
+      currentPassword: string;
+      newPassword: string;
+    },
+  ) {
+    const user =
+      await UserRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError(
+        "User not found",
+        404,
+      );
+    }
+
+    if (!user.isActive) {
+      throw new AppError(
+        "Account is inactive",
+        401,
+      );
+    }
+
+    const isPasswordValid =
+      await bcrypt.compare(
+        data.currentPassword,
+        user.password,
+      );
+
+    if (!isPasswordValid) {
+      throw new AppError(
+        "Current password is incorrect",
+        400,
+      );
+    }
+
+    const isSamePassword =
+      await bcrypt.compare(
+        data.newPassword,
+        user.password,
+      );
+
+    if (isSamePassword) {
+      throw new AppError(
+        "New password must be different from current password",
+        400,
+      );
+    }
+
+    const hashedPassword =
+      await bcrypt.hash(
+        data.newPassword,
+        10,
+      );
+
+    await UserRepository.updatePassword(
+      userId,
+      hashedPassword,
+    );
+
+    await prisma.refreshToken.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  }
 }

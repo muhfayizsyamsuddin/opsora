@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { approveLeave } from "@/services/leave.service";
 
 import type { Leave } from "@/features/leaves/types/leave";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useApproveLeave() {
   const queryClient = useQueryClient();
@@ -40,9 +41,12 @@ export function useApproveLeave() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to approve leave request.",
+        getApiErrorMessage(
+          error,
+          "Failed to approve leave request.",
+        ),
       );
     },
   });

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { updateCustomer } from "@/services/customer.service";
 import type { UpdateCustomerInput } from "@/features/customers/types/customer";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateCustomer() {
   const queryClient = useQueryClient();
@@ -36,9 +37,12 @@ export function useUpdateCustomer() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update customer.",
+        getApiErrorMessage(
+          error,
+          "Failed to update customer.",
+        ),
       );
     },
   });

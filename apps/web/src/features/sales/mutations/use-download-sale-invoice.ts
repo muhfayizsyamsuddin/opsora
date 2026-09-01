@@ -4,15 +4,19 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { downloadSaleInvoicePdf } from "@/services/sale.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDownloadSaleInvoice() {
   return useMutation({
     mutationFn: (id: string) =>
       downloadSaleInvoicePdf(id),
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to download invoice PDF.",
+        getApiErrorMessage(
+          error,
+          "Failed to download invoice PDF.",
+        ),
       );
     },
   });

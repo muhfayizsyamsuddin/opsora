@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 
 import { createAttendance } from "@/services/attendance.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateAttendance() {
   const queryClient = useQueryClient();
@@ -33,9 +34,12 @@ export function useCreateAttendance() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create attendance.",
+        getApiErrorMessage(
+          error,
+          "Failed to create attendance.",
+        ),
       );
     },
   });

@@ -7,7 +7,8 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-
+import { UpdateProfileForm } from "@/features/auth/components/UpdateProfileForm";
+import { ChangePasswordForm } from "@/features/auth/components/ChangePasswordForm";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/users/queries/use-current-user";
 import { useLogout } from "@/hooks/use-logout";
@@ -172,6 +173,43 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Edit Profile */}
+        <section className="rounded-2xl border bg-card shadow-sm">
+          <div className="border-b px-5 py-5 sm:px-6">
+            <h2 className="text-sm font-semibold">
+              Edit Profile
+            </h2>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              Update your personal account information.
+            </p>
+          </div>
+
+          <div className="p-5 sm:p-6">
+            <UpdateProfileForm
+              name={data.name}
+              email={data.email}
+            />
+          </div>
+        </section>
+      
+      {/* Account Security */}
+      <section className="rounded-2xl border bg-card shadow-sm">
+        <div className="border-b px-5 py-5 sm:px-6">
+          <h2 className="text-sm font-semibold">
+            Account Security
+          </h2>
+
+          <p className="mt-1 text-xs text-muted-foreground">
+            Change your password to keep your account secure.
+          </p>
+        </div>
+
+        <div className="p-5 sm:p-6">
+          <ChangePasswordForm />
         </div>
       </section>
 

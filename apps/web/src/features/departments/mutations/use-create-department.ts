@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { createDepartment } from "@/services/department.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateDepartment() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useCreateDepartment() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create department.",
+        getApiErrorMessage(
+          error,
+          "Failed to create department.",
+        ),
       );
     },
   });

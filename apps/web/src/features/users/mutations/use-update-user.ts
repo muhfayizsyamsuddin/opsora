@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { updateUser } from "@/services/user.service";
 
 import type { UpdateUserInput } from "@/features/users/types/user";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UpdateUserVariables = {
   id: string;
@@ -39,9 +40,12 @@ export function useUpdateUser() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update user.",
+        getApiErrorMessage(
+          error,
+          "Failed to update user.",
+        ),
       );
     },
   });

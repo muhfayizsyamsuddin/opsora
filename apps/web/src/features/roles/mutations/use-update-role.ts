@@ -11,6 +11,7 @@ import { updateRole } from "@/services/role.service";
 import type {
   UpdateRoleInput,
 } from "@/features/roles/types/role";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UpdateRoleVariables = {
   id: string;
@@ -44,9 +45,12 @@ export function useUpdateRole() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update role.",
+        getApiErrorMessage(
+          error,
+          "Failed to update role.",
+        ),
       );
     },
   });

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createCategory } from "@/services/category.service";
 import type { CreateCategoryInput } from "@/features/categories/types/category";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateCategory() {
   const queryClient = useQueryClient();
@@ -26,9 +27,12 @@ export function useCreateCategory() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create category.",
+        getApiErrorMessage(
+          error,
+          "Failed to create category.",
+        ),
       );
     },
   });

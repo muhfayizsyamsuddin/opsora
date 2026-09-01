@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteSupplier } from "@/services/supplier.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteSupplier() {
   const queryClient = useQueryClient();
@@ -25,9 +26,12 @@ export function useDeleteSupplier() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete supplier. Please try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete supplier. Please try again.",
+        ),
       );
     },
   });

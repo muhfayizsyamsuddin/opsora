@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { createProduct } from "@/services/product.service";
 import type { CreateProductInput } from "@/features/products/types/product";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
@@ -23,9 +24,12 @@ export function useCreateProduct() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create product. Please check the form and try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to create product. Please check the form and try again.",
+        ),
       );
     },
   });

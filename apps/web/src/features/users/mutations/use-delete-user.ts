@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteUser } from "@/services/user.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteUser() {
   const queryClient = useQueryClient();
@@ -28,9 +29,12 @@ export function useDeleteUser() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to deactivate user.",
+        getApiErrorMessage(
+          error,
+          "Failed to deactivate user.",
+        ),
       );
     },
   });

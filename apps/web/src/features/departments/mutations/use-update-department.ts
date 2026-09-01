@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { updateDepartment } from "@/services/department.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateDepartment() {
   const queryClient = useQueryClient();
@@ -43,9 +44,12 @@ export function useUpdateDepartment() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update department.",
+        getApiErrorMessage(
+          error,
+          "Failed to update department.",
+        ),
       );
     },
   });

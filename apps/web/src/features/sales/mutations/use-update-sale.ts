@@ -12,6 +12,7 @@ import type {
   Sale,
   UpdateSaleInput,
 } from "@/features/sales/types/sale";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateSale() {
   const queryClient = useQueryClient();
@@ -48,9 +49,12 @@ export function useUpdateSale() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update sale.",
+        getApiErrorMessage(
+          error,
+          "Failed to update sale.",
+        ),
       );
     },
   });

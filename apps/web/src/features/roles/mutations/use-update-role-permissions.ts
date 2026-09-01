@@ -13,6 +13,7 @@ import {
 import type {
   UpdateRolePermissionsInput,
 } from "@/features/roles/types/role";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UpdateRolePermissionsVariables = {
   id: string;
@@ -46,9 +47,12 @@ export function useUpdateRolePermissions() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update role permissions.",
+        getApiErrorMessage(
+          error,
+          "Failed to update role permissions.",
+        ),
       );
     },
   });

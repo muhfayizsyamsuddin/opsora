@@ -12,6 +12,7 @@ import type {
   Leave,
   UpdateLeaveInput,
 } from "@/features/leaves/types/leave";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UpdateLeaveMutationInput = {
   id: string;
@@ -51,9 +52,12 @@ export function useUpdateLeave() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update leave request.",
+        getApiErrorMessage(
+          error,
+          "Failed to update leave request.",
+        ),
       );
     },
   });

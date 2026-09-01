@@ -29,6 +29,21 @@ export class AuthController {
     },
   );
 
+  static updateMe = asyncHandler(
+    async (req: Request, res: Response) => {
+      const user = await AuthService.updateMe(
+        req.user!.id,
+        req.body,
+      );
+
+      return success(
+        res,
+        user,
+        "Profile updated successfully",
+      );
+    },
+  );
+
   static refresh = asyncHandler(
     async (req: Request, res: Response) => {
       const result =
@@ -53,6 +68,21 @@ export class AuthController {
         res,
         null,
         "Logout successful",
+      );
+    },
+  );
+
+  static changePassword = asyncHandler(
+    async (req: Request, res: Response) => {
+      await AuthService.changePassword(
+        req.user!.id,
+        req.body,
+      );
+
+      return success(
+        res,
+        null,
+        "Password changed successfully",
       );
     },
   );

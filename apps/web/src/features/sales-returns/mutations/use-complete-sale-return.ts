@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { completeSaleReturn } from "@/services/sale-return.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCompleteSaleReturn() {
   const queryClient = useQueryClient();
@@ -50,9 +51,12 @@ export function useCompleteSaleReturn() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to complete sale return.",
+        getApiErrorMessage(
+          error,
+          "Failed to complete sale return.",
+        ),
       );
     },
   });

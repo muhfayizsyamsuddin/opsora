@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { uploadProductImage } from "@/services/product.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUploadProductImage() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useUploadProductImage() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to upload product image.",
+        getApiErrorMessage(
+          error,
+          "Failed to upload product image.",
+        ),
       );
     },
   });

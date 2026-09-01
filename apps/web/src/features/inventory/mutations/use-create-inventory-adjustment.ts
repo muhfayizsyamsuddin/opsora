@@ -10,6 +10,7 @@ import {
   createInventoryAdjustment,
   type CreateInventoryAdjustmentInput,
 } from "@/services/inventory.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateInventoryAdjustment() {
   const queryClient = useQueryClient();
@@ -45,9 +46,12 @@ export function useCreateInventoryAdjustment() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create inventory adjustment.",
+        getApiErrorMessage(
+          error,
+          "Failed to create inventory adjustment.",
+        ),
       );
     },
   });

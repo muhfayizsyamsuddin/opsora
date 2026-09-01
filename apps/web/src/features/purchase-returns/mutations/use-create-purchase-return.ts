@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createPurchaseReturn } from "@/services/purchase-return.service";
 import type { CreatePurchaseReturnInput } from "@/features/purchase-returns/types/purchase-return";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreatePurchaseReturn() {
   const queryClient = useQueryClient();
@@ -26,9 +27,12 @@ export function useCreatePurchaseReturn() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create purchase return.",
+        getApiErrorMessage(
+          error,
+          "Failed to create purchase return.",
+        ),
       );
     },
   });

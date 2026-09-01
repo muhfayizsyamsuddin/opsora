@@ -6,6 +6,9 @@ import type {
   LoginResponse,
   RefreshResponse,
   User,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  ChangePasswordRequest,
 } from "@/features/auth/types/auth";
 
 import type { ApiResponse } from "@/types/api";
@@ -49,5 +52,26 @@ export async function logout(
   await api.post(
     API.AUTH.LOGOUT,
     { refresh_token },
+  );
+}
+
+export async function updateProfile(
+  data: UpdateProfileRequest,
+): Promise<UpdateProfileResponse> {
+  const response =
+    await api.patch<ApiResponse<UpdateProfileResponse>>(
+      API.AUTH.UPDATE_ME,
+      data,
+    );
+
+  return response.data.data;
+}
+
+export async function changePassword(
+  data: ChangePasswordRequest,
+): Promise<void> {
+  await api.patch(
+    API.AUTH.CHANGE_PASSWORD,
+    data,
   );
 }

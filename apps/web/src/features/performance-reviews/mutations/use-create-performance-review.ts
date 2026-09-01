@@ -11,6 +11,7 @@ import { createPerformanceReview } from "@/services/performance-review.service";
 import type {
   CreatePerformanceReviewInput,
 } from "@/features/performance-reviews/types/performance-review";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreatePerformanceReview() {
   const queryClient = useQueryClient();
@@ -38,9 +39,12 @@ export function useCreatePerformanceReview() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create performance review.",
+        getApiErrorMessage(
+          error,
+          "Failed to create performance review.",
+        ),
       );
     },
   });

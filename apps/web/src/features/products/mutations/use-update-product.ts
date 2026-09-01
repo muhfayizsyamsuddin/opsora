@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { updateProduct } from "@/services/product.service";
 import type { UpdateProductInput } from "@/features/products/types/product";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
@@ -33,9 +34,12 @@ export function useUpdateProduct() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update product. Please check the form and try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to update product. Please check the form and try again.",
+        ),
       );
     },
   });

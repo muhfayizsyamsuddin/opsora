@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createSupplier } from "@/services/supplier.service";
 import type { CreateSupplierInput } from "@/features/suppliers/types/supplier";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateSupplier() {
   const queryClient = useQueryClient();
@@ -26,9 +27,12 @@ export function useCreateSupplier() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create supplier.",
+        getApiErrorMessage(
+          error,
+          "Failed to create supplier.",
+        ),
       );
     },
   });

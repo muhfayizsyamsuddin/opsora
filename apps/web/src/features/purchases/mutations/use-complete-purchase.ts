@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { completePurchase } from "@/services/purchase.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCompletePurchase() {
   const queryClient = useQueryClient();
@@ -50,9 +51,12 @@ export function useCompletePurchase() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to complete purchase.",
+        getApiErrorMessage(
+          error,
+          "Failed to complete purchase.",
+        ),
       );
     },
   });

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { updateCategory } from "@/services/category.service";
 import type { UpdateCategoryInput } from "@/features/categories/types/category";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
@@ -36,9 +37,12 @@ export function useUpdateCategory() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update category.",
+        getApiErrorMessage(
+          error,
+          "Failed to update category.",
+        ),
       );
     },
   });

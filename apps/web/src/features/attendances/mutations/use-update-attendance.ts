@@ -16,6 +16,7 @@ import type {
 import type {
   UpdateAttendanceInput,
 } from "@/features/attendances/types/attendance";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateAttendance() {
   const queryClient = useQueryClient();
@@ -55,9 +56,12 @@ export function useUpdateAttendance() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update attendance.",
+        getApiErrorMessage(
+          error,
+          "Failed to update attendance.",
+        ),
       );
     },
   });

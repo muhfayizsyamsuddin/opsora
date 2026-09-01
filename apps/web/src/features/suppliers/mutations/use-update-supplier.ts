@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { updateSupplier } from "@/services/supplier.service";
 import type { UpdateSupplierInput } from "@/features/suppliers/types/supplier";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateSupplier() {
   const queryClient = useQueryClient();
@@ -36,9 +37,12 @@ export function useUpdateSupplier() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update supplier.",
+        getApiErrorMessage(
+          error,
+          "Failed to update supplier.",
+        ),
       );
     },
   });

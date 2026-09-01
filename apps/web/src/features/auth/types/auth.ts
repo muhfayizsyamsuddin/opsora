@@ -23,3 +23,24 @@ export interface RefreshResponse {
   token_type: "Bearer";
   refresh_token: string;
 }
+
+export interface UpdateProfileRequest {
+  name?: string;
+  email?: string;
+}
+
+export interface UpdateProfileResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: string | null;
+  roleId: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteDepartment } from "@/services/department.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteDepartment() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useDeleteDepartment() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete department.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete department.",
+        ),
       );
     },
   });

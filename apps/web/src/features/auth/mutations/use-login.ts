@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { login } from "@/services/auth.service";
 import { storage } from "@/services/storage";
 import { useAuthStore } from "@/stores/auth.store";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useLogin() {
   const router = useRouter();
@@ -26,8 +27,13 @@ export function useLogin() {
       router.replace("/dashboard");
     },
 
-    onError() {
-      toast.error("Email atau password salah");
+    onError(error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          "Unable to sign in. Please try again.",
+        ),
+      );
     },
   });
 }

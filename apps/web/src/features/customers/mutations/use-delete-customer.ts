@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteCustomer } from "@/services/customer.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteCustomer() {
   const queryClient = useQueryClient();
@@ -25,9 +26,12 @@ export function useDeleteCustomer() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete customer. Please try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete customer. Please try again.",
+        ),
       );
     },
   });

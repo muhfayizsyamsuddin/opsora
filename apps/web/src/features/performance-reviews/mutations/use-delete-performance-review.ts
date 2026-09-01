@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   deletePerformanceReview,
 } from "@/services/performance-review.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeletePerformanceReview() {
   const queryClient = useQueryClient();
@@ -36,9 +37,12 @@ export function useDeletePerformanceReview() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete performance review.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete performance review.",
+        ),
       );
     },
   });

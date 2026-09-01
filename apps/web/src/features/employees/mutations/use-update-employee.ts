@@ -12,6 +12,7 @@ import type {
   Employee,
   UpdateEmployeeInput,
 } from "@/features/employees/types/employee";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();
@@ -48,9 +49,12 @@ export function useUpdateEmployee() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update employee.",
+        getApiErrorMessage(
+          error,
+          "Failed to update employee.",
+        ),
       );
     },
   });

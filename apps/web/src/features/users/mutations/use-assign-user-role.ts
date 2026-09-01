@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { assignUserRole } from "@/services/user.service";
 
 import type { AssignUserRoleInput } from "@/features/users/types/user";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type AssignUserRoleVariables = {
   id: string;
@@ -47,9 +48,12 @@ export function useAssignUserRole() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update user role.",
+        getApiErrorMessage(
+          error,
+          "Failed to update user role.",
+        ),
       );
     },
   });

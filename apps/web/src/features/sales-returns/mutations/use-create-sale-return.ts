@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createSaleReturn } from "@/services/sale-return.service";
 import type { CreateSaleReturnPayload } from "@/features/sales-returns/types/sale-return";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateSaleReturn() {
   const queryClient = useQueryClient();
@@ -26,9 +27,12 @@ export function useCreateSaleReturn() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create sale return.",
+        getApiErrorMessage(
+          error,
+          "Failed to create sale return.",
+        ),
       );
     },
   });

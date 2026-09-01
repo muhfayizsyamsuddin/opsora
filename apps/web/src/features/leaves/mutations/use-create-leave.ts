@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { createLeave } from "@/services/leave.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateLeave() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useCreateLeave() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create leave request.",
+        getApiErrorMessage(
+          error,
+          "Failed to create leave request.",
+        ),
       );
     },
   });

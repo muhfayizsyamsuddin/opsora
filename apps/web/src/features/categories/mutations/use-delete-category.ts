@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteCategory } from "@/services/category.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteCategory() {
   const queryClient = useQueryClient();
@@ -25,9 +26,12 @@ export function useDeleteCategory() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete category. Please try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete category. Please try again.",
+        ),
       );
     },
   });

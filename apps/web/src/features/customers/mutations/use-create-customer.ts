@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createCustomer } from "@/services/customer.service";
 import type { CreateCustomerInput } from "@/features/customers/types/customer";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
@@ -26,9 +27,12 @@ export function useCreateCustomer() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create customer.",
+        getApiErrorMessage(
+          error,
+          "Failed to create customer.",
+        ),
       );
     },
   });

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { deleteProduct } from "@/services/product.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
@@ -21,9 +22,12 @@ export function useDeleteProduct() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete product. Please try again.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete product. Please try again.",
+        ),
       );
     },
   });

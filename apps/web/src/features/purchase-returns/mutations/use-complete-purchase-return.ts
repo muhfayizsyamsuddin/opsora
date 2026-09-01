@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { completePurchaseReturn } from "@/services/purchase-return.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCompletePurchaseReturn() {
   const queryClient = useQueryClient();
@@ -50,9 +51,12 @@ export function useCompletePurchaseReturn() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to complete purchase return.",
+        getApiErrorMessage(
+          error,
+          "Failed to complete purchase return.",
+        ),
       );
     },
   });

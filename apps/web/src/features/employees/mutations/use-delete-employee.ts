@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteEmployee } from "@/services/employee.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteEmployee() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useDeleteEmployee() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to deactivate employee.",
+        getApiErrorMessage(
+          error,
+          "Failed to deactivate employee.",
+        ),
       );
     },
   });

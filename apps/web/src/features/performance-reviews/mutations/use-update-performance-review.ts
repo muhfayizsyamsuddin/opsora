@@ -13,6 +13,7 @@ import {
 import type {
   UpdatePerformanceReviewInput,
 } from "@/features/performance-reviews/types/performance-review";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type UpdatePerformanceReviewMutationInput = {
   id: string;
@@ -57,9 +58,12 @@ export function useUpdatePerformanceReview() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update performance review.",
+        getApiErrorMessage(
+          error,
+          "Failed to update performance review.",
+        ),
       );
     },
   });

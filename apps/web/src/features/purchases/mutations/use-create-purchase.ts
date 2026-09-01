@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { createPurchase } from "@/services/purchase.service";
 import type { CreatePurchaseInput } from "@/features/purchases/types/purchase";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreatePurchase() {
   const queryClient = useQueryClient();
@@ -34,9 +35,12 @@ export function useCreatePurchase() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create purchase.",
+        getApiErrorMessage(
+          error,
+          "Failed to create purchase.",
+        ),
       );
     },
   });

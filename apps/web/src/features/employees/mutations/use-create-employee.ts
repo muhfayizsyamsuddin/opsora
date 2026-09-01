@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { createEmployee } from "@/services/employee.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateEmployee() {
   const queryClient = useQueryClient();
@@ -32,9 +33,12 @@ export function useCreateEmployee() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create employee.",
+        getApiErrorMessage(
+          error,
+          "Failed to create employee.",
+        ),
       );
     },
   });

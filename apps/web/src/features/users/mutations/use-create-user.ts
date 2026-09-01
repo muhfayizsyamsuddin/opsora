@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { createUser } from "@/services/user.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateUser() {
   const queryClient = useQueryClient();
@@ -24,9 +25,12 @@ export function useCreateUser() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to create user.",
+        getApiErrorMessage(
+          error,
+          "Failed to create user.",
+        ),
       );
     },
   });

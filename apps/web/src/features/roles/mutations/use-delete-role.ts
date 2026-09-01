@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteRole } from "@/services/role.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useDeleteRole() {
   const queryClient = useQueryClient();
@@ -28,9 +29,12 @@ export function useDeleteRole() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to delete role.",
+        getApiErrorMessage(
+          error,
+          "Failed to delete role.",
+        ),
       );
     },
   });

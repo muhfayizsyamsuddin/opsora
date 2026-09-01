@@ -11,6 +11,7 @@ import { updatePurchase } from "@/services/purchase.service";
 import type {
   UpdatePurchaseInput,
 } from "@/features/purchases/types/purchase";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdatePurchase() {
   const queryClient = useQueryClient();
@@ -47,9 +48,12 @@ export function useUpdatePurchase() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update purchase.",
+        getApiErrorMessage(
+          error,
+          "Failed to update purchase.",
+        ),
       );
     },
   });

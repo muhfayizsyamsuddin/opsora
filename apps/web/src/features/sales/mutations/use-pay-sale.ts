@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { paySale } from "@/services/sale.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function usePaySale() {
   const queryClient = useQueryClient();
@@ -50,9 +51,12 @@ export function usePaySale() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to pay sale.",
+        getApiErrorMessage(
+          error,
+          "Failed to pay sale.",
+        ),
       );
     },
   });

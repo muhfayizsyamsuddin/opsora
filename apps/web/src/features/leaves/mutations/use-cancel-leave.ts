@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { cancelLeave } from "@/services/leave.service";
 
 import type { Leave } from "@/features/leaves/types/leave";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCancelLeave() {
   const queryClient = useQueryClient();
@@ -40,9 +41,12 @@ export function useCancelLeave() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to cancel leave request.",
+        getApiErrorMessage(
+          error,
+          "Failed to cancel leave request.",
+        ),
       );
     },
   });

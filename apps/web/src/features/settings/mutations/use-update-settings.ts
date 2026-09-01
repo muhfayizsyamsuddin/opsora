@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 
 import { updateSettings } from "@/services/setting.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useUpdateSettings() {
   const queryClient = useQueryClient();
@@ -25,9 +26,12 @@ export function useUpdateSettings() {
       );
     },
 
-    onError: () => {
+    onError: (error) => {
       toast.error(
-        "Failed to update settings.",
+        getApiErrorMessage(
+          error,
+          "Failed to update settings.",
+        ),
       );
     },
   });
