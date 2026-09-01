@@ -246,6 +246,25 @@ async function seed() {
 
   const permissionMap = new Map<string, string>();
 
+  const legacyPermissionNames = [
+    "leave.read",
+    "leave.create",
+    "leave.approve",
+    "leave.reject",
+    "leave.update",
+    "leave.cancel",
+    "inventory.read",
+    "inventory.adjust",
+  ];
+
+  await prisma.permission.deleteMany({
+    where: {
+      name: {
+        in: legacyPermissionNames,
+      },
+    },
+  });
+
   for (const [name, description] of permissions) {
     const permission = await prisma.permission.upsert({
       where: { name },
