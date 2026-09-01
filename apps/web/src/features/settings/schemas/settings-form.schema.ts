@@ -24,22 +24,6 @@ export const settingsFormSchema = z.object({
       .string()
       .max(500, "Address must be at most 500 characters."),
   }),
-
-  system: z.object({
-    theme: z.enum(["light", "dark"]),
-
-    currency: z
-      .string()
-      .min(3, "Currency must be at least 3 characters.")
-      .max(10, "Currency must be at most 10 characters."),
-
-    dateFormat: z
-      .string()
-      .min(1, "Date format is required.")
-      .max(50, "Date format must be at most 50 characters."),
-
-    timeFormat: z.enum(["12h", "24h"]),
-  }),
 });
 
 export type SettingsFormValues =
