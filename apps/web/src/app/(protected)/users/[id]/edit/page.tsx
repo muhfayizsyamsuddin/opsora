@@ -137,7 +137,7 @@ export default function EditUserPage({
       {/* Header */}
       <div>
         <p className="text-sm font-medium text-muted-foreground">
-          People Operations
+          Administration
         </p>
 
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">

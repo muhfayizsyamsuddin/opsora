@@ -63,7 +63,7 @@ export default function UserPermissionsPage({
       <div className="space-y-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            People Operations
+            Administration
           </p>
 
           <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -81,7 +81,7 @@ export default function UserPermissionsPage({
       <div className="space-y-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            People Operations
+            Administration
           </p>
 
           <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -130,7 +130,7 @@ export default function UserPermissionsPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            People Operations
+            Administration
           </p>
 
           <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">

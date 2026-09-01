@@ -66,7 +66,7 @@ export default function CreateUserPage() {
     <div className="space-y-6">
       <div>
         <p className="text-sm font-medium text-muted-foreground">
-          People Operations
+          Administration
         </p>
 
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">

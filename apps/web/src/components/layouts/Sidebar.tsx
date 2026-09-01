@@ -8,6 +8,7 @@ import {
   Boxes,
   Building2,
   CalendarCheck,
+  ChevronDown,
   CircleDollarSign,
   ClipboardCheck,
   ClipboardList,
@@ -182,6 +183,26 @@ function SidebarContent({
   const pathname = usePathname();
   const { hasPermission } = usePermissions();
 
+  const isPeopleRoute = peopleMenuItems.some(
+    (item) =>
+      pathname === item.href ||
+      pathname.startsWith(`${item.href}/`),
+  );
+
+  const isAdministrationRoute =
+    administrationMenuItems.some(
+      (item) =>
+        pathname === item.href ||
+        pathname.startsWith(`${item.href}/`),
+    );
+
+  const [peopleOpen, setPeopleOpen] = useState(
+    isPeopleRoute,
+  );
+
+  const [administrationOpen, setAdministrationOpen] =
+    useState(isAdministrationRoute);
+
   const visibleCoreMenuItems =
     coreMenuItems.filter(
       (item) =>
@@ -274,59 +295,28 @@ function SidebarContent({
           })}
         </div>
         {visiblePeopleMenuItems.length > 0 && (
-          <div className="mt-8">
-            <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              People Operations
-            </p>
+          <div className="mt-6">
+            <button
+              type="button"
+              aria-expanded={peopleOpen}
+              onClick={() =>
+                setPeopleOpen((current) => !current)
+              }
+              className="mb-2 flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            >
+              <span>People Operations</span>
 
-            <div className="space-y-1">
-              {visiblePeopleMenuItems.map((item) => {
-                const Icon = item.icon;
-
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(
-                    `${item.href}/`,
-                  );
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={cn(
-                      "group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium",
-                      "transition-all duration-200",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "h-[18px] w-[18px] shrink-0 transition-transform duration-200",
-                        !isActive &&
-                          "group-hover:translate-x-0.5",
-                      )}
-                    />
-
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {visibleAdministrationMenuItems.length > 0 && (
-          <div className="mt-8">
-            <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Administration
-            </p>
-
-            <div className="space-y-1">
-              {visibleAdministrationMenuItems.map((item) => {
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  peopleOpen && "rotate-180",
+                )}
+              />
+            </button>
+            
+            {peopleOpen && (
+              <div className="space-y-1">
+                {visiblePeopleMenuItems.map((item) => {
                   const Icon = item.icon;
 
                   const isActive =
@@ -361,7 +351,72 @@ function SidebarContent({
                     </Link>
                   );
                 })}
-            </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {visibleAdministrationMenuItems.length > 0 && (
+          <div className="mt-6">
+            <button
+              type="button"
+              aria-expanded={administrationOpen}
+              onClick={() =>
+                setAdministrationOpen(
+                  (current) => !current,
+                )
+              }
+              className="mb-2 flex w-full items-center justify-between rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            >
+              <span>Administration</span>
+
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  administrationOpen && "rotate-180",
+                )}
+              />
+            </button>
+
+            {administrationOpen && (
+              <div className="space-y-1">
+                {visibleAdministrationMenuItems.map((item) => {
+                    const Icon = item.icon;
+
+                    const isActive =
+                      pathname === item.href ||
+                      pathname.startsWith(
+                        `${item.href}/`,
+                      );
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={onNavigate}
+                        className={cn(
+                          "group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium",
+                          "transition-all duration-200",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            "h-[18px] w-[18px] shrink-0 transition-transform duration-200",
+                            !isActive &&
+                              "group-hover:translate-x-0.5",
+                          )}
+                        />
+
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+              </div>
+            )}
           </div>
         )}
       </nav>

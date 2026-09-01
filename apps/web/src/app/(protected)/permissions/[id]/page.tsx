@@ -126,7 +126,7 @@ export default function PermissionDetailPage() {
         </Button>
 
         <p className="text-sm font-medium text-muted-foreground">
-          Access Control
+          Administration
         </p>
 
         <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
