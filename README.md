@@ -2,17 +2,35 @@
 
 Enterprise Business Operations Management System.
 
-Opsora is a full-stack web application for managing business operations including inventory, purchasing, sales, returns, employees, attendance, payroll, performance reviews, roles, permissions, and business reporting.
+[Live Demo](https://opsora.faizms.com)
 
-## Status
+## Overview
 
-**Current release: v1.2**
+Opsora is an enterprise business operations management system covering inventory, purchasing, sales, HR, payroll, performance management, and role-based administration.
 
-Opsora v1.2 is deployed to production.
 
-Production:
+## Key Engineering Highlights
 
-https://opsora.faizms.com
+- Role-Based Access Control (RBAC)
+- JWT authentication
+- Inventory & warehouse management
+- Purchasing & sales workflow
+- HR, attendance, payroll, performance review
+- Search, filtering, and pagination
+- PostgreSQL + Prisma
+- Dockerized deployment
+- GitHub Actions CI/CD
+- Traefik reverse proxy
+
+## Architecture
+
+Next.js Frontend
+        ↓
+Express REST API
+        ↓
+Prisma ORM
+        ↓
+PostgreSQL
 
 ## Features
 
@@ -55,38 +73,25 @@ https://opsora.faizms.com
 ## Tech Stack
 
 ### Frontend
-
-- Next.js 16
-- React 19
+- Next.js
+- React
 - TypeScript
 - Tailwind CSS
-- Zustand
-- TanStack Query
 
 ### Backend
-
 - Node.js
-- Express.js
+- Express
 - TypeScript
-- Prisma ORM
-- Zod
-- JWT
+- Prisma
 
 ### Database
-
 - PostgreSQL
 
-### Storage
-
-- Cloudinary
-
-### Infrastructure
-
+### DevOps
 - Docker
 - Docker Compose
 - GitHub Actions
 - Traefik
-- VPS
 
 ### Documentation
 
@@ -107,6 +112,11 @@ The documentation covers:
 - Git workflow
 - deployment
 - architecture decision records
+
+## Deployment
+
+Production:
+https://opsora.faizms.com
 
 ### Release
 

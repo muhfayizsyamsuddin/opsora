@@ -153,7 +153,7 @@ This documentation follows several principles:
 Current Documentation Version
 
 ```
-v1.0
+v1.2
 ```
 
 ---
