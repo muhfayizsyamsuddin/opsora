@@ -2,12 +2,39 @@
 
 Enterprise Business Operations Management System.
 
-[Live Demo](https://opsora.faizms.com)
-
 ## Overview
 
 Opsora is an enterprise business operations management system covering inventory, purchasing, sales, HR, payroll, performance management, and role-based administration.
 
+## Demo Access
+
+A public read-only demo account is available for recruiters and reviewers.
+
+**Live App:**  
+https://opsora.faizms.com
+
+**Email:**  
+demo@opsora.faizms.com
+
+**Password:**  
+demoapp123
+
+**Role:**  
+DEMO
+
+The demo account has read-only access to:
+- Dashboard
+- Products
+- Categories
+- Suppliers
+- Customers
+- Inventory
+- Purchases and Purchase Returns
+- Sales and Sale Returns
+- Reports
+- People Operations
+
+Administrative actions and data modification are restricted.
 
 ## Key Engineering Highlights
 
